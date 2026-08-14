@@ -1,0 +1,60 @@
+/* components/service-card/service-card.wxss */
+
+.service-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.service-card:active {
+  transform: scale(0.98);
+}
+
+.service-card__icon-area {
+  position: relative;
+  height: 200rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(184,134,11,0.08), rgba(230,126,34,0.08));
+}
+
+.service-card__icon {
+  font-size: 72rpx;
+}
+
+.service-card__tag {
+  position: absolute;
+  top: 16rpx;
+  right: 16rpx;
+}
+
+.service-card__info {
+  padding: 20rpx 24rpx 12rpx;
+}
+
+.service-card__title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.service-card__desc {
+  font-size: 22rpx;
+  color: var(--text-hint);
+  margin-top: 6rpx;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.service-card__footer {
+  padding: 12rpx 24rpx 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1rpx solid var(--border-color);
+}

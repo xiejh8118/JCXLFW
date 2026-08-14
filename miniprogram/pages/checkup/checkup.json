@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "合规体检",
+  "usingComponents": {
+    "contact-bar": "/components/contact-bar/contact-bar"
+  }
+}

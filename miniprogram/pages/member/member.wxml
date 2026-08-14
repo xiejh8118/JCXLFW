@@ -1,0 +1,117 @@
+<!-- pages/member/member.wxml -->
+<!-- 会员中心：邀请码解锁 + 内容展示，无任何支付逻辑 -->
+<view class="member-page">
+
+  <!-- 访客状态：输入邀请码 -->
+  <block wx:if="{{memberStatus === 'guest'}}">
+    <view class="guest-section">
+      <view class="guest-icon">🔑</view>
+      <view class="guest-title">输入邀请码</view>
+      <view class="guest-desc">
+        会员邀请码由您的专属顾问通过企业微信发送，\n付款成功后即可激活会员权限。
+      </view>
+
+      <view class="code-input-wrap">
+        <input
+          class="code-input"
+          placeholder="请输入8位邀请码"
+          value="{{inviteCode}}"
+          bindinput="onCodeInput"
+          maxlength="16"
+        />
+        <text class="code-paste" bindtap="onPasteCode">粘贴</text>
+      </view>
+
+      <button class="btn-activate" bindtap="verifyCode" loading="{{verifying}}">
+        {{verifying ? '验证中...' : '激活会员'}}
+      </button>
+
+      <view class="guest-hint">
+        <text>还没有邀请码？</text>
+        <contact-bar text="咨询会员服务" source="member_consult" type="link" />
+      </view>
+
+      <view class="guest-preview">
+        <view class="guest-preview__title">会员专享内容预览</view>
+        <view class="guest-preview__list">
+          <view class="preview-item">📄 金边酒店VAT优化案例</view>
+          <view class="preview-item">📄 外籍员工薪资税合规方案</view>
+          <view class="preview-item">📦 GDT增值税申报表模板</view>
+          <view class="preview-item">📦 WHT代扣税计算表（15类）</view>
+          <view class="preview-item">📄 外籍劳工证办理全流程指南</view>
+        </view>
+        <view class="guest-preview__lock">输入邀请码解锁全部内容</view>
+      </view>
+    </view>
+  </block>
+
+  <!-- 会员状态：展示内容 -->
+  <block wx:if="{{memberStatus === 'member'}}">
+    <!-- 会员卡 -->
+    <view class="member-card">
+      <view class="member-card__top">
+        <view class="member-card__level">{{memberInfo.level}}</view>
+        <view class="member-card__code">{{memberInfo.codeMasked}}</view>
+      </view>
+      <view class="member-card__info">
+        <view class="member-card__row">
+          <text class="member-card__label">激活日期</text>
+          <text>{{memberInfo.activateTime}}</text>
+        </view>
+        <view class="member-card__row">
+          <text class="member-card__label">有效期至</text>
+          <text>{{memberInfo.expireTime}}</text>
+        </view>
+      </view>
+      <view class="member-card__services">
+        <text wx:for="{{memberInfo.services}}" wx:key="*this" class="member-card__service-tag">{{item}}</text>
+      </view>
+    </view>
+
+    <!-- 服务进度 -->
+    <view wx:if="{{serviceProgress.length > 0}}" class="section">
+      <view class="section__title">服务进度</view>
+      <view class="progress-list">
+        <view wx:for="{{serviceProgress}}" wx:key="name" class="progress-item">
+          <view class="progress-item__header">
+            <text class="progress-item__name">{{item.name}}</text>
+            <text class="progress-tag progress-tag--{{item.status === '已完成' ? 'done' : item.status === '进行中' ? 'active' : 'pending'}}">{{item.status}}</text>
+          </view>
+          <view class="progress-bar">
+            <view class="progress-bar__fill" style="width: {{item.progress}}%"></view>
+          </view>
+          <text class="progress-item__date">{{item.date}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 会员专享内容 -->
+    <view class="section">
+      <view class="section__title">专享内容库</view>
+      <view class="content-list">
+        <view
+          wx:for="{{memberContent}}"
+          wx:key="id"
+          class="content-item"
+          data-id="{{item.id}}"
+          data-type="{{item.type}}"
+          bindtap="onContentTap"
+        >
+          <view class="content-item__icon">{{item.icon}}</view>
+          <view class="content-item__body">
+            <view class="content-item__title">{{item.title}}</view>
+            <view class="content-item__desc">{{item.desc}}</view>
+          </view>
+          <text class="content-item__tag">{{item.tag}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 底部操作 -->
+    <view class="member-footer">
+      <contact-bar text="联系专属顾问" source="member_dashboard" type="outline" />
+      <text class="member-footer__logout" bindtap="onLogout">退出会员</text>
+    </view>
+  </block>
+
+</view>

@@ -1,0 +1,80 @@
+<!-- components/currency-calc/currency-calc.wxml - 实时汇率换算器 -->
+<view class="currency-calc card">
+  <!-- 标题 -->
+  <view class="flex-between mb-20">
+    <view class="fw-bold">💱 汇率换算</view>
+    <view class="flex-center text-sm text-hint" bindtap="onRefreshRate">
+      <text wx:if="{{loadingRate}}">更新中...</text>
+      <text wx:else>🔄 更新</text>
+    </view>
+  </view>
+
+  <!-- 源货币 + 金额输入 -->
+  <view class="currency-row">
+    <view class="currency-selector">
+      <view 
+        class="currency-chip {{fromCurrency === item.code ? 'currency-chip--active' : ''}}"
+        wx:for="{{currencies}}" wx:key="code"
+        wx:for-item="item"
+        data-code="{{item.code}}"
+        bindtap="onFromCurrencyTap"
+      >
+        <text class="mr-10">{{item.flag}}</text>{{item.code}}
+      </view>
+    </view>
+    <input 
+      class="currency-input" 
+      type="digit" 
+      value="{{amount}}"
+      placeholder="0"
+      bindinput="onAmountInput"
+    />
+  </view>
+
+  <!-- 交换按钮 -->
+  <view class="swap-btn" bindtap="onSwap">
+    <text>⇅</text>
+  </view>
+
+  <!-- 目标货币 -->
+  <view class="currency-row">
+    <view class="currency-selector">
+      <view 
+        class="currency-chip {{toCurrency === item.code ? 'currency-chip--active' : ''}}"
+        wx:for="{{currencies}}" wx:key="code"
+        wx:for-item="item"
+        data-code="{{item.code}}"
+        bindtap="onToCurrencyTap"
+      >
+        <text class="mr-10">{{item.flag}}</text>{{item.code}}
+      </view>
+    </view>
+    <view class="currency-input currency-input--result">
+      <text wx:if="{{result !== null}}" class="text-xl fw-bold text-primary">{{result}}</text>
+      <text wx:else class="text-hint">0</text>
+    </view>
+  </view>
+
+  <!-- 快速金额 -->
+  <view class="flex flex-wrap mt-20">
+    <view 
+      class="quick-chip"
+      wx:for="{{[1,5,10,50,100,500]}}" wx:key="*this"
+      wx:for-item="amt"
+      data-amt="{{amt}}"
+      bindtap="onQuickAmount"
+    >{{amt}}{{fromCurrency === 'USD' ? '$' : fromCurrency === 'CNY' ? '¥' : '៛'}}</view>
+  </view>
+
+  <!-- 汇率信息 -->
+  <view class="flex-between mt-20 text-sm text-hint">
+    <text wx:if="{{!embedded && rateText}}">{{rateText}}</text>
+    <text wx:if="{{lastUpdate}}">{{lastUpdate}} 更新</text>
+  </view>
+
+  <!-- 复制 -->
+  <view class="flex-between mt-10" wx:if="{{!embedded && result !== null}}">
+    <view></view>
+    <view class="text-primary text-sm" bindtap="onCopyResult">📋 复制结果</view>
+  </view>
+</view>

@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "商务服务",
+  "usingComponents": {
+    "contact-bar": "/components/contact-bar/contact-bar"
+  }
+}

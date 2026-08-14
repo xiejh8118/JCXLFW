@@ -1,0 +1,7 @@
+{
+  "navigationStyle": "custom",
+  "enablePullDownRefresh": true,
+  "usingComponents": {
+    "currency-calc": "/components/currency-calc/currency-calc"
+  }
+}

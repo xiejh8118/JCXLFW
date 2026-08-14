@@ -1,0 +1,9 @@
+{
+  "name": "sendInvoice",
+  "version": "1.0.0",
+  "description": "通过邮箱/Telegram发送柬埔寨发票",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

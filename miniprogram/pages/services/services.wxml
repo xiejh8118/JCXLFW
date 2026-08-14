@@ -1,0 +1,134 @@
+<!-- pages/services/services.wxml -->
+<!-- 合规版服务展示页：纯信息展示 + 客服咨询，无在线交易 -->
+
+<view class="container">
+  <!-- 头部 -->
+  <view class="svc-header">
+    <view class="svc-header__title">商务服务</view>
+    <view class="svc-header__lang" bindtap="onLangSwitch">{{languageLabel}}</view>
+  </view>
+
+  <!-- 标签切换 -->
+  <view class="svc-tabs">
+    <view
+      class="svc-tab {{activeTab == index ? 'svc-tab--active' : ''}}"
+      wx:for="{{tabs}}"
+      wx:key="*this"
+      data-index="{{index}}"
+      bindtap="onTabChange"
+    >{{item}}</view>
+  </view>
+
+  <!-- 酒店住宿 -->
+  <view wx:if="{{activeTab == 0}}" class="svc-list">
+    <view class="svc-card" wx:for="{{hotels}}" wx:key="id">
+      <view class="svc-card__head" data-id="{{item.id}}" bindtap="toggleHotel">
+        <view class="svc-card__left">
+          <view class="svc-card__name">{{item.name}}</view>
+          <view class="svc-card__sub">{{item.nameEn}} · {{item.city}}</view>
+        </view>
+        <view class="svc-card__right">
+          <view class="svc-card__price">{{item.refPrice}}</view>
+          <view class="svc-card__label">参考价</view>
+        </view>
+      </view>
+
+      <!-- 标签 -->
+      <view class="svc-tags">
+        <text class="svc-tag" wx:for="{{item.tags}}" wx:for-item="tag" wx:key="*this">{{tag}}</text>
+      </view>
+
+      <!-- 展开详情 -->
+      <view class="svc-card__body" wx:if="{{expandedHotel == item.id}}">
+        <view class="svc-desc">{{item.desc}}</view>
+      </view>
+
+      <!-- 客服咨询按钮 -->
+      <contact-bar
+        text="咨询房源详情"
+        source="hotel_{{item.id}}"
+        type="outline"
+      />
+    </view>
+  </view>
+
+  <!-- 签证服务 -->
+  <view wx:if="{{activeTab == 1}}" class="svc-list">
+    <view class="svc-card" wx:for="{{visaTypes}}" wx:key="id">
+      <view class="svc-card__head" data-id="{{item.id}}" bindtap="toggleVisa">
+        <view class="svc-card__left">
+          <view class="svc-card__name">{{item.name}}</view>
+          <view class="svc-card__sub">停留 {{item.stayDays}} · {{item.processingDays}}</view>
+        </view>
+        <view class="svc-card__right">
+          <view class="svc-card__price">{{item.refFee}}</view>
+          <view class="svc-card__label">参考费用</view>
+        </view>
+      </view>
+
+      <!-- 展开详情 -->
+      <view class="svc-card__body" wx:if="{{expandedVisa == item.id}}">
+        <view class="svc-section__label">所需材料</view>
+        <view class="svc-materials">
+          <view class="svc-material__item" wx:for="{{item.materials}}" wx:for-item="mat" wx:key="*this">
+            <text class="svc-material__dot">·</text>
+            <text>{{mat}}</text>
+          </view>
+        </view>
+        <view class="svc-note" wx:if="{{item.note}}">{{item.note}}</view>
+      </view>
+
+      <!-- 客服咨询按钮 -->
+      <contact-bar
+        text="咨询签证办理"
+        source="visa_{{item.id}}"
+        type="outline"
+      />
+    </view>
+  </view>
+
+  <!-- 财税代办 -->
+  <view wx:if="{{activeTab == 2}}" class="svc-list">
+    <view class="svc-card" wx:for="{{taxServices}}" wx:key="id">
+      <view class="svc-card__head" data-id="{{item.id}}" bindtap="toggleTax">
+        <view class="svc-card__left">
+          <view class="svc-card__name">{{item.name}}</view>
+          <view class="svc-card__sub">周期 {{item.cycle}}</view>
+        </view>
+        <view class="svc-card__right">
+          <view class="svc-card__price">{{item.refFee}}</view>
+          <view class="svc-card__label">参考费用</view>
+        </view>
+      </view>
+
+      <!-- 展开详情 -->
+      <view class="svc-card__body" wx:if="{{expandedTax == item.id}}">
+        <view class="svc-desc">{{item.desc}}</view>
+        <view class="svc-section__label">服务包含</view>
+        <view class="svc-includes">
+          <view class="svc-include__item" wx:for="{{item.includes}}" wx:for-item="inc" wx:key="*this">
+            <text class="svc-material__dot">·</text>
+            <text>{{inc}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 客服咨询按钮 -->
+      <contact-bar
+        text="咨询代办服务"
+        source="tax_{{item.id}}"
+        type="outline"
+      />
+    </view>
+  </view>
+
+  <!-- 底部通用咨询 -->
+  <view class="svc-bottom">
+    <view class="svc-bottom__text">需要其他服务或有定制需求？</view>
+    <contact-bar
+      text="联系客服咨询"
+      source="general"
+      type="primary"
+    />
+  </view>
+</view>

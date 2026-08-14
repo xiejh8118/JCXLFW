@@ -1,0 +1,10 @@
+{
+  "name": "genReceiptPdf",
+  "version": "1.0.0",
+  "description": "中鼎物业 - 水电房租账单PDF生成",
+  "main": "index.js",
+  "dependencies": {
+    "pdfkit": "^0.15.0",
+    "wx-server-sdk": "~2.6.3"
+  }
+}

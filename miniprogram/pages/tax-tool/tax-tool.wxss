@@ -1,0 +1,117 @@
+/* pages/tax-tool/tax-tool.wxss */
+
+.tax-tabs {
+  display: flex;
+  background: var(--bg-card);
+  padding: 0 30rpx;
+  margin-bottom: 20rpx;
+}
+
+.tax-tab {
+  flex: 1;
+  text-align: center;
+  padding: 24rpx 0;
+  font-size: 28rpx;
+  color: var(--text-secondary);
+  position: relative;
+}
+
+.tax-tab--active {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.tax-tab--active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 25%;
+  width: 50%;
+  height: 4rpx;
+  background: var(--primary);
+  border-radius: 2rpx;
+}
+
+/* 模式切换 */
+.mode-btn {
+  flex: 1;
+  text-align: center;
+  padding: 16rpx;
+  font-size: 24rpx;
+  color: var(--text-secondary);
+  border: 2rpx solid var(--border-color);
+  border-radius: var(--radius-sm);
+  margin-right: 12rpx;
+}
+
+.mode-btn:last-child {
+  margin-right: 0;
+}
+
+.mode-btn--active {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: rgba(184, 134, 11, 0.05);
+  font-weight: 600;
+}
+
+/* 税率显示 */
+.rate-display {
+  padding: 16rpx 24rpx;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+/* 快速填入 */
+.quick-tag {
+  padding: 8rpx 20rpx;
+  background: rgba(184, 134, 11, 0.08);
+  border-radius: 20rpx;
+  font-size: 22rpx;
+  color: var(--primary);
+  margin-right: 12rpx;
+  margin-bottom: 12rpx;
+}
+
+.quick-tag:active {
+  background: var(--primary);
+  color: #FFFFFF;
+}
+
+/* 计算结果 */
+.result-card {
+  margin-top: 30rpx;
+  padding: 24rpx;
+  background: linear-gradient(135deg, rgba(184,134,11,0.05), rgba(230,126,34,0.05));
+  border-radius: var(--radius-md);
+  border: 1rpx solid rgba(184,134,11,0.15);
+}
+
+.result-card__header {
+  margin-bottom: 8rpx;
+}
+
+.result-row {
+  padding: 14rpx 0;
+  font-size: 28rpx;
+}
+
+.result-row--total {
+  border-top: 2rpx solid rgba(184,134,11,0.2);
+  padding-top: 20rpx;
+  margin-top: 8rpx;
+}
+
+/* 税率表 */
+.tax-brackets {
+  padding: 16rpx;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+}
+
+.bracket-row {
+  padding: 4rpx 0;
+}

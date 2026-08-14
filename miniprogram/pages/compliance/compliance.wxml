@@ -1,0 +1,138 @@
+<!-- pages/compliance/compliance.wxml -->
+<view class="container">
+  <view class="page-header">
+    <view class="page-header__title">合规文档中心</view>
+    <view class="page-header__subtitle">签证·劳工证·公司注册·税务登记</view>
+  </view>
+
+  <!-- Tabs -->
+  <view class="tax-tabs">
+    <view 
+      class="tax-tab {{activeTab === item.key ? 'tax-tab--active' : ''}}"
+      wx:for="{{tabs}}" wx:key="key"
+      data-key="{{item.key}}" bindtap="onTabChange"
+    >
+      <text class="mr-10">{{item.icon}}</text>{{item.label}}
+    </view>
+  </view>
+
+  <!-- ======== 签证 ======== -->
+  <view class="section" wx:if="{{activeTab === 'visa'}}">
+    <view class="fw-bold mb-20" style="font-size: 32rpx;">签证类型指南</view>
+
+    <view class="card card--hover mb-20" wx:for="{{visaTypes}}" wx:key="type" data-type="{{item.type}}" bindtap="onVisaDetail">
+      <view class="flex-between mb-10">
+        <view class="fw-bold text-lg">{{item.name}} ({{item.type}}类)</view>
+        <view class="tag tag--primary">${{item.fee}}</view>
+      </view>
+      <view class="text-hint text-sm mb-10">有效期: {{item.duration}}</view>
+      <view class="text-sm">{{item.desc}}</view>
+    </view>
+  </view>
+
+  <!-- ======== 劳工证 ======== -->
+  <view class="section" wx:if="{{activeTab === 'workpermit'}}">
+    <view class="fw-bold mb-20" style="font-size: 32rpx;">劳工证办理指南</view>
+
+    <view class="card mb-20">
+      <view class="flex-between mb-20">
+        <view class="fw-bold">年度费用</view>
+        <view class="text-xl fw-bold text-accent">${{workPermitInfo.fee}}</view>
+      </view>
+      <view class="flex-between mb-20">
+        <view>有效期</view>
+        <view class="tag tag--success">{{workPermitInfo.validity}}</view>
+      </view>
+    </view>
+
+    <view class="card mb-20">
+      <view class="fw-bold mb-16">所需材料</view>
+      <view class="flex flex-wrap">
+        <view class="tag mr-10 mb-10" wx:for="{{workPermitInfo.requirements}}" wx:key="*this">{{item}}</view>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="fw-bold mb-16">办理流程</view>
+      <view class="step-list">
+        <view class="step-item flex" wx:for="{{workPermitInfo.steps}}" wx:key="*this">
+          <view class="step-num">{{index + 1}}</view>
+          <view class="step-text flex-1">{{item}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ======== 公司注册 ======== -->
+  <view class="section" wx:if="{{activeTab === 'business'}}">
+    <view class="card mb-20">
+      <view class="fw-bold mb-20">公司注册流程</view>
+      <view class="step-list">
+        <view class="step-item flex" wx:for="{{['商业部核名(1-3天)','准备公司章程','存入注册资本金','商业部注册登记(5-10天)','税务登记(VAT/WHT)','劳工部备案','开业']}}" wx:key="*this">
+          <view class="step-num">{{index + 1}}</view>
+          <view class="step-text flex-1">{{item}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="fw-bold mb-16">常见企业类型</view>
+      <view class="mb-10 flex-between">
+        <view class="fw-bold">有限责任公司 (LTD)</view>
+        <view class="text-sm text-hint">最低注册资本 $10,000</view>
+      </view>
+      <view class="mb-10 flex-between">
+        <view class="fw-bold">分公司 (Branch)</view>
+        <view class="text-sm text-hint">母公司完全控股</view>
+      </view>
+      <view class="flex-between">
+        <view class="fw-bold">代表处 (Rep Office)</view>
+        <view class="text-sm text-hint">非营利活动</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ======== 税务登记 ======== -->
+  <view class="section" wx:if="{{activeTab === 'taxreg'}}">
+    <view class="card mb-20">
+      <view class="fw-bold mb-16">税务登记步骤</view>
+      <view class="step-list">
+        <view class="step-item flex" wx:for="{{['公司注册完成后15天内申请TIN(税号)','申请VAT证书','注册WHT代扣资格','开立税务银行账户','申请税控发票机/电子发票系统']}}" wx:key="*this">
+          <view class="step-num">{{index + 1}}</view>
+          <view class="step-text flex-1">{{item}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="fw-bold mb-16">主要税种申报期限</view>
+      <view class="mb-10 flex-between">
+        <view>增值税 (VAT)</view>
+        <view class="tag tag--warning">每月20日前</view>
+      </view>
+      <view class="mb-10 flex-between">
+        <view>代扣税 (WHT)</view>
+        <view class="tag tag--warning">每月20日前</view>
+      </view>
+      <view class="mb-10 flex-between">
+        <view>薪资税</view>
+        <view class="tag tag--warning">每月20日前</view>
+      </view>
+      <view class="flex-between">
+        <view>年度所得税</view>
+        <view class="tag tag--danger">次年3月31日前</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 合规提示 -->
+  <view class="section">
+    <view class="section__title">合规提示</view>
+    <view class="card" wx:for="{{tips}}" wx:key="text" data-text="{{item.text}}" bindtap="onCopyTip">
+      <view class="flex">
+        <text class="mr-10">{{item.icon}}</text>
+        <text class="text-sm flex-1">{{item.text}}</text>
+      </view>
+    </view>
+  </view>
+</view>

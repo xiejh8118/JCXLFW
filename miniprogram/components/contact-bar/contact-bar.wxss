@@ -1,0 +1,82 @@
+/* components/contact-bar/contact-bar.wxss */
+/* 重置 button 默认样式 */
+.contact-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  width: 100%;
+  border: none;
+  border-radius: var(--radius-md, 12rpx);
+  font-size: 28rpx;
+  font-weight: 500;
+  padding: 0;
+  margin: 0;
+  line-height: 1.6;
+  box-sizing: border-box;
+}
+
+/* 主按钮 — 金色实底 */
+.contact-btn--primary {
+  background: #B8860B;
+  color: #fff;
+  height: 88rpx;
+}
+
+.contact-btn--primary::after {
+  border: none;
+}
+
+/* 描边按钮 */
+.contact-btn--outline {
+  background: transparent;
+  color: #B8860B;
+  border: 2rpx solid #B8860B;
+  height: 80rpx;
+}
+
+.contact-btn--outline::after {
+  border: none;
+}
+
+/* 迷你按钮 */
+.contact-btn--mini {
+  background: #B8860B15;
+  color: #B8860B;
+  height: 64rpx;
+  font-size: 24rpx;
+  border-radius: 32rpx;
+}
+
+.contact-btn--mini::after {
+  border: none;
+}
+
+/* 文字链接（内嵌场景） */
+.contact-btn--link {
+  background: transparent;
+  color: #B8860B;
+  height: auto;
+  min-height: 48rpx;
+  font-size: 26rpx;
+  font-weight: 400;
+  width: auto;
+  display: inline-flex;
+  padding: 0;
+}
+
+.contact-btn--link::after {
+  border: none;
+}
+
+.contact-btn--link .contact-btn__icon {
+  display: none;
+}
+
+.contact-btn__icon {
+  font-size: 28rpx;
+}
+
+.contact-btn__text {
+  font-size: inherit;
+}
