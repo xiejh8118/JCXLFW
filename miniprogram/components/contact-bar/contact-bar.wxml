@@ -1,0 +1,15 @@
+<!-- components/contact-bar/contact-bar.wxml -->
+<!-- 核心合规组件：button open-type="contact" 唤起微信原生客服会话 -->
+<button
+  class="contact-btn contact-btn--{{type}}"
+  open-type="contact"
+  bindcontact="onContact"
+  session-from="{{source}}"
+  send-message-title="咨询"
+  send-message-path="/pages/services/services?source={{source}}"
+  send-message-img=""
+  show-message-card="true"
+>
+  <text class="contact-btn__icon">💬</text>
+  <text class="contact-btn__text">{{text}}</text>
+</button>

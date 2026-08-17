@@ -1,0 +1,367 @@
+<!-- pages/property/property.wxml - 中鼎物业工作台（三语 zh/en/km，文案取 L = i18n getScope('property')） -->
+
+<!-- ===== 登录遮罩 ===== -->
+<view class="login-overlay" wx:if="{{!isLoggedIn}}">
+  <view class="login-card">
+    <image src="/images/logo.png" class="login-logo" mode="aspectFit" lazy-load="false" />
+    <view class="login-title">{{L.title}}</view>
+    <view class="login-subtitle">{{L.subtitle}}</view>
+
+    <view class="login-field">
+      <text class="login-label">{{L.username}}</text>
+      <input class="login-input" type="text" placeholder="{{L.usernamePlaceholder}}" value="{{loginForm.username}}" data-field="username" bindinput="onLoginInput" />
+    </view>
+    <view class="login-field">
+      <text class="login-label">{{L.password}}</text>
+      <input class="login-input" type="text" password="{{true}}" placeholder="{{L.passwordPlaceholder}}" value="{{loginForm.password}}" data-field="password" bindinput="onLoginInput" />
+    </view>
+
+    <view class="login-error" wx:if="{{loginError}}">{{loginError}}</view>
+
+    <button class="login-btn" bindtap="doLogin">{{L.login}}</button>
+    <view class="login-hint">{{L.loginDefault}}</view>
+  </view>
+</view>
+
+<!-- ===== 主界面 ===== -->
+<view class="container" wx:if="{{isLoggedIn}}">
+
+  <!-- 顶部用户栏 -->
+  <view class="top-bar">
+    <view class="top-bar__user">
+      <view class="top-bar__avatar {{isAdmin ? 'admin' : 'operator'}}">{{currentUser.avatarChar}}</view>
+      <view class="top-bar__info">
+        <text class="top-bar__name">{{currentUser.username}}</text>
+        <text class="top-bar__role">{{isAdmin ? L.admin : L.operator}}</text>
+      </view>
+    </view>
+    <view class="top-bar__logout" bindtap="logout">{{L.logout}}</view>
+  </view>
+
+  <!-- 统计卡片 -->
+  <view class="stats-row">
+    <view class="stat-card">
+      <text class="stat-card__value">{{stats.totalRooms}}</text>
+      <text class="stat-card__label">{{L.statRooms}}</text>
+    </view>
+    <view class="stat-card stat-card--danger">
+      <text class="stat-card__value">{{stats.unpaidCount}}</text>
+      <text class="stat-card__label">{{L.statUnpaid}}</text>
+    </view>
+    <view class="stat-card stat-card--danger">
+      <text class="stat-card__value stat-card__value--sm">{{stats.unpaidAmountText}}</text>
+      <text class="stat-card__label">{{L.statUnpaidAmount}}</text>
+    </view>
+    <view class="stat-card stat-card--success">
+      <text class="stat-card__value stat-card__value--sm">{{stats.monthCollectedText}}</text>
+      <text class="stat-card__label">{{L.statCollected}}</text>
+    </view>
+  </view>
+
+  <!-- Tab 导航 -->
+  <view class="tab-nav">
+    <view class="tab-btn {{currentTab === 'today' ? 'active' : ''}}" data-tab="today" bindtap="switchTab">📋 {{L.tabToday}}</view>
+    <view class="tab-btn {{currentTab === 'ledger' ? 'active' : ''}}" data-tab="ledger" bindtap="switchTab">📒 {{L.tabLedger}}</view>
+    <view class="tab-btn {{currentTab === 'meter' ? 'active' : ''}}" data-tab="meter" bindtap="switchTab">⚡ {{L.tabMeter}}</view>
+    <view class="tab-btn {{currentTab === 'users' ? 'active' : ''}}" data-tab="users" bindtap="switchTab" wx:if="{{isAdmin || permState.user_manage}}">👤 {{L.tabUsers}}</view>
+  </view>
+
+  <!-- ===== 今日待办 ===== -->
+  <view class="tab-content" wx:if="{{currentTab === 'today'}}">
+    <view class="today-empty" wx:if="{{todayTasks.length === 0}}">
+      <text class="today-empty__icon">✅</text>
+      <text class="today-empty__text">{{L.todayEmpty}}</text>
+    </view>
+
+    <view class="today-item today-item--{{item.taskClass}}" wx:for="{{todayTasks}}" wx:key="id">
+      <view class="today-item__left">
+        <text class="today-item__room">{{item.room}}</text>
+        <text class="today-item__month">{{item.month}}</text>
+        <text class="today-item__amount" wx:if="{{item.taskType === 'lowElec'}}">{{L.remain}} {{item.remainElecText}}</text>
+        <text class="today-item__amount" wx:else>{{item.totalText}}</text>
+        <text class="today-item__tag">{{item.taskLabel}}</text>
+      </view>
+      <view class="today-item__actions" wx:if="{{(item.taskType === 'lowElec' && (isAdmin || permState.receipt_pdf)) || (item.taskType !== 'lowElec' && (isAdmin || permState.ledger_edit))}}">
+        <view class="mini-btn mini-btn--elec" data-id="{{item.recordId}}" bindtap="onPrintLowElec" wx:if="{{item.taskType === 'lowElec'}}">{{L.notice}}</view>
+        <block wx:else>
+          <view class="mini-btn mini-btn--primary" data-id="{{item.id}}" bindtap="markPaid" wx:if="{{isAdmin || permState.ledger_edit}}">{{L.paid}}</view>
+          <view class="mini-btn" data-id="{{item.id}}" bindtap="cycleCollectStatus" wx:if="{{isAdmin || permState.ledger_edit}}">{{L.collect}}</view>
+        </block>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 收费台账 ===== -->
+  <view class="tab-content" wx:if="{{currentTab === 'ledger'}}">
+    <!-- 筛选栏 -->
+    <view class="filter-bar">
+      <picker class="filter-picker" value="{{filterMonth}}" range="{{filterMonths}}" bindchange="onFilterMonth">
+        <view class="filter-picker__inner">
+          <text>{{filterMonth || L.allMonths}}</text>
+          <text class="filter-arrow">▾</text>
+        </view>
+      </picker>
+      <view class="filter-count">{{recordCountText}}</view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{displayRecords.length === 0}}">
+      <text class="empty-state__icon">📒</text>
+      <text class="empty-state__text">{{L.ledgerEmpty}}</text>
+      <view class="empty-state__btn" data-tab="meter" bindtap="switchTab">{{L.goMeter}}</view>
+    </view>
+
+    <!-- 记录卡片列表 -->
+    <view class="record-card" wx:for="{{displayRecords}}" wx:key="id">
+      <view class="record-card__header">
+        <view class="record-card__room">
+          <text class="record-card__room-no">{{item.room}}</text>
+          <text class="record-card__month">{{item.month}}</text>
+        </view>
+        <view class="record-card__badges">
+          <text class="status-badge status-badge--{{item.payStatusClass}}" data-id="{{item.id}}" bindtap="cyclePayStatus">{{item.payStatusText}}</text>
+          <text class="collect-badge collect-badge--{{item.collectStatusClass}}" data-id="{{item.id}}" bindtap="cycleCollectStatus">{{item.collectStatusText}}</text>
+          <text class="elec-badge elec-badge--low" wx:if="{{item.lowElec}}" data-id="{{item.id}}" bindtap="onPrintLowElec">⚡{{item.lowElecText}}</text>
+        </view>
+      </view>
+
+      <view class="record-card__body">
+        <view class="record-detail">
+          <view class="record-detail__row">
+            <text class="record-detail__label">{{L.waterFee}}</text>
+            <text class="record-detail__value">{{item.waterUsageText}} · {{item.waterFeeText}}</text>
+          </view>
+          <view class="record-detail__row">
+            <text class="record-detail__label">{{L.elecFee}}</text>
+            <text class="record-detail__value">{{item.elecUsageText}} · {{item.elecFeeText}}</text>
+          </view>
+          <view class="record-detail__row">
+            <text class="record-detail__label">{{L.rent}}</text>
+            <text class="record-detail__value">{{item.rentText}}</text>
+          </view>
+          <view class="record-detail__row record-detail__row--total">
+            <text class="record-detail__label">{{L.total}}</text>
+            <text class="record-detail__value record-detail__value--total">{{item.totalText}}</text>
+          </view>
+          <view class="record-detail__row" wx:if="{{item.remark}}">
+            <text class="record-detail__label">{{L.remark}}</text>
+            <text class="record-detail__value">{{item.remark}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="record-card__actions">
+        <view class="mini-btn mini-btn--elec" data-id="{{item.id}}" bindtap="onPrintLowElec" wx:if="{{item.lowElec && (isAdmin || permState.receipt_pdf)}}">{{L.notice}}</view>
+        <view class="mini-btn mini-btn--pdf" data-id="{{item.id}}" bindtap="onGenPdf" wx:if="{{isAdmin || permState.receipt_pdf}}">{{L.bill}}</view>
+        <view class="mini-btn" data-id="{{item.id}}" bindtap="editRecord" wx:if="{{isAdmin || permState.ledger_edit}}">{{L.edit}}</view>
+        <view class="mini-btn mini-btn--danger" data-id="{{item.id}}" bindtap="deleteRecord" wx:if="{{isAdmin || permState.ledger_delete}}">{{L.del}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 抄表录入 ===== -->
+  <view class="tab-content" wx:if="{{currentTab === 'meter'}}">
+    <view class="form-card">
+      <view class="form-card__title">{{editingId ? L.editRecord : L.addRecord}}</view>
+
+      <!-- 房号（输入联想，从 327 个预设房号中快速匹配） -->
+      <view class="form-row">
+        <text class="form-label">{{L.room}}</text>
+        <view class="room-input-wrap">
+          <input
+            class="form-input"
+            type="text"
+            placeholder="{{L.roomPlaceholder}}"
+            value="{{meterForm.room}}"
+            data-field="room"
+            bindinput="onMeterInput"
+            bindfocus="onRoomFocus"
+            bindblur="onRoomBlur"
+          />
+          <view class="room-suggest" wx:if="{{showRoomList}}">
+            <view
+              class="room-suggest__item"
+              wx:for="{{filteredRooms}}"
+              wx:key="*this"
+              data-room="{{item}}"
+              catchtouchstart="onRoomPick"
+              catchtap="onRoomPick"
+            >{{item}}</view>
+            <view wx:if="{{filteredRooms.length === 0}}" class="room-suggest__empty">{{L.roomNoMatch}}</view>
+          </view>
+        </view>
+      </view>
+
+      <view class="form-row">
+        <text class="form-label">{{L.month}}</text>
+        <input class="form-input" type="text" placeholder="{{L.monthPlaceholder}}" value="{{meterForm.month}}" data-field="month" bindinput="onMeterInput" />
+      </view>
+
+      <view class="form-divider">{{L.waterMeter}}</view>
+      <view class="form-row form-row--double">
+        <view class="form-cell">
+          <text class="form-label">{{L.prevReading}}</text>
+          <input class="form-input" type="digit" placeholder="0" value="{{meterForm.prevWater}}" data-field="prevWater" bindinput="onMeterInput" />
+        </view>
+        <view class="form-cell">
+          <text class="form-label">{{L.currReading}}</text>
+          <input class="form-input" type="digit" placeholder="0" value="{{meterForm.currWater}}" data-field="currWater" bindinput="onMeterInput" />
+        </view>
+      </view>
+
+      <view class="form-divider">{{L.elecMeter}}</view>
+      <view class="form-row form-row--double">
+        <view class="form-cell">
+          <text class="form-label">{{L.prevReading}}</text>
+          <input class="form-input" type="digit" placeholder="0" value="{{meterForm.prevElec}}" data-field="prevElec" bindinput="onMeterInput" />
+        </view>
+        <view class="form-cell">
+          <text class="form-label">{{L.currReading}}</text>
+          <input class="form-input" type="digit" placeholder="0" value="{{meterForm.currElec}}" data-field="currElec" bindinput="onMeterInput" />
+        </view>
+      </view>
+      <view class="form-row">
+        <text class="form-label">{{L.remainElec}}<text class="form-label__hint">{{remainElecHintText}}</text></text>
+        <input class="form-input" type="digit" placeholder="{{L.remainElecPlaceholder}}" value="{{meterForm.remainElec}}" data-field="remainElec" bindinput="onMeterInput" />
+      </view>
+
+      <view class="form-divider">{{L.fee}}</view>
+      <view class="form-row">
+        <text class="form-label">{{L.rentDollar}}</text>
+        <input class="form-input" type="digit" placeholder="0" value="{{meterForm.rent}}" data-field="rent" bindinput="onMeterInput" />
+      </view>
+
+      <view class="form-row">
+        <text class="form-label">{{L.remark}}</text>
+        <input class="form-input" type="text" placeholder="{{L.optional}}" value="{{meterForm.remark}}" data-field="remark" bindinput="onMeterInput" />
+      </view>
+
+      <!-- 实时计算结果 -->
+      <view class="calc-preview">
+        <view class="calc-preview__row">
+          <text>{{L.waterUsage}}</text>
+          <text>{{meterCalc.waterUsage}}{{L.unitTon}}</text>
+        </view>
+        <view class="calc-preview__row">
+          <text>{{L.elecUsage}}</text>
+          <text>{{meterCalc.elecUsage}}{{L.unitKwh}}</text>
+        </view>
+        <view class="calc-preview__row">
+          <text>{{L.waterFee}}</text>
+          <text>${{meterCalc.waterFee}}</text>
+        </view>
+        <view class="calc-preview__row">
+          <text>{{L.elecFee}}</text>
+          <text>${{meterCalc.elecFee}}</text>
+        </view>
+        <view class="calc-preview__row">
+          <text>{{L.remainElecShort}}</text>
+          <text>{{meterCalc.remainElec}}</text>
+        </view>
+        <view class="calc-preview__row calc-preview__row--warn" wx:if="{{meterCalc.lowElec}}">
+          <text>⚠ {{L.lowElecWarn}}</text>
+          <text>{{lowElecHintText}}</text>
+        </view>
+        <view class="calc-preview__row calc-preview__row--total">
+          <text>{{L.total}}</text>
+          <text>${{meterCalc.total}}</text>
+        </view>
+      </view>
+
+      <view class="form-actions">
+        <button class="form-btn form-btn--primary" bindtap="saveMeterRecord" wx:if="{{isAdmin || permState.meter}}">{{editingId ? L.saveModify : L.saveRecord}}</button>
+        <button class="form-btn form-btn--ghost" bindtap="resetMeterForm" wx:if="{{editingId}}">{{L.cancelEdit}}</button>
+      </view>
+    </view>
+
+    <!-- 费率设置 -->
+    <view class="form-card">
+      <view class="form-card__title">{{L.rateSetting}}</view>
+      <view class="form-row form-row--double">
+        <view class="form-cell">
+          <text class="form-label">{{L.waterRate}}</text>
+          <input class="form-input" type="digit" placeholder="0.7" value="{{rates.water}}" data-field="water" bindinput="onRateInput" />
+        </view>
+        <view class="form-cell">
+          <text class="form-label">{{L.elecRate}}</text>
+          <input class="form-input" type="digit" placeholder="0.205" value="{{rates.elec}}" data-field="elec" bindinput="onRateInput" />
+        </view>
+      </view>
+      <view class="form-row">
+        <text class="form-label">{{L.lowElecThreshold}}<text class="form-label__hint">{{L.lowElecThresholdHint}}</text></text>
+        <input class="form-input" type="digit" placeholder="100" value="{{rates.lowElecThreshold}}" data-field="lowElecThreshold" bindinput="onRateInput" />
+      </view>
+      <button class="form-btn form-btn--ghost" bindtap="saveRates" wx:if="{{isAdmin || permState.rate_setting}}">{{L.saveRates}}</button>
+    </view>
+  </view>
+
+  <!-- ===== 用户管理 ===== -->
+  <view class="tab-content" wx:if="{{currentTab === 'users' && isAdmin}}">
+    <view class="user-card" wx:for="{{users}}" wx:key="id">
+      <view class="user-card__left">
+        <view class="user-card__avatar {{item.role === 'admin' ? 'admin' : 'operator'}}">{{item.avatarChar}}</view>
+        <view class="user-card__info">
+          <text class="user-card__name">{{item.username}}</text>
+          <text class="user-card__role role-badge role-badge--{{item.role === 'admin' ? 'admin' : 'operator'}}">{{item.role === 'admin' ? L.admin : L.operator}}</text>
+          <text class="user-card__created">{{item.createdAt}}</text>
+        </view>
+      </view>
+      <view class="user-card__actions" wx:if="{{isAdmin || permState.user_manage}}">
+        <view class="mini-btn" data-id="{{item.id}}" bindtap="openUserModal">{{L.edit}}</view>
+        <view class="mini-btn mini-btn--danger" data-id="{{item.id}}" bindtap="deleteUser" wx:if="{{item.username !== 'admin'}}">{{L.del}}</view>
+      </view>
+    </view>
+
+    <view class="add-user-btn" bindtap="openUserModal">{{L.addOperator}}</view>
+  </view>
+
+  <!-- 物业咨询：小程序内生成需求单，避免客服引流 -->
+  <button class="property-consult-btn" bindtap="consultRequirement">{{L.consult}}</button>
+</view>
+
+<!-- ===== 账单画布（隐藏，用于本地生成账单图片） ===== -->
+<canvas type="2d" id="receiptCanvas" style="width:595px;height:842px;position:fixed;left:-9999px;top:0;pointer-events:none;"></canvas>
+
+<!-- ===== 用户编辑弹窗 ===== -->
+<view class="modal-mask" wx:if="{{userModalShown}}" bindtap="closeUserModal">
+  <view class="modal-card" catchtap="">
+    <view class="modal-card__title">{{userModalTitle}}</view>
+
+    <view class="form-row">
+      <text class="form-label">{{L.username}}</text>
+      <input class="form-input" type="text" placeholder="{{L.usernamePlaceholder}}" value="{{userForm.username}}" data-field="username" bindinput="onUserInput" />
+    </view>
+    <view class="form-row">
+      <text class="form-label">{{L.password}}</text>
+      <input class="form-input" type="text" password="{{true}}" placeholder="{{L.passwordPlaceholder}}" value="{{userForm.password}}" data-field="password" bindinput="onUserInput" />
+    </view>
+    <view class="form-row">
+      <text class="form-label">{{L.role}}</text>
+      <picker value="{{userForm.role === 'admin' ? 0 : 1}}" range="{{[L.admin, L.operator]}}" bindchange="onUserRoleChange">
+        <view class="form-input form-input--picker">
+          <text>{{userForm.role === 'admin' ? L.admin : L.operator}}</text>
+          <text class="filter-arrow">▾</text>
+        </view>
+      </picker>
+    </view>
+
+    <!-- 权限选择（仅操作员可定制，管理员默认全权限） -->
+    <view class="form-row" wx:if="{{userForm.role !== 'admin'}}">
+      <text class="form-label">{{L.permAssign}}</text>
+      <view class="perm-grid">
+        <view class="perm-item {{userPermMap[item.key] ? 'perm-item--active' : ''}}" wx:for="{{permissionDefs}}" wx:key="key" data-key="{{item.key}}" bindtap="toggleUserPermission">
+          <view class="perm-item__check">{{userPermMap[item.key] ? '☑' : '☐'}}</view>
+          <view class="perm-item__body">
+            <text class="perm-item__label">{{L.permNames[item.key]}}</text>
+            <text class="perm-item__desc">{{L.permDescs[item.key]}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="form-actions">
+      <button class="form-btn form-btn--primary" bindtap="saveUser">{{L.save}}</button>
+      <button class="form-btn form-btn--ghost" bindtap="closeUserModal">{{L.cancel}}</button>
+    </view>
+  </view>
+</view>

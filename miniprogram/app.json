@@ -1,0 +1,42 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/requirement/requirement",
+    "pages/tax-tool/tax-tool",
+    "pages/compliance/compliance",
+    "pages/property/property",
+    "pages/services/services",
+    "pages/checkup/checkup",
+    "pages/member/member",
+    "pages/profile/profile"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#B8860B",
+    "navigationBarTitleText": "KHMER 中鼎服务",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#FFF8F0",
+    "enableShareAppMessage": true,
+    "enableShareTimeline": true
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#B8860B",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "black",
+    "list": [
+      { "pagePath": "pages/index/index", "text": "首页" },
+      { "pagePath": "pages/requirement/requirement", "text": "需求单" },
+      { "pagePath": "pages/profile/profile", "text": "我的" }
+    ]
+  },
+  "usingComponents": {
+    "currency-calc": "/components/currency-calc/currency-calc",
+    "invoice-gen": "/components/invoice-gen/invoice-gen"
+  },
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents",
+  "permission": {
+    "scope.userLocation": { "desc": "用于汇率时区参考" }
+  }
+}

@@ -1,0 +1,31 @@
+.page { min-height: 100vh; background: #FFF8F0; padding-bottom: 40rpx; }
+.header { display: flex; align-items: center; justify-content: space-between; padding: 28rpx 32rpx; background: #B8860B; color: #fff; }
+.title { font-size: 36rpx; font-weight: 700; }
+.new-btn { font-size: 26rpx; background: rgba(255,255,255,.2); padding: 8rpx 24rpx; border-radius: 30rpx; }
+.form { background: #fff; margin: 20rpx; border-radius: 16rpx; padding: 24rpx; }
+.form-row { display: flex; align-items: center; margin-bottom: 16rpx; }
+.label { font-size: 26rpx; color: #666; width: 140rpx; }
+.picker { flex: 1; background: #f5f5f5; border-radius: 10rpx; padding: 16rpx 20rpx; font-size: 28rpx; }
+.field { width: 100%; background: #f5f5f5; border-radius: 10rpx; padding: 18rpx 20rpx; font-size: 28rpx; margin-bottom: 16rpx; box-sizing: border-box; }
+.area { height: 140rpx; }
+.btn-primary { background: #B8860B; color: #fff; font-size: 28rpx; border-radius: 12rpx; margin-top: 8rpx; }
+.tip, .empty { text-align: center; color: #999; font-size: 26rpx; margin-top: 80rpx; }
+.card { background: #fff; margin: 20rpx; border-radius: 16rpx; padding: 24rpx; box-shadow: 0 2rpx 10rpx rgba(0,0,0,.04); }
+.card-top { display: flex; align-items: center; }
+.order-no { font-size: 24rpx; color: #999; }
+.type-tag { font-size: 22rpx; color: #B8860B; background: #fff3e0; padding: 4rpx 14rpx; border-radius: 20rpx; margin: 0 12rpx; }
+.status { font-size: 22rpx; padding: 4rpx 14rpx; border-radius: 20rpx; margin-left: auto; }
+.status.pending { color: #888; background: #eee; }
+.status.matching { color: #1565c0; background: #e3f2fd; }
+.status.accepted { color: #2e7d32; background: #e8f5e9; }
+.status.processing { color: #ef6c00; background: #fff3e0; }
+.status.completed { color: #6a1b9a; background: #f3e5f5; }
+.status.rated { color: #455a64; background: #eceff1; }
+.card-title { font-size: 30rpx; font-weight: 600; margin-top: 14rpx; }
+.card-detail { font-size: 26rpx; color: #666; margin-top: 8rpx; }
+.matched { font-size: 24rpx; color: #555; margin-top: 10rpx; }
+.m-label { color: #999; }
+.m-name { color: #B8860B; }
+.card-actions { margin-top: 16rpx; }
+.btn-advance { background: #B8860B; color: #fff; font-size: 24rpx; }
+.btn-rate { background: #6a1b9a; color: #fff; font-size: 24rpx; }

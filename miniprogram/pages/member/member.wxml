@@ -1,0 +1,111 @@
+<!-- pages/member/member.wxml -->
+<!-- 会员中心：邀请码解锁 + 内容展示，无任何支付逻辑（三语，文案取 L） -->
+<view class="member-page">
+
+  <!-- 访客状态：输入邀请码 -->
+  <block wx:if="{{memberStatus === 'guest'}}">
+    <view class="guest-section">
+      <view class="guest-icon">🔑</view>
+      <view class="guest-title">{{L.guestTitle}}</view>
+      <view class="guest-desc">{{L.guestDesc}}</view>
+
+      <view class="code-input-wrap">
+        <input
+          class="code-input"
+          placeholder="{{L.codePlaceholder}}"
+          value="{{inviteCode}}"
+          bindinput="onCodeInput"
+          maxlength="16"
+        />
+        <text class="code-paste" bindtap="onPasteCode">{{L.paste}}</text>
+      </view>
+
+      <button class="btn-activate" bindtap="verifyCode" loading="{{verifying}}">
+        {{verifying ? L.verifying : L.activate}}
+      </button>
+
+      <view class="guest-hint">
+        <text>{{L.noCode}}</text>
+        <text class="link-text" bindtap="consultRequirement">{{L.consultService}}</text>
+      </view>
+
+      <view class="guest-preview">
+        <view class="guest-preview__title">{{L.previewTitle}}</view>
+        <view class="guest-preview__list">
+          <view class="preview-item" wx:for="{{previewItems}}" wx:key="*this">{{item}}</view>
+        </view>
+        <view class="guest-preview__lock">{{L.previewLock}}</view>
+      </view>
+    </view>
+  </block>
+
+  <!-- 会员状态：展示内容 -->
+  <block wx:if="{{memberStatus === 'member'}}">
+    <!-- 会员卡 -->
+    <view class="member-card">
+      <view class="member-card__top">
+        <view class="member-card__level">{{L.levelPro}}</view>
+        <view class="member-card__code">{{memberInfo.codeMasked}}</view>
+      </view>
+      <view class="member-card__info">
+        <view class="member-card__row">
+          <text class="member-card__label">{{L.activateDate}}</text>
+          <text>{{memberInfo.activateTime}}</text>
+        </view>
+        <view class="member-card__row">
+          <text class="member-card__label">{{L.expireDate}}</text>
+          <text>{{memberInfo.expireTime}}</text>
+        </view>
+      </view>
+      <view class="member-card__services">
+        <text wx:for="{{L.servicesList}}" wx:key="*this" class="member-card__service-tag">{{item}}</text>
+      </view>
+    </view>
+
+    <!-- 服务进度 -->
+    <view wx:if="{{serviceProgress.length > 0}}" class="section">
+      <view class="section__title">{{L.serviceProgress}}</view>
+      <view class="progress-list">
+        <view wx:for="{{serviceProgress}}" wx:key="name" class="progress-item">
+          <view class="progress-item__header">
+            <text class="progress-item__name">{{item.name}}</text>
+            <text class="progress-tag progress-tag--{{item.statusKey}}">{{item.statusText}}</text>
+          </view>
+          <view class="progress-bar">
+            <view class="progress-bar__fill" style="width: {{item.progress}}%"></view>
+          </view>
+          <text class="progress-item__date">{{item.date}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 会员专享内容 -->
+    <view class="section">
+      <view class="section__title">{{L.contentLib}}</view>
+      <view class="content-list">
+        <view
+          wx:for="{{memberContent}}"
+          wx:key="id"
+          class="content-item"
+          data-id="{{item.id}}"
+          data-type="{{item.type}}"
+          bindtap="onContentTap"
+        >
+          <view class="content-item__icon">{{item.icon}}</view>
+          <view class="content-item__body">
+            <view class="content-item__title">{{item.title}}</view>
+            <view class="content-item__desc">{{item.desc}}</view>
+          </view>
+          <text class="content-item__tag">{{item.tag}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 底部操作 -->
+    <view class="member-footer">
+      <button class="member-footer__btn" bindtap="consultRequirement">{{L.contactAdvisor}}</button>
+      <text class="member-footer__logout" bindtap="onLogout">{{L.logoutMember}}</text>
+    </view>
+  </block>
+
+</view>

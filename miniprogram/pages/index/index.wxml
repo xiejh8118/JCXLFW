@@ -1,0 +1,100 @@
+<!-- pages/index/index.wxml - 首页 -->
+<view class="container">
+  <!-- 顶部头部 -->
+  <view class="index-header">
+    <view class="index-header__row">
+      <view>
+        <view class="index-header__greeting">{{sectionTitles.greeting}}</view>
+        <view class="index-header__title">{{sectionTitles.appName}}</view>
+      </view>
+      <view class="index-header__lang" bindtap="onLangSwitch">
+        <text>{{languageLabel}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 商务服务入口（跳转服务展示页，合规：仅信息展示） -->
+  <view class="svc-banner" bindtap="onServiceTap">
+    <view class="svc-banner__left">
+      <view class="svc-banner__title">{{serviceBanner.title}}</view>
+      <view class="svc-banner__subtitle">{{serviceBanner.subtitle}}</view>
+    </view>
+    <view class="svc-banner__arrow">></view>
+  </view>
+
+  <!-- 合规体检入口（核心获客工具：免费 → 报告 → 客服承接） -->
+  <view class="checkup-banner" bindtap="onCheckupTap">
+    <view class="checkup-banner__badge">{{checkupBanner.tag}}</view>
+    <view class="checkup-banner__body">
+      <view class="checkup-banner__title">{{checkupBanner.title}}</view>
+      <view class="checkup-banner__subtitle">{{checkupBanner.subtitle}}</view>
+    </view>
+    <view class="checkup-banner__arrow">></view>
+  </view>
+
+  <!-- 合规资讯 -->
+  <view class="section">
+    <view class="section__title">{{sectionTitles.quickServices}}</view>
+    <view class="service-grid">
+      <view
+        class="service-item"
+        wx:for="{{quickServices}}"
+        wx:key="id"
+        data-page="{{item.page}}"
+        data-id="{{item.id}}"
+        bindtap="onItemTap"
+      >
+        <view class="service-item__icon" style="background: {{item.color}}20;">
+          <text>{{item.icon}}</text>
+        </view>
+        <view class="service-item__name">{{item.name}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 汇率换算（点击展开） -->
+  <view class="section" wx:if="{{exchangeRateShown}}">
+    <currency-calc />
+  </view>
+
+  <!-- 实用工具 -->
+  <view class="section">
+    <view class="section__title">{{sectionTitles.tools}}</view>
+    <view class="tool-grid">
+      <view
+        class="tool-item"
+        wx:for="{{tools}}"
+        wx:key="id"
+        data-page="{{item.page}}"
+        data-id="{{item.id}}"
+        bindtap="onItemTap"
+      >
+        <view class="tool-item__icon" style="background: {{item.color}}15;">
+          <text>{{item.icon}}</text>
+        </view>
+        <view class="tool-item__name">{{item.name}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 今日汇率卡片 -->
+  <view class="section">
+    <view class="section__title">{{sectionTitles.todayRate}}</view>
+    <view class="rate-card card">
+      <view class="rate-row flex-between">
+        <view class="rate-pair">
+          <text class="rate-currency">USD → KHR</text>
+          <text class="rate-value">{{rates.USD_KHR}}</text>
+        </view>
+        <view class="rate-pair">
+          <text class="rate-currency">CNY → KHR</text>
+          <text class="rate-value">{{rates.CNY_KHR}}</text>
+        </view>
+      </view>
+      <view class="rate-update text-hint text-sm" wx:if="{{rateUpdateTime}}">
+        {{sectionTitles.lastUpdate}} {{rateUpdateTime}}
+      </view>
+    </view>
+  </view>
+
+</view>

@@ -1,0 +1,228 @@
+// pages/index/index.js - 首页
+const { t, getCurrentLang } = require('../../utils/i18n.js');
+const api = require('../../utils/api.js');
+const dateHelper = require('../../utils/date-helper.js');
+
+const APP = getApp();
+
+const LANG_LABELS = {
+  'zh-CN': '中文',
+  'en': 'EN',
+  'km': 'ខ្មែរ'
+};
+
+const LANG_ORDER = ['zh-CN', 'en', 'km'];
+
+Page({
+  data: {
+    // 语言
+    languageLabel: '中文',
+
+    // 业务板块（真实功能页，纯本地计算/静态内容，不涉及 AI 类目）
+    quickServices: [
+      { id: 'visa', icon: '🛂', page: '/pages/compliance/compliance?tab=visa', color: '#9B59B6', name: '签证' },
+      { id: 'workpermit', icon: '📄', page: '/pages/compliance/compliance?tab=workpermit', color: '#3498DB', name: '劳工证' },
+      { id: 'company', icon: '🏢', page: '/pages/compliance/compliance?tab=business', color: '#E67E22', name: '公司注册' },
+      { id: 'invoice', icon: '🧾', page: '/pages/compliance/compliance?tab=taxreg', color: '#16A085', name: '税务登记' }
+    ],
+
+    // 实用工具
+    tools: [
+      { id: 'vat', icon: '🧮', page: '/pages/tax-tool/tax-tool?type=vat', color: '#E74C3C', name: 'VAT' },
+      { id: 'wht', icon: '📊', page: '/pages/tax-tool/tax-tool?type=wht', color: '#F39C12', name: 'WHT' },
+      { id: 'exchange', icon: '💱', page: '', color: '#8E44AD', name: '汇率' },
+      { id: 'calendar', icon: '📅', page: '', color: '#2ECC71', name: '佛历' }
+    ],
+
+    exchangeRateShown: true,
+
+    // 今日汇率
+    rates: {
+      USD_KHR: 4100,
+      CNY_KHR: 570
+    },
+    rateUpdateTime: '',
+
+    // 商务服务入口（跳转到服务展示页）
+    serviceBanner: {
+      title: '酒店 · 签证 · 财税',
+      subtitle: '一站式柬埔寨商务服务',
+      page: '/pages/services/services'
+    },
+
+    // 合规体检入口（核心获客工具 → 生成报告 → 唤起客服）
+    checkupBanner: {
+      title: '企业合规体检',
+      subtitle: '6项风险扫描 · 60秒出报告',
+      tag: '免费',
+      page: '/pages/checkup/checkup'
+    },
+
+    // 节标题（预计算避免 WXML 函数调用）
+    sectionTitles: {
+      appName: '柬企海外商务服务',
+      quickServices: '合规资讯',
+      tools: '实用工具',
+      todayRate: '今日汇率',
+      lastUpdate: '更新于'
+    }
+  },
+
+  onLoad() {
+    this.updateLanguageLabel();
+    this.updateTranslations();
+    this.loadExchangeRate();
+  },
+
+  onShow() {
+    this.updateLanguageLabel();
+    this.updateTranslations();
+  },
+
+  onLanguageChange() {
+    this.updateLanguageLabel();
+    this.updateTranslations();
+  },
+
+  // 更新右上角语言标签
+  updateLanguageLabel() {
+    const lang = getCurrentLang();
+    this.setData({ languageLabel: LANG_LABELS[lang] || '中文' });
+  },
+
+  updateTranslations() {
+    const services = this.data.quickServices.map(s => ({ ...s, name: t(`home.${s.id}`) }));
+    const tools = this.data.tools.map(item => ({ ...item, name: t(`home.${item.id}`) }));
+    const sectionTitles = {
+      appName: t('home.appName'),
+      quickServices: t('home.quickServices'),
+      tools: t('home.tools'),
+      todayRate: t('home.todayRate'),
+      lastUpdate: t('home.lastUpdate'),
+      greeting: t('home.greeting'),
+      svcBannerTitle: t('home.svcBannerTitle'),
+      svcBannerSubtitle: t('home.svcBannerSubtitle'),
+      checkupTitle: t('home.checkupTitle'),
+      checkupSubtitle: t('home.checkupSubtitle'),
+      checkupTag: t('home.checkupTag')
+    };
+    this.setData({
+      quickServices: services,
+      tools,
+      sectionTitles,
+      serviceBanner: { ...this.data.serviceBanner, title: sectionTitles.svcBannerTitle, subtitle: sectionTitles.svcBannerSubtitle },
+      checkupBanner: { ...this.data.checkupBanner, title: sectionTitles.checkupTitle, subtitle: sectionTitles.checkupSubtitle, tag: sectionTitles.checkupTag }
+    });
+    wx.setNavigationBarTitle({ title: t('home.title') });
+  },
+
+  // 首页右上角语言切换：弹出中文/英文/柬文三语选择
+  onLangSwitch() {
+    const self = this;
+    const itemList = ['中文', 'English', 'ភាសាខ្មែរ'];
+    wx.showActionSheet({
+      itemList,
+      success(res) {
+        const lang = LANG_ORDER[res.tapIndex];
+        if (lang && lang !== getCurrentLang()) {
+          APP.switchLanguage(lang);
+        }
+      }
+    });
+  },
+
+  // 加载今日汇率
+  async loadExchangeRate() {
+    try {
+      const res = await api.getExchangeRate();
+      const rates = {
+        USD_KHR: res?.USD_KHR || APP.globalData.exchangeRates.USD_KHR,
+        CNY_KHR: res?.CNY_KHR || APP.globalData.exchangeRates.CNY_KHR
+      };
+      this.setData({
+        rates,
+        rateUpdateTime: this.formatRateTime()
+      });
+      APP.globalData.exchangeRates = rates;
+    } catch (err) {
+      this.setData({
+        rates: APP.globalData.exchangeRates,
+        rateUpdateTime: this.formatRateTime()
+      });
+    }
+  },
+
+  formatRateTime() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    return `${h}:${m}`;
+  },
+
+  // 工具/服务点击
+  onItemTap(e) {
+    const { page, id } = e.currentTarget.dataset;
+    if (id === 'exchange') {
+      this.setData({ exchangeRateShown: !this.data.exchangeRateShown });
+      return;
+    }
+    if (id === 'calendar') {
+      this.showCalendarTool();
+      return;
+    }
+    if (page) {
+      // 判断是 tabBar 页面还是普通页面
+      const tabPages = ['/pages/index/index', '/pages/requirement/requirement', '/pages/profile/profile'];
+      const basePath = page.split('?')[0];
+      if (tabPages.indexOf(basePath) >= 0) {
+        wx.switchTab({ url: basePath });
+      } else {
+        wx.navigateTo({ url: page });
+      }
+    }
+  },
+
+  // 商务服务入口
+  onServiceTap() {
+    wx.navigateTo({ url: this.data.serviceBanner.page });
+  },
+
+  // 合规体检入口
+  onCheckupTap() {
+    wx.navigateTo({ url: this.data.checkupBanner.page });
+  },
+
+  // 佛历转换弹窗
+  showCalendarTool() {
+    const today = new Date();
+    const beYear = dateHelper.gregorianToBuddhist(today);
+    const khmerDate = dateHelper.formatDate(today, 'khmer');
+    wx.showModal({
+      title: t('home.calTitle'),
+      content: t('home.calContent', { year: beYear, date: khmerDate }),
+      showCancel: false,
+      confirmText: t('common.know')
+    });
+  },
+
+  // 下拉刷新
+  onPullDownRefresh() {
+    this.updateTranslations();
+    this.loadExchangeRate();
+    wx.stopPullDownRefresh();
+  },
+
+  onShareAppMessage() {
+    return {
+      title: t('home.shareTitle'),
+      path: '/pages/index/index'
+    };
+  },
+
+  onShareTimeline() {
+    return {
+      title: t('home.shareTimeline'),
+      query: ''
+    };
+  }
+});

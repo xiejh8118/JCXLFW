@@ -1,0 +1,297 @@
+/* app.wxss - 全局样式 */
+
+/* ========== CSS 变量（柬埔寨主题色） ========== */
+page {
+  --primary: #B8860B;           /* 暗金色 - 吴哥窟金 */
+  --primary-light: #D4A843;     /* 浅金色 */
+  --primary-dark: #8B6508;      /* 深金色 */
+  --accent: #E67E22;            /* 橙色 - 僧袍橙 */
+  --accent-light: #F0C27A;
+  --success: #27AE60;           /* 热带绿 */
+  --danger: #E74C3C;            /* 警示红 */
+  --warning: #F39C12;           /* 警告黄 */
+  --info: #3498DB;              /* 信息蓝 */
+
+  --bg-primary: #FFF8F0;        /* 米白底色 */
+  --bg-card: #FFFFFF;
+  --bg-secondary: #F5F0E8;
+
+  --text-primary: #2C1810;      /* 深褐文字 */
+  --text-secondary: #8B7355;    /* 浅褐文字 */
+  --text-hint: #B8A890;         /* 提示文字 */
+
+  --border-color: #E8DCC8;
+  --shadow: 0 2rpx 16rpx rgba(184, 134, 11, 0.08);
+
+  --radius-sm: 8rpx;
+  --radius-md: 16rpx;
+  --radius-lg: 24rpx;
+
+  --font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 
+    'PingFang SC', 'Microsoft YaHei', sans-serif;
+
+  font-family: var(--font-family);
+  font-size: 28rpx;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  line-height: 1.6;
+  box-sizing: border-box;
+}
+
+/* ========== 通用布局 ========== */
+.container {
+  min-height: 100vh;
+  padding-bottom: 120rpx;
+}
+
+.page-header {
+  padding: 32rpx 30rpx 24rpx;
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+}
+
+.page-header__title {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.page-header__subtitle {
+  font-size: 24rpx;
+  color: rgba(255,255,255,0.8);
+  margin-top: 8rpx;
+}
+
+.section {
+  margin: 24rpx 30rpx;
+}
+
+.section__title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 20rpx;
+  padding-left: 16rpx;
+  border-left: 6rpx solid var(--primary);
+}
+
+/* ========== 卡片 ========== */
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow);
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+}
+
+.card--hover {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card--hover:active {
+  transform: scale(0.98);
+  box-shadow: 0 1rpx 8rpx rgba(184, 134, 11, 0.12);
+}
+
+/* ========== 按钮 ========== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 80rpx;
+  padding: 0 40rpx;
+  border-radius: var(--radius-md);
+  font-size: 28rpx;
+  font-weight: 500;
+  border: none;
+  transition: opacity 0.2s;
+}
+
+.btn:active {
+  opacity: 0.8;
+}
+
+.btn--primary {
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+  color: #FFFFFF;
+}
+
+.btn--outline {
+  background: transparent;
+  color: var(--primary);
+  border: 2rpx solid var(--primary);
+}
+
+.btn--accent {
+  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  color: #FFFFFF;
+}
+
+.btn--sm {
+  height: 56rpx;
+  padding: 0 24rpx;
+  font-size: 24rpx;
+  border-radius: var(--radius-sm);
+}
+
+.btn--lg {
+  height: 96rpx;
+  padding: 0 56rpx;
+  font-size: 32rpx;
+  border-radius: var(--radius-lg);
+}
+
+.btn--block {
+  display: flex;
+  width: 100%;
+}
+
+/* ========== 表单 ========== */
+.form-group {
+  margin-bottom: 24rpx;
+}
+
+.form-label {
+  font-size: 26rpx;
+  color: var(--text-secondary);
+  margin-bottom: 10rpx;
+  display: block;
+}
+
+.form-input {
+  width: 100%;
+  height: 80rpx;
+  padding: 0 24rpx;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  font-size: 28rpx;
+  color: var(--text-primary);
+  border: 2rpx solid transparent;
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  border-color: var(--primary);
+  background: var(--bg-card);
+}
+
+.form-textarea {
+  width: 100%;
+  min-height: 160rpx;
+  padding: 20rpx 24rpx;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  font-size: 28rpx;
+  color: var(--text-primary);
+  border: 2rpx solid transparent;
+  box-sizing: border-box;
+}
+
+/* ========== 标签/徽章 ========== */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4rpx 16rpx;
+  border-radius: 20rpx;
+  font-size: 22rpx;
+  line-height: 1.6;
+}
+
+.tag--primary {
+  background: rgba(184, 134, 11, 0.1);
+  color: var(--primary);
+}
+
+.tag--success {
+  background: rgba(39, 174, 96, 0.1);
+  color: var(--success);
+}
+
+.tag--danger {
+  background: rgba(231, 76, 60, 0.1);
+  color: var(--danger);
+}
+
+.tag--warning {
+  background: rgba(243, 156, 18, 0.1);
+  color: var(--warning);
+}
+
+/* ========== 工具类 ========== */
+.flex { display: flex; }
+.flex-center { display: flex; align-items: center; justify-content: center; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.flex-wrap { flex-wrap: wrap; }
+.flex-1 { flex: 1; }
+.flex-col { display: flex; flex-direction: column; }
+
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-primary { color: var(--primary); }
+.text-accent { color: var(--accent); }
+.text-success { color: var(--success); }
+.text-danger { color: var(--danger); }
+.text-hint { color: var(--text-hint); }
+
+.text-sm { font-size: 22rpx; }
+.text-md { font-size: 28rpx; }
+.text-lg { font-size: 36rpx; }
+.text-xl { font-size: 44rpx; }
+
+.fw-bold { font-weight: 700; }
+
+.mt-10 { margin-top: 10rpx; }
+.mt-20 { margin-top: 20rpx; }
+.mt-30 { margin-top: 30rpx; }
+.mb-10 { margin-bottom: 10rpx; }
+.mb-20 { margin-bottom: 20rpx; }
+.ml-10 { margin-left: 10rpx; }
+.mr-10 { margin-right: 10rpx; }
+
+.p-20 { padding: 20rpx; }
+.p-30 { padding: 30rpx; }
+
+/* ========== 空状态 ========== */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80rpx 40rpx;
+}
+
+.empty-state__icon {
+  width: 200rpx;
+  height: 200rpx;
+  opacity: 0.3;
+  margin-bottom: 24rpx;
+}
+
+.empty-state__text {
+  font-size: 28rpx;
+  color: var(--text-hint);
+}
+
+/* ========== 加载态 ========== */
+.loading-more {
+  text-align: center;
+  padding: 30rpx;
+  font-size: 24rpx;
+  color: var(--text-hint);
+}
+
+/* ========== 分隔线 ========== */
+.divider {
+  height: 1rpx;
+  background: var(--border-color);
+  margin: 20rpx 0;
+}
+
+/* ========== 价格显示 ========== */
+.price {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.price--usd::before { content: '$ '; }
+.price--khr::after { content: ' ៛'; }
+.price--rmb::before { content: '¥ '; }

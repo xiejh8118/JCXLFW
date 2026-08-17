@@ -1,0 +1,309 @@
+/* pages/checkup/checkup.wxss */
+.checkup-page {
+  min-height: 100vh;
+  background: var(--bg-page, #FFF8F0);
+  padding: 24rpx;
+  box-sizing: border-box;
+}
+
+/* 步骤指示器 */
+.stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20rpx 0 32rpx;
+}
+.step {
+  font-size: 24rpx;
+  color: #999;
+  white-space: nowrap;
+}
+.step--active {
+  color: var(--primary, #B8860B);
+  font-weight: 500;
+}
+.step-line {
+  width: 60rpx;
+  height: 2rpx;
+  background: #DDD;
+  margin: 0 16rpx;
+}
+.step-line--active {
+  background: var(--primary, #B8860B);
+}
+
+/* 表单 */
+.form-section {
+  background: #FFF;
+  border-radius: 20rpx;
+  padding: 40rpx 32rpx;
+}
+.form-hint {
+  font-size: 26rpx;
+  color: #999;
+  text-align: center;
+  margin-bottom: 40rpx;
+}
+.form-item {
+  margin-bottom: 32rpx;
+}
+.form-label {
+  display: block;
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 12rpx;
+  font-weight: 500;
+}
+.form-input {
+  width: 100%;
+  height: 80rpx;
+  border: 2rpx solid #E5E5E5;
+  border-radius: 12rpx;
+  padding: 0 24rpx;
+  font-size: 28rpx;
+  box-sizing: border-box;
+}
+.form-picker {
+  height: 80rpx;
+  line-height: 80rpx;
+  border: 2rpx solid #E5E5E5;
+  border-radius: 12rpx;
+  padding: 0 24rpx;
+  font-size: 28rpx;
+  color: #333;
+}
+.form-picker--placeholder {
+  color: #BBB;
+}
+.form-item--switch {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.form-item--switch .form-label {
+  margin-bottom: 0;
+}
+
+/* 按钮 */
+.btn-primary {
+  width: 100%;
+  height: 88rpx;
+  line-height: 88rpx;
+  background: var(--primary, #B8860B);
+  color: #FFF;
+  border-radius: 12rpx;
+  font-size: 30rpx;
+  font-weight: 500;
+  margin-top: 20rpx;
+  border: none;
+}
+.btn-outline {
+  flex: 1;
+  height: 80rpx;
+  line-height: 80rpx;
+  background: #FFF;
+  color: var(--primary, #B8860B);
+  border: 2rpx solid var(--primary, #B8860B);
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  margin-right: 20rpx;
+  padding: 0;
+}
+
+/* 答题 */
+.quiz-section {
+  padding-top: 20rpx;
+}
+.quiz-progress {
+  margin-bottom: 40rpx;
+}
+.quiz-progress__text {
+  font-size: 24rpx;
+  color: #999;
+}
+.quiz-progress__bar {
+  height: 6rpx;
+  background: #EEE;
+  border-radius: 3rpx;
+  margin-top: 12rpx;
+  overflow: hidden;
+}
+.quiz-progress__fill {
+  height: 100%;
+  background: var(--primary, #B8860B);
+  border-radius: 3rpx;
+  transition: width 0.3s ease;
+}
+.quiz-card {
+  background: #FFF;
+  border-radius: 20rpx;
+  padding: 48rpx 32rpx;
+}
+.quiz-card__title {
+  font-size: 36rpx;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 16rpx;
+}
+.quiz-card__desc {
+  font-size: 26rpx;
+  color: #999;
+  margin-bottom: 40rpx;
+}
+.quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+.quiz-option {
+  padding: 28rpx 24rpx;
+  border: 2rpx solid #E5E5E5;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  color: #333;
+  transition: all 0.2s;
+}
+.quiz-option--selected {
+  border-color: var(--primary, #B8860B);
+  background: rgba(184, 134, 11, 0.06);
+  color: var(--primary, #B8860B);
+}
+.quiz-prev {
+  text-align: center;
+  font-size: 26rpx;
+  color: #999;
+  margin-top: 32rpx;
+  padding: 20rpx;
+}
+
+/* 报告 */
+.report-section {
+  padding-bottom: 40rpx;
+}
+.report-header {
+  background: #FFF;
+  border-radius: 20rpx;
+  padding: 48rpx 32rpx;
+  text-align: center;
+  border-top: 6rpx solid;
+}
+.report-grade {
+  font-size: 96rpx;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.report-score {
+  margin: 16rpx 0;
+}
+.report-score__num {
+  font-size: 56rpx;
+  font-weight: 700;
+  color: #333;
+}
+.report-score__unit {
+  font-size: 28rpx;
+  color: #999;
+  margin-left: 8rpx;
+}
+.report-company {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: 500;
+}
+.report-date {
+  font-size: 24rpx;
+  color: #BBB;
+  margin-top: 8rpx;
+}
+.report-summary {
+  background: #FFF;
+  border-radius: 20rpx;
+  padding: 32rpx;
+  margin-top: 24rpx;
+}
+.report-summary__title {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 16rpx;
+}
+.report-summary__text {
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.7;
+}
+.report-issues,
+.report-recs {
+  background: #FFF;
+  border-radius: 20rpx;
+  padding: 32rpx;
+  margin-top: 24rpx;
+}
+.report-section__title {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 24rpx;
+}
+.issue-item {
+  padding: 20rpx 0;
+  border-bottom: 2rpx solid #F5F5F5;
+}
+.issue-item:last-child {
+  border-bottom: none;
+}
+.issue-item__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8rpx;
+}
+.issue-item__title {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+}
+.issue-tag {
+  font-size: 22rpx;
+  padding: 4rpx 16rpx;
+  border-radius: 20rpx;
+}
+.issue-tag--safe { background: #E1F5EE; color: #0F6E56; }
+.issue-tag--warning { background: #FAEEDA; color: #854F0B; }
+.issue-tag--danger { background: #FAECE7; color: #993C1D; }
+.issue-tag--unknown { background: #F1EFE8; color: #5F5E5A; }
+.issue-item__desc {
+  font-size: 24rpx;
+  color: #999;
+}
+.rec-item {
+  padding: 16rpx 0;
+}
+.rec-item__text {
+  font-size: 26rpx;
+  color: #555;
+  line-height: 1.6;
+}
+.report-actions {
+  display: flex;
+  align-items: center;
+  margin-top: 40rpx;
+}
+.report-footer {
+  margin-top: 40rpx;
+  text-align: center;
+}
+.report-footer__text {
+  display: block;
+  font-size: 22rpx;
+  color: #BBB;
+  line-height: 1.6;
+  padding: 0 20rpx;
+}
+.report-footer__restart {
+  display: inline-block;
+  font-size: 26rpx;
+  color: var(--primary, #B8860B);
+  margin-top: 20rpx;
+  padding: 16rpx 40rpx;
+}

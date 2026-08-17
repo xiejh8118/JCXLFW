@@ -1,0 +1,109 @@
+/* pages/profile/profile.wxss */
+
+.profile-header {
+  padding: 60rpx 30rpx 40rpx;
+  background: linear-gradient(160deg, #6B3A0A 0%, var(--primary-dark) 40%, var(--primary) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.profile-avatar {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 50%;
+  border: 4rpx solid rgba(255,255,255,0.3);
+}
+
+.profile-avatar--empty {
+  background: rgba(255,255,255,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 60rpx;
+}
+
+.profile-name {
+  color: #FFFFFF;
+  font-size: 32rpx;
+  font-weight: 600;
+}
+
+/* 订单统计 */
+.order-stats {
+  padding: 24rpx 10rpx;
+}
+
+.stat-item {
+  flex: 1;
+  text-align: center;
+}
+
+.stat-num {
+  font-size: 36rpx;
+  font-weight: 700;
+  margin-bottom: 4rpx;
+}
+
+.stat-label {
+  font-size: 22rpx;
+  color: var(--text-hint);
+}
+
+/* 菜单 */
+.menu-list {
+  padding: 0;
+  overflow: hidden;
+}
+
+.menu-item {
+  padding: 28rpx 24rpx;
+  border-bottom: 1rpx solid var(--border-color);
+  font-size: 28rpx;
+  transition: background 0.2s;
+}
+
+.menu-item:last-child {
+  border-bottom: none;
+}
+
+.menu-item:active {
+  background: var(--bg-secondary);
+}
+
+.menu-item__icon {
+  font-size: 36rpx;
+}
+
+/* 真 button 样式重置，让它和 menu-item 视觉一致 */
+.menu-item--btn {
+  width: 100%;
+  margin: 0;
+  padding: 28rpx 24rpx;
+  line-height: inherit;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  font-size: 28rpx;
+  text-align: left;
+}
+.menu-item--btn::after {
+  border: none;
+}
+
+/* 语言选择 */
+.lang-item {
+  padding: 24rpx 16rpx;
+  border-bottom: 1rpx solid var(--border-color);
+  font-size: 28rpx;
+}
+
+.lang-item:last-child {
+  border-bottom: none;
+}
+
+.lang-item--active {
+  background: rgba(184, 134, 11, 0.05);
+  color: var(--primary);
+  font-weight: 600;
+}

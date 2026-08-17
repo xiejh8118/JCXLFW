@@ -1,0 +1,90 @@
+<!-- components/invoice-gen/invoice-gen.wxml - 电子发票生成器 -->
+<view class="modal-mask" wx:if="{{show}}" bindtap="onClose">
+  <view class="invoice-modal" catchtap="">
+    <!-- 头部 -->
+    <view class="invoice-header flex-between">
+      <view class="fw-bold text-lg">🧾 电子发票</view>
+      <view class="text-primary" bindtap="onClose">关闭</view>
+    </view>
+
+    <scroll-view class="invoice-body" scroll-y>
+      <!-- 服务信息 -->
+      <view class="invoice-section">
+        <view class="invoice-section__title">服务信息</view>
+        <view class="info-row flex-between">
+          <text>编号</text>
+          <text>{{service.reference || '--'}}</text>
+        </view>
+        <view class="info-row flex-between">
+          <text>服务</text>
+          <text>{{service.name || '--'}}</text>
+        </view>
+        <view class="info-row flex-between">
+          <text>金额</text>
+          <text class="price price--usd fw-bold">{{service.amount || 0}}</text>
+        </view>
+      </view>
+
+      <!-- 发票抬头 -->
+      <view class="invoice-section">
+        <view class="invoice-section__title">发票抬头</view>
+
+        <view class="form-group">
+          <view class="form-label">公司名称 *</view>
+          <input class="form-input" placeholder="请输入公司名称" value="{{invoice.companyName}}" bindinput="onCompanyNameInput"/>
+        </view>
+
+        <view class="form-group">
+          <view class="form-label">税号 (TIN)</view>
+          <input class="form-input" placeholder="L001-XXXXXXXXX" value="{{invoice.taxId}}" bindinput="onTaxIdInput"/>
+        </view>
+
+        <view class="form-group">
+          <view class="form-label">邮箱 *</view>
+          <input class="form-input" type="text" placeholder="receipt@company.com" value="{{invoice.email}}" bindinput="onEmailInput"/>
+        </view>
+
+        <view class="form-group">
+          <view class="form-label">地址</view>
+          <input class="form-input" placeholder="公司地址" value="{{invoice.address}}" bindinput="onAddressInput"/>
+        </view>
+      </view>
+
+      <!-- 发票设置 -->
+      <view class="invoice-section">
+        <view class="invoice-section__title">发票设置</view>
+
+        <view class="flex-between mb-20">
+          <text>格式</text>
+          <picker mode="selector" range="{{formatOptions}}" value="{{formatIndex}}" bindchange="onFormatChange">
+            <text class="text-primary">{{formatOptions[formatIndex]}}</text>
+          </picker>
+        </view>
+
+        <view class="flex-between mb-20">
+          <text>发送方式</text>
+          <picker mode="selector" range="{{sendMethods}}" value="{{sendMethodIndex}}" bindchange="onSendMethodChange">
+            <text class="text-primary">{{sendMethods[sendMethodIndex]}}</text>
+          </picker>
+        </view>
+
+        <view class="flex-between mb-20">
+          <text>包含高棉文</text>
+          <switch checked="{{includeKhmer}}" bindchange="onKhmerToggle" color="#B8860B"/>
+        </view>
+
+        <view class="flex-between">
+          <text>税务印章</text>
+          <switch checked="{{includeStamp}}" bindchange="onStampToggle" color="#B8860B"/>
+        </view>
+      </view>
+
+      <!-- 生成按钮 -->
+      <view class="btn btn--primary btn--block" bindtap="onGenerate">生成并发送发票</view>
+
+      <view class="text-center text-sm text-hint mt-20">
+        柬埔寨电子发票符合GDT标准格式
+      </view>
+    </scroll-view>
+  </view>
+</view>

@@ -1,0 +1,138 @@
+<!-- pages/compliance/compliance.wxml - 合规文档中心（三语，文案取 L） -->
+<view class="container">
+  <view class="page-header">
+    <view class="page-header__title">{{L.title}}</view>
+    <view class="page-header__subtitle">{{L.subtitle}}</view>
+  </view>
+
+  <!-- Tabs -->
+  <view class="tax-tabs">
+    <view
+      class="tax-tab {{activeTab === item.key ? 'tax-tab--active' : ''}}"
+      wx:for="{{tabs}}" wx:key="key"
+      data-key="{{item.key}}" bindtap="onTabChange"
+    >
+      <text class="mr-10">{{item.icon}}</text>{{item.label}}
+    </view>
+  </view>
+
+  <!-- ======== 签证 ======== -->
+  <view class="section" wx:if="{{activeTab === 'visa'}}">
+    <view class="fw-bold mb-20" style="font-size: 32rpx;">{{L.visaGuide}}</view>
+
+    <view class="card card--hover mb-20" wx:for="{{visaTypes}}" wx:key="type" data-type="{{item.type}}" bindtap="onVisaDetail">
+      <view class="flex-between mb-10">
+        <view class="fw-bold text-lg">{{item.name}} ({{item.type}}{{L.visaTypeSuffix}})</view>
+        <view class="tag tag--primary">${{item.fee}}</view>
+      </view>
+      <view class="text-hint text-sm mb-10">{{item.durationLabel}}</view>
+      <view class="text-sm">{{item.desc}}</view>
+    </view>
+  </view>
+
+  <!-- ======== 劳工证 ======== -->
+  <view class="section" wx:if="{{activeTab === 'workpermit'}}">
+    <view class="fw-bold mb-20" style="font-size: 32rpx;">{{L.workPermitGuide}}</view>
+
+    <view class="card mb-20">
+      <view class="flex-between mb-20">
+        <view class="fw-bold">{{L.annualFee}}</view>
+        <view class="text-xl fw-bold text-accent">${{workPermitInfo.fee}}</view>
+      </view>
+      <view class="flex-between mb-20">
+        <view>{{L.validity}}</view>
+        <view class="tag tag--success">{{workPermitInfo.validity}}</view>
+      </view>
+    </view>
+
+    <view class="card mb-20">
+      <view class="fw-bold mb-16">{{L.requirements}}</view>
+      <view class="flex flex-wrap">
+        <view class="tag mr-10 mb-10" wx:for="{{workPermitInfo.requirements}}" wx:key="*this">{{item}}</view>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="fw-bold mb-16">{{L.process}}</view>
+      <view class="step-list">
+        <view class="step-item flex" wx:for="{{workPermitInfo.steps}}" wx:key="*this">
+          <view class="step-num">{{index + 1}}</view>
+          <view class="step-text flex-1">{{item}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ======== 公司注册 ======== -->
+  <view class="section" wx:if="{{activeTab === 'business'}}">
+    <view class="card mb-20">
+      <view class="fw-bold mb-20">{{L.companyReg}}</view>
+      <view class="step-list">
+        <view class="step-item flex" wx:for="{{L.regSteps}}" wx:key="*this">
+          <view class="step-num">{{index + 1}}</view>
+          <view class="step-text flex-1">{{item}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="fw-bold mb-16">{{L.commonTypes}}</view>
+      <view class="mb-10 flex-between">
+        <view class="fw-bold">{{L.entityLtd}}</view>
+        <view class="text-sm text-hint">{{L.entityLtdDesc}}</view>
+      </view>
+      <view class="mb-10 flex-between">
+        <view class="fw-bold">{{L.entityBranch}}</view>
+        <view class="text-sm text-hint">{{L.entityBranchDesc}}</view>
+      </view>
+      <view class="flex-between">
+        <view class="fw-bold">{{L.entityRep}}</view>
+        <view class="text-sm text-hint">{{L.entityRepDesc}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ======== 税务登记 ======== -->
+  <view class="section" wx:if="{{activeTab === 'taxreg'}}">
+    <view class="card mb-20">
+      <view class="fw-bold mb-16">{{L.taxRegSteps}}</view>
+      <view class="step-list">
+        <view class="step-item flex" wx:for="{{L.taxRegStepsList}}" wx:key="*this">
+          <view class="step-num">{{index + 1}}</view>
+          <view class="step-text flex-1">{{item}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="fw-bold mb-16">{{L.taxDeadline}}</view>
+      <view class="mb-10 flex-between">
+        <view>{{L.taxVat}}</view>
+        <view class="tag tag--warning">{{L.vatDeadline}}</view>
+      </view>
+      <view class="mb-10 flex-between">
+        <view>{{L.taxWht}}</view>
+        <view class="tag tag--warning">{{L.vatDeadline}}</view>
+      </view>
+      <view class="mb-10 flex-between">
+        <view>{{L.taxSalary}}</view>
+        <view class="tag tag--warning">{{L.vatDeadline}}</view>
+      </view>
+      <view class="flex-between">
+        <view>{{L.taxAnnual}}</view>
+        <view class="tag tag--danger">{{L.annualIncomeDeadline}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 合规提示 -->
+  <view class="section">
+    <view class="section__title">{{L.complianceTip}}</view>
+    <view class="card" wx:for="{{tips}}" wx:key="text" data-text="{{item.text}}" bindtap="onCopyTip">
+      <view class="flex">
+        <text class="mr-10">{{item.icon}}</text>
+        <text class="text-sm flex-1">{{item.text}}</text>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,25 @@
+<!-- components/service-card/service-card.wxml -->
+<view class="service-card" style="{{customStyle}}" bindtap="onTap">
+  <!-- 图标区域 -->
+  <view class="service-card__icon-area">
+    <text class="service-card__icon">{{icon}}</text>
+    <view wx:if="{{tag}}" class="service-card__tag tag tag--{{tagColor}}">{{tag}}</view>
+  </view>
+
+  <!-- 信息区 -->
+  <view class="service-card__info">
+    <view class="service-card__title">{{title}}</view>
+    <view class="service-card__desc" wx:if="{{desc}}">{{desc}}</view>
+  </view>
+
+  <!-- 价格区 -->
+  <view class="service-card__footer" wx:if="{{showPrice && priceUSD > 0}}">
+    <view class="service-card__price">
+      <text class="price price--usd fw-bold">{{priceUSD}}</text>
+      <text class="text-sm text-hint">{{priceLabel}}</text>
+    </view>
+    <view class="service-card__action">
+      <text class="text-primary text-sm">预订 →</text>
+    </view>
+  </view>
+</view>
