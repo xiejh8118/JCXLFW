@@ -1,0 +1,9 @@
+{
+  "name": "khmerApi",
+  "version": "1.0.0",
+  "description": "KHMER AI 2.0 云函数：AI助手 + 需求单闭环 + 供应链匹配（国际版云开发）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}
