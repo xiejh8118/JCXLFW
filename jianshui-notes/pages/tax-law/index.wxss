@@ -1,0 +1,142 @@
+/* 柬埔寨税法页面 */
+
+/* 搜索栏 */
+.search-section {
+  padding: 24rpx;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  background: #FFFFFF;
+  border-radius: 40rpx;
+  padding: 16rpx 28rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+
+.search-icon {
+  font-size: 32rpx;
+  margin-right: 16rpx;
+}
+
+.search-input {
+  flex: 1;
+  font-size: 28rpx;
+  color: #2C2416;
+}
+
+.search-clear {
+  font-size: 28rpx;
+  color: #BFB09A;
+  padding: 8rpx;
+}
+
+/* 分类标签 */
+.category-scroll {
+  white-space: nowrap;
+  padding: 0 24rpx;
+}
+
+.category-list {
+  display: inline-flex;
+  gap: 16rpx;
+  padding-bottom: 8rpx;
+}
+
+.category-tag {
+  display: inline-block;
+  padding: 12rpx 28rpx;
+  border-radius: 40rpx;
+  font-size: 26rpx;
+  background: #FFFFFF;
+  color: #8B7355;
+  white-space: nowrap;
+  transition: all 0.3s;
+}
+
+.category-tag.active {
+  background: #C8963E;
+  color: #FFFFFF;
+}
+
+/* 结果计数 */
+.result-count {
+  padding: 16rpx 36rpx;
+}
+
+/* 税法列表 */
+.law-list {
+  padding: 0 24rpx;
+}
+
+.law-card {
+  margin: 0 0 24rpx 0;
+  padding: 28rpx 32rpx;
+}
+
+.law-header {
+  display: flex;
+  align-items: flex-start;
+}
+
+.law-header-left {
+  flex: 1;
+}
+
+.law-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #2C2416;
+  margin-bottom: 10rpx;
+  line-height: 1.4;
+}
+
+.law-summary {
+  font-size: 26rpx;
+  color: #8B7355;
+  margin-bottom: 14rpx;
+  line-height: 1.5;
+}
+
+.law-tags {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.law-arrow {
+  font-size: 22rpx;
+  color: #BFB09A;
+  margin-left: 16rpx;
+  margin-top: 8rpx;
+  transition: transform 0.3s;
+}
+
+.law-arrow.expanded {
+  transform: rotate(90deg);
+}
+
+/* 展开内容 */
+.law-content {
+  margin-top: 8rpx;
+}
+
+.law-text {
+  font-size: 28rpx;
+  color: #2C2416;
+  line-height: 1.8;
+  white-space: pre-line;
+}
+
+.law-actions {
+  margin-top: 24rpx;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.copy-btn {
+  font-size: 26rpx;
+  color: #C8963E;
+  padding: 8rpx 20rpx;
+  border-radius: 8rpx;
+  background: #F5E6CC;
+}

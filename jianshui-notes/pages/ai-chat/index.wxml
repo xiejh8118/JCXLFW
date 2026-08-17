@@ -1,0 +1,103 @@
+<!-- 柬埔寨问答页面 -->
+<view class="chat-container">
+
+  <!-- 聊天消息区域 -->
+  <scroll-view 
+    class="chat-scroll" 
+    scroll-y 
+    scroll-into-view="{{scrollToView}}"
+    scroll-with-animation
+  >
+    <view class="chat-messages">
+      
+      <!-- 消息列表 -->
+      <view 
+        wx:for="{{messages}}" 
+        wx:key="id"
+        id="msg-{{item.id}}"
+        class="msg-wrapper {{item.role === 'user' ? 'msg-user' : 'msg-assistant'}}"
+      >
+        <!-- 助手消息 -->
+        <view wx:if="{{item.role === 'assistant'}}" class="msg-row-assistant">
+          <view class="avatar-assistant">🤖</view>
+          <view class="msg-bubble-assistant">
+            <view class="msg-text">{{item.content}}</view>
+            <view class="msg-time">{{item.timestamp}}</view>
+          </view>
+        </view>
+
+        <!-- 用户消息 -->
+        <view wx:else class="msg-row-user">
+          <view class="msg-bubble-user">
+            <view class="msg-text">{{item.content}}</view>
+            <view class="msg-time">{{item.timestamp}}</view>
+          </view>
+          <view class="avatar-user">👤</view>
+        </view>
+      </view>
+
+      <!-- 打字动画 -->
+      <view wx:if="{{isTyping}}" class="msg-wrapper msg-assistant">
+        <view class="msg-row-assistant">
+          <view class="avatar-assistant">🤖</view>
+          <view class="msg-bubble-assistant typing-bubble">
+            <view class="typing-dots">
+              <view class="dot"></view>
+              <view class="dot"></view>
+              <view class="dot"></view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 快捷问题（初始状态） -->
+      <view wx:if="{{showQuickQuestions && messages.length <= 1}}" class="quick-section">
+        <view class="quick-title">💡 常见问题</view>
+        <view class="quick-list">
+          <view 
+            wx:for="{{quickQuestions}}" 
+            wx:key="*this"
+            class="quick-item"
+            data-question="{{item}}"
+            bindtap="onQuickQuestion"
+          >{{item}}</view>
+        </view>
+      </view>
+
+    </view>
+  </scroll-view>
+
+  <!-- 底部输入区域 -->
+  <view class="input-area">
+    <view class="input-bar">
+      <input 
+        class="chat-input"
+        placeholder="输入您的问题..."
+        value="{{inputValue}}"
+        bindinput="onInputChange"
+        bindconfirm="onSend"
+        confirm-type="send"
+        adjust-position="{{true}}"
+      />
+      <view 
+        class="send-btn {{inputValue ? 'active' : ''}}"
+        bindtap="onSend"
+      >
+        <text class="send-icon">➤</text>
+      </view>
+    </view>
+    
+    <!-- 快捷问题栏 -->
+    <view wx:if="{{!showQuickQuestions}}" class="mini-quick-bar">
+      <text class="mini-quick-label">快捷：</text>
+      <text 
+        wx:for="{{quickQuestions.slice(0, 4)}}" 
+        wx:key="*this"
+        class="mini-quick-item"
+        data-question="{{item}}"
+        bindtap="onQuickQuestion"
+      >{{item}}</text>
+    </view>
+  </view>
+
+</view>

@@ -1,0 +1,81 @@
+<!-- 柬埔寨特产页面 -->
+<view class="page-container">
+
+  <!-- 分类标签 -->
+  <scroll-view class="category-scroll" scroll-x enable-flex>
+    <view class="category-list">
+      <view 
+        wx:for="{{categories}}" 
+        wx:key="id"
+        class="category-tag {{activeCategory === item.id ? 'active' : ''}}"
+        data-category="{{item.id}}"
+        bindtap="onCategoryChange"
+      >{{item.name}}</view>
+    </view>
+  </scroll-view>
+
+  <!-- 结果计数 -->
+  <view class="result-count">
+    <text class="text-secondary text-small">共 {{filteredSpecialties.length}} 件特产</text>
+  </view>
+
+  <!-- 特产网格 -->
+  <view class="specialty-grid">
+    <view 
+      wx:for="{{filteredSpecialties}}" 
+      wx:key="id"
+      class="specialty-card card"
+      data-id="{{item.id}}"
+      bindtap="onViewDetail"
+    >
+      <view class="specialty-cover">
+        <image wx:if="{{item.img}}" class="specialty-cover-img" src="/assets/images/{{item.img}}" mode="aspectFill" />
+        <view wx:else class="specialty-cover-emoji">{{item.image}}</view>
+      </view>
+      <view class="specialty-info">
+        <view class="specialty-name">{{item.name}}</view>
+        <view class="specialty-price">{{item.price}}</view>
+        <view class="specialty-rating">
+          <text wx:for="{{[1,2,3,4,5]}}" wx:key="*this" class="star-small {{index < item.rating ? 'active' : ''}}">★</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view wx:if="{{filteredSpecialties.length === 0}}" class="empty-state" style="width: 100%;">
+      <view class="empty-state-icon">🎁</view>
+      <view class="empty-state-text">暂无该分类的特产信息</view>
+    </view>
+  </view>
+
+  <!-- 详情弹窗 -->
+  <view wx:if="{{showDetail && detailItem}}" class="detail-overlay" bindtap="onCloseDetail">
+    <view class="detail-panel" catchtap="">
+      <view class="detail-hero">
+        <view class="detail-icon">{{detailItem.image}}</view>
+        <view class="detail-close" bindtap="onCloseDetail">✕</view>
+      </view>
+      
+      <view class="detail-body">
+        <view class="detail-name">{{detailItem.name}}</view>
+        <view class="detail-price">💰 {{detailItem.price}}</view>
+        
+        <view class="detail-rating mb-24">
+          <text wx:for="{{[1,2,3,4,5]}}" wx:key="*this" class="star {{index < detailItem.rating ? 'active' : ''}}">★</text>
+          <text class="rating-text">{{detailItem.rating}}.0</text>
+        </view>
+
+        <view class="divider"></view>
+        
+        <view class="detail-text">{{detailItem.content}}</view>
+
+        <view class="divider"></view>
+
+        <view class="detail-tags">
+          <text wx:for="{{detailItem.tags}}" wx:key="*this" class="tag tag-primary">{{item}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+</view>

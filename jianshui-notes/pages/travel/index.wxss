@@ -1,0 +1,210 @@
+/* 柬埔寨旅游页面 */
+
+/* 分类标签 */
+.category-scroll {
+  white-space: nowrap;
+  padding: 24rpx;
+}
+
+.category-list {
+  display: inline-flex;
+  gap: 16rpx;
+  padding-bottom: 8rpx;
+}
+
+.category-tag {
+  display: inline-block;
+  padding: 12rpx 28rpx;
+  border-radius: 40rpx;
+  font-size: 26rpx;
+  background: #FFFFFF;
+  color: #8B7355;
+  white-space: nowrap;
+  transition: all 0.3s;
+}
+
+.category-tag.active {
+  background: #C8963E;
+  color: #FFFFFF;
+}
+
+/* 景点列表 */
+.spot-list {
+  padding: 0 24rpx;
+}
+
+.spot-card {
+  margin: 0 0 24rpx 0;
+}
+
+.spot-top {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 16rpx;
+}
+
+.spot-icon {
+  font-size: 72rpx;
+  margin-right: 20rpx;
+}
+
+.spot-meta {
+  flex: 1;
+}
+
+.spot-name {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #2C2416;
+  margin-bottom: 6rpx;
+}
+
+.spot-location {
+  font-size: 24rpx;
+  color: #8B7355;
+  margin-bottom: 8rpx;
+}
+
+.spot-rating {
+  display: flex;
+  align-items: center;
+}
+
+.star {
+  font-size: 28rpx;
+  color: #E0D0B0;
+  margin-right: 4rpx;
+}
+
+.star.active {
+  color: #F5A623;
+}
+
+.rating-text {
+  font-size: 24rpx;
+  color: #8B7355;
+  margin-left: 8rpx;
+}
+
+.spot-summary {
+  font-size: 26rpx;
+  color: #8B7355;
+  line-height: 1.6;
+  margin-bottom: 14rpx;
+}
+
+.spot-tags {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 14rpx;
+}
+
+.spot-season {
+  font-size: 24rpx;
+  color: #8B7355;
+}
+
+.season-label {
+  color: #2C2416;
+}
+
+.season-text {
+  color: #C8963E;
+}
+
+/* 详情弹窗 */
+.detail-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.detail-panel {
+  background: #FFFFFF;
+  border-radius: 32rpx 32rpx 0 0;
+  max-height: 85vh;
+  width: 100%;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.detail-hero {
+  height: 280rpx;
+  background: linear-gradient(135deg, #C8963E, #D4A84E);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 32rpx 32rpx 0 0;
+  position: relative;
+}
+
+.detail-icon {
+  font-size: 120rpx;
+}
+
+.detail-close {
+  position: absolute;
+  top: 24rpx;
+  right: 24rpx;
+  width: 56rpx;
+  height: 56rpx;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  color: #FFFFFF;
+}
+
+.detail-body {
+  padding: 32rpx;
+}
+
+.detail-name {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #2C2416;
+  margin-bottom: 8rpx;
+}
+
+.detail-location {
+  font-size: 26rpx;
+  color: #8B7355;
+  margin-bottom: 12rpx;
+}
+
+.detail-rating {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8rpx;
+}
+
+.detail-text {
+  font-size: 28rpx;
+  color: #2C2416;
+  line-height: 1.8;
+  white-space: pre-line;
+}
+
+.detail-season {
+  font-size: 26rpx;
+  color: #8B7355;
+}
