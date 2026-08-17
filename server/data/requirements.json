@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "order_no": "KHMER-20260815-6600",
+    "type": "accommodation",
+    "title": "西港团队公寓",
+    "detail": "需要3间",
+    "contact": "",
+    "status": "rated",
+    "openid": "dev-openid-123",
+    "matched_ids": [],
+    "status_history": [
+      {
+        "status": "pending",
+        "note": "创建需求单",
+        "at": 1786785710146
+      },
+      {
+        "status": "matching",
+        "note": "开始匹配",
+        "at": 1786785712162
+      },
+      {
+        "status": "rated",
+        "note": "评价 5星",
+        "at": 1786785712164
+      }
+    ],
+    "created_at": 1786785710146,
+    "updated_at": 1786785712164
+  }
+]
