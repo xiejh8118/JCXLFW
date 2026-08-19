@@ -1,4 +1,4 @@
-<!-- pages/index/index.wxml - 首页（KHMER AI 2.0 柬埔寨酒店 AI 商旅后勤平台） -->
+<!-- pages/index/index.wxml - 首页（柬企海外商旅服务 / KHMER 智能商旅助手） -->
 <view class="container">
   <!-- 顶部头部 -->
   <view class="index-header">
@@ -49,6 +49,18 @@
         <view class="cta-card__subtitle">{{sectionTitles.submitSubtitle}}</view>
       </view>
       <view class="cta-card__btn">{{sectionTitles.submitBtn}} ></view>
+    </view>
+  </view>
+
+  <!-- 智能客服（多语言 FAQ，规则匹配） -->
+  <view class="section">
+    <view class="cs-card" bindtap="onOpenHelp">
+      <view class="cs-card__icon">💬</view>
+      <view class="cs-card__left">
+        <view class="cs-card__title">{{sectionTitles.helpTitle}}</view>
+        <view class="cs-card__subtitle">{{sectionTitles.helpSubtitle}}</view>
+      </view>
+      <view class="cs-card__btn">></view>
     </view>
   </view>
 

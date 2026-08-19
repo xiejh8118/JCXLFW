@@ -23,9 +23,44 @@
 .status.rated { color: #455a64; background: #eceff1; }
 .card-title { font-size: 30rpx; font-weight: 600; margin-top: 14rpx; }
 .card-detail { font-size: 26rpx; color: #666; margin-top: 8rpx; }
+
+/* 闭环进度 */
+.progress { display: flex; align-items: flex-start; margin-top: 18rpx; }
+.progress-step { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; }
+.progress-step::before {
+  content: '';
+  position: absolute;
+  top: 18rpx;
+  left: -50%;
+  width: 100%;
+  height: 3rpx;
+  background: #e0e0e0;
+  z-index: 0;
+}
+.progress-step:first-child::before { display: none; }
+.progress-step.done::before { background: #B8860B; }
+.progress-dot {
+  width: 36rpx; height: 36rpx; line-height: 36rpx; text-align: center;
+  border-radius: 50%; background: #e0e0e0; color: #fff; font-size: 20rpx;
+  position: relative; z-index: 1;
+}
+.progress-step.done .progress-dot { background: #B8860B; }
+.progress-text { font-size: 18rpx; color: #999; margin-top: 6rpx; text-align: center; }
+.progress-step.done .progress-text { color: #B8860B; }
+
 .matched { font-size: 24rpx; color: #555; margin-top: 10rpx; }
 .m-label { color: #999; }
 .m-name { color: #B8860B; }
+
+/* 报价 */
+.quote-box {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 14rpx; padding: 14rpx 18rpx;
+  background: #fff8f0; border: 1rpx solid #f0e0c0; border-radius: 10rpx;
+}
+.quote-label { font-size: 24rpx; color: #999; }
+.quote-value { font-size: 28rpx; font-weight: 600; color: #B8860B; }
+
 .card-actions { margin-top: 16rpx; }
 .btn-advance { background: #B8860B; color: #fff; font-size: 24rpx; }
 .btn-rate { background: #6a1b9a; color: #fff; font-size: 24rpx; }

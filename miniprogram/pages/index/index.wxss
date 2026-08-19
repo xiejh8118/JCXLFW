@@ -242,7 +242,7 @@
   line-height: 1.5;
 }
 
-/* ===== 新定位样式（KHMER AI 2.0） ===== */
+/* ===== 新定位样式（柬企海外商旅服务 / KHMER） ===== */
 
 /* 平台定位横幅 */
 .platform-banner {
@@ -333,6 +333,43 @@
   font-weight: 600;
   padding: 16rpx 28rpx;
   border-radius: 30rpx;
+}
+
+/* 智能客服卡片 */
+.cs-card {
+  display: flex;
+  align-items: center;
+  padding: 28rpx 32rpx;
+  background: linear-gradient(135deg, #B8860B 0%, #D4A017 100%);
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 16rpx rgba(184,134,11,0.25);
+}
+.cs-card:active {
+  transform: scale(0.98);
+}
+.cs-card__icon {
+  font-size: 48rpx;
+  margin-right: 20rpx;
+}
+.cs-card__left {
+  flex: 1;
+}
+.cs-card__title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 8rpx;
+}
+.cs-card__subtitle {
+  font-size: 22rpx;
+  color: rgba(255,255,255,0.85);
+}
+.cs-card__btn {
+  flex-shrink: 0;
+  margin-left: 20rpx;
+  color: #fff;
+  font-size: 40rpx;
+  font-weight: 600;
 }
 
 /* 免责声明 */

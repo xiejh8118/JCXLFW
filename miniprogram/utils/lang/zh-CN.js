@@ -1,8 +1,8 @@
 // 中文语言包（全站）
 module.exports = {
   app: {
-    name: 'KHMER AI 2.0',
-    slogan: '柬埔寨酒店 AI 商旅后勤平台'
+    name: '柬企海外商旅服务',
+    slogan: '柬埔寨智能商旅服务助手'
   },
   nav: {
     home: '首页',
@@ -45,11 +45,11 @@ module.exports = {
     khr: '瑞尔'
   },
   home: {
-    title: 'KHMER AI 2.0',
-    appName: 'KHMER AI 2.0',
-    subtitle: '柬埔寨酒店 AI 商旅后勤平台',
+    title: '柬企海外商旅服务',
+    appName: '柬企海外商旅服务',
+    subtitle: '柬埔寨智能商旅服务助手',
     greeting: '你好',
-    slogan: '从入住开始，AI 帮企业在柬埔寨落地',
+    slogan: '从入住开始，智能帮企业在柬埔寨落地',
     scenarios: '核心服务',
     stay: '住宿服务',
     stayDesc: '酒店 · 长住 · 企业房',
@@ -70,43 +70,30 @@ module.exports = {
     calContent: '佛历 {year} 年\n{date}'
   },
   services: {
-    title: '商务服务',
-    tabs: ['酒店住宿', '签证服务', '财税代办'],
-    refPrice: '参考价',
-    refFee: '参考费用',
-    stay: '停留',
-    materials: '所需材料',
-    includes: '服务包含',
-    note: '说明',
-    desc: '简介',
-    consultHotel: '生成住宿需求单',
-    consultVisa: '生成签证需求单',
-    consultTax: '生成代办需求单',
-    bottomText: '查看我的全部需求单，跟踪处理进度',
-    contactUs: '进入需求单中心',
-    shareTitle: '柬埔寨商务服务 - 酒店住宿·签证办理·财税代办',
-    stayPrefix: '停留 {val}',
-    cyclePrefix: '周期 {val}',
-    // 业务数据（展示层三语）
-    data: {
-      hotels: [
-        { id: 'h001', name: '金边索菲特酒店', nameEn: 'Sofitel Phnom Penh', city: '金边', star: 5, refPrice: '￥680起/晚', tags: ['商务中心', '泳池', '健身房', '接机'], desc: '位于金边市中心，毗邻使馆区，适合商务出差。201间客房，配全套会议设施。' },
-        { id: 'h002', name: '暹粒吴哥莱佛士酒店', nameEn: 'Raffles Grand Hotel d\'Angkor', city: '暹粒', star: 5, refPrice: '￥850起/晚', tags: ['近吴哥窟', '历史建筑', 'spa', '接机'], desc: '距吴哥窟仅15分钟车程，法式殖民风格建筑，适合商务考察+文化旅游。' },
-        { id: 'h003', name: '西哈努克港假日酒店', nameEn: 'Holiday Inn Sihanoukville', city: '西哈努克', star: 4, refPrice: '￥420起/晚', tags: ['海滨', '会议厅', '性价比'], desc: '西港核心地段，适合特区企业出差，配中型会议室和商务中心。' },
-        { id: 'h004', name: '金边铂尔曼酒店', nameEn: 'Pullman Phnom Penh Arcadia', city: '金边', star: 5, refPrice: '￥550起/晚', tags: ['高楼景观', '屋顶泳池', '商务配套'], desc: '244间客房，位于KK大厦，直通购物中心，适合长期商务驻留。' }
-      ],
-      visaTypes: [
-        { id: 'v001', name: '商务签证（EB）', duration: '单次入境，可延期', refFee: '￥280（含服务费）', stayDays: '30天起，可续签', materials: ['护照原件（6个月以上）', '2寸白底照片2张', '中方公司营业执照', '柬方邀请函', '往返机票预订单'], processingDays: '3-5个工作日', note: '商务签证可在柬境内续签为6个月/12个月长期签证' },
-        { id: 'v002', name: '工作签证（EB延期）', duration: '6个月或12个月', refFee: '￥1,500起（含劳工证）', stayDays: '180天/365天', materials: ['有效护照', '劳工证（由我方代办）', '雇主聘用合同', '健康证明'], processingDays: '7-10个工作日', note: '需先办理劳工证，我方提供劳工证+工作签证一站式服务' },
-        { id: 'v003', name: '电子签证（e-Visa）', duration: '单次入境', refFee: '￥200', stayDays: '30天', materials: ['护照扫描件', '数码照片', '信用卡支付'], processingDays: '3个工作日', note: '仅限旅游目的，不可在柬境内续签为工作签证' }
-      ],
-      taxServices: [
-        { id: 't001', name: '公司注册代办', refFee: '￥3,500起', cycle: '15-20个工作日', includes: ['核名', '营业执照', '税务登记', '印章刻制', '银行开户协助'], desc: '提供 LLC / PLC 两种公司类型注册，含中柬双语文件准备' },
-        { id: 't002', name: '月度记账报税', refFee: '￥800/月起', cycle: '每月10日前完成', includes: ['账务处理', 'VAT申报', '预扣税申报', '薪资税申报', '月度财务报表'], desc: '熟悉柬埔寨GDT税务系统，确保合规申报，避免罚款' },
-        { id: 't003', name: '年度审计协助', refFee: '￥5,000起', cycle: '财年结束后3个月内', includes: ['财务数据整理', '审计资料准备', '与审计师对接', '审计报告翻译'], desc: '协助对接柬埔寨注册审计师（KICPA），完成法定年度审计' },
-        { id: 't004', name: '劳工证代办', refFee: '￥1,200/人', cycle: '10-15个工作日', includes: ['劳工部申请', '健康检查预约', '工作卡办理', '外籍配额确认'], desc: '每年9月前需完成续办，逾期罚款$500/人' }
-      ]
-    }
+    title: '服务与供应商网络',
+    applyBtn: '成为供应商',
+    applyTitle: '入驻供应商',
+    kindLabels: { accommodation: '住宿', supplychain: '物流仓储', property: '物业' },
+    kindOptions: ['住宿', '物流仓储', '物业'],
+    nameLabel: '名称',
+    cityLabel: '城市',
+    ratingLabel: '评分',
+    priceLabel: '价格',
+    contactLabel: '联系',
+    tagsLabel: '标签',
+    consultBtn: '生成需求单',
+    consultOk: '已生成需求单',
+    submitRequirement: '提交需求单',
+    needName: '请填写供应商名称',
+    applySuccess: '入驻申请已提交',
+    formName: '供应商名称',
+    formKind: '类型',
+    formCity: '城市',
+    formTags: '标签(逗号分隔)',
+    formPrice: '价格说明',
+    formContact: '联系方式',
+    formDesc: '简介',
+    shareTitle: '柬企海外商旅服务 - 柬埔寨智能商旅服务助手'
   },
   profile: {
     title: '个人中心',
@@ -114,6 +101,7 @@ module.exports = {
     guest: '游客',
     language: '语言设置',
     about: '关于我们',
+    privacy: '隐私政策',
     feedback: '意见反馈',
     logout: '退出登录',
     version: '版本',
@@ -123,13 +111,12 @@ module.exports = {
     logoutContent: '退出后需要重新登录',
     loggedOut: '已退出',
     loginSuccess: '登录成功',
-    aboutTitle: 'KHMER AI 2.0',
-    aboutContent: 'v1.0.0\n\n柬埔寨酒店 AI 商旅后勤平台：\n• 以酒店为入口的商旅后勤服务\n• 住宿 · 企业后勤 · 物流仓储 · 物业工单\n• 微信 AI 调起，一句话生成需求单\n• 中 / 英 / 高棉三语服务',
+    aboutTitle: '柬企海外商旅服务',
+    aboutContent: 'v1.0.0\n\n柬埔寨智能商旅服务助手：\n• 以酒店为入口的商旅后勤服务\n• 住宿 · 企业后勤 · 物流仓储 · 物业工单\n• 微信 AI 调起，一句话生成需求单\n• 中 / 英 / 高棉三语服务',
     langSwitched: '语言已切换',
     close: '关闭',
     feedbackTip: '请在客服会话中反馈',
-    property: '中鼎物业工作台',
-    shareTitle: 'KHMER AI 2.0 - 柬埔寨酒店 AI 商旅后勤平台'
+    shareTitle: '柬企海外商旅服务 - 柬埔寨智能商旅服务助手'
   },
   property: {
     title: '中鼎物业工作台',
@@ -150,6 +137,7 @@ module.exports = {
     tabToday: '待办',
     tabLedger: '台账',
     tabMeter: '抄表',
+    tabRepair: '报修',
     tabUsers: '用户',
     todayEmpty: '暂无待处理事项',
     remain: '剩余',
@@ -222,6 +210,20 @@ module.exports = {
     save: '保存',
     cancel: '取消',
     consult: '物业系统咨询',
+    // 报修工单（物业工单增强）
+    repairTitle: '报修工单',
+    repairType: '报修类型',
+    repairTypes: ['水电', '空调', '保洁', '安保', '其他'],
+    repairDetailPlaceholder: '请描述具体问题，如：空调不制冷',
+    repairSubmit: '提交并报到平台',
+    repairViewCenter: '查看需求单进度',
+    repairEmpty: '暂无报修工单',
+    repairPrefix: '报修',
+    repairDefaultDetail: '物业报修',
+    needRepairType: '请选择报修类型',
+    submitting: '提交中',
+    repairSubmitted: '已上报至需求单',
+    repairFail: '上报失败',
     needUsername: '请输入用户名',
     needPassword: '请输入密码',
     needUsernamePwd: '请输入用户名和密码',
@@ -363,6 +365,8 @@ module.exports = {
       candidates: '匹配推荐',
       matchScore: '匹配分',
       statusFlow: '闭环进度',
+      stepLabels: ['待处理', '匹配中', '已接单', '处理中', '已完成'],
+      quote: '报价',
       advance: '推进状态',
       note: '处理备注',
       rate: '评价',

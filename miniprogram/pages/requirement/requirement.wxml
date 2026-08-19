@@ -28,10 +28,25 @@
     </view>
     <view class="card-title">{{item.title}}</view>
     <view wx:if="{{item.detail}}" class="card-detail">{{item.detail}}</view>
+
+    <!-- 闭环进度 -->
+    <view class="progress">
+      <view class="progress-step {{index <= item.progress ? 'done' : ''}}" wx:for="{{L.requirement.stepLabels}}" wx:for-item="s" wx:for-index="index" wx:key="*this">
+        <view class="progress-dot">{{index < item.progress ? '✓' : index + 1}}</view>
+        <text class="progress-text">{{s}}</text>
+      </view>
+    </view>
+
     <view wx:if="{{item.matched.length}}" class="matched">
       <text class="m-label">{{L.requirement.candidates}}：</text>
       <text wx:for="{{item.matched}}" wx:for-item="m" wx:key="id" class="m-name">{{m.name}} </text>
     </view>
+
+    <view wx:if="{{item.quote}}" class="quote-box">
+      <text class="quote-label">{{L.requirement.quote}}</text>
+      <text class="quote-value">{{item.quote}}</text>
+    </view>
+
     <view class="card-actions">
       <button wx:if="{{item.status === 'completed'}}" class="btn-rate" size="mini" bindtap="rate" data-id="{{item.id}}">{{L.requirement.rate}}</button>
       <button wx:elif="{{item.nextStatus}}" class="btn-advance" size="mini" bindtap="advance" data-id="{{item.id}}" data-next="{{item.nextStatus}}">{{L.requirement.advance}} · {{L.requirement.statusLabels[item.nextStatus]}}</button>

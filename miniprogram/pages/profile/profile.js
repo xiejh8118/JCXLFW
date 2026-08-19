@@ -38,7 +38,7 @@ Page({
       L,
       currentLanguage: getCurrentLang(),
       menuItems: [
-        { id: 'property', icon: '🏢', label: L.property, page: '/pages/property/property' },
+        { id: 'privacy', icon: '🔒', label: L.privacy, page: '/pages/privacy/privacy' },
         { id: 'language', icon: '🌐', label: L.language, page: '' },
         { id: 'feedback', icon: '💬', label: L.feedback, page: '', type: 'contact' }
       ]
@@ -127,7 +127,7 @@ Page({
 
   // 复制版本号
   onVersionTap() {
-    wx.setClipboardData({ data: 'KHMER AI 2.0 - v1.0.0' });
+    wx.setClipboardData({ data: '柬企海外商旅服务 - v1.0.0' });
     wx.showToast({ title: t('common.copied'), icon: 'success' });
   },
 

@@ -63,6 +63,7 @@
     <view class="tab-btn {{currentTab === 'today' ? 'active' : ''}}" data-tab="today" bindtap="switchTab">📋 {{L.tabToday}}</view>
     <view class="tab-btn {{currentTab === 'ledger' ? 'active' : ''}}" data-tab="ledger" bindtap="switchTab">📒 {{L.tabLedger}}</view>
     <view class="tab-btn {{currentTab === 'meter' ? 'active' : ''}}" data-tab="meter" bindtap="switchTab">⚡ {{L.tabMeter}}</view>
+    <view class="tab-btn {{currentTab === 'repair' ? 'active' : ''}}" data-tab="repair" bindtap="switchTab">🛠 {{L.tabRepair}}</view>
     <view class="tab-btn {{currentTab === 'users' ? 'active' : ''}}" data-tab="users" bindtap="switchTab" wx:if="{{isAdmin || permState.user_manage}}">👤 {{L.tabUsers}}</view>
   </view>
 
@@ -292,6 +293,76 @@
         <input class="form-input" type="digit" placeholder="100" value="{{rates.lowElecThreshold}}" data-field="lowElecThreshold" bindinput="onRateInput" />
       </view>
       <button class="form-btn form-btn--ghost" bindtap="saveRates" wx:if="{{isAdmin || permState.rate_setting}}">{{L.saveRates}}</button>
+    </view>
+  </view>
+
+  <!-- ===== 报修工单（物业工单增强） ===== -->
+  <view class="tab-content" wx:if="{{currentTab === 'repair'}}">
+    <view class="form-card">
+      <view class="form-card__title">{{L.repairTitle}}</view>
+
+      <!-- 房号（输入联想，复用 327 个预设房号） -->
+      <view class="form-row">
+        <text class="form-label">{{L.room}}</text>
+        <view class="room-input-wrap">
+          <input
+            class="form-input"
+            type="text"
+            placeholder="{{L.roomPlaceholder}}"
+            value="{{repairForm.room}}"
+            data-field="room"
+            bindinput="onRepairRoomInput"
+            bindfocus="onRepairRoomFocus"
+            bindblur="onRepairRoomBlur"
+          />
+          <view class="room-suggest" wx:if="{{showRoomList}}">
+            <view
+              class="room-suggest__item"
+              wx:for="{{filteredRooms}}"
+              wx:key="*this"
+              data-room="{{item}}"
+              catchtouchstart="onRepairRoomPick"
+              catchtap="onRepairRoomPick"
+            >{{item}}</view>
+            <view wx:if="{{filteredRooms.length === 0}}" class="room-suggest__empty">{{L.roomNoMatch}}</view>
+          </view>
+        </view>
+      </view>
+
+      <view class="form-row">
+        <text class="form-label">{{L.repairType}}</text>
+        <picker class="form-input form-input--picker" range="{{L.repairTypes}}" bindchange="onRepairTypeChange">
+          <view class="form-input form-input--picker">
+            <text>{{L.repairTypes[repairTypeIndex]}}</text>
+            <text class="filter-arrow">▾</text>
+          </view>
+        </picker>
+      </view>
+
+      <view class="form-row">
+        <text class="form-label">{{L.detail}}</text>
+        <textarea class="form-input" placeholder="{{L.repairDetailPlaceholder}}" value="{{repairForm.detail}}" data-field="detail" bindinput="onRepairDetail" />
+      </view>
+
+      <button class="form-btn form-btn--primary" bindtap="submitRepair">{{L.repairSubmit}}</button>
+      <button class="form-btn form-btn--ghost" bindtap="openRequirementCenter">{{L.repairViewCenter}}</button>
+    </view>
+
+    <!-- 已上报工单 -->
+    <view class="repair-list">
+      <view class="repair-item" wx:for="{{repairTickets}}" wx:key="id">
+        <view class="repair-item__top">
+          <text class="repair-item__room">{{item.room}}</text>
+          <text class="repair-item__type">{{item.type}}</text>
+          <text class="repair-item__status">{{item.statusLabel}}</text>
+        </view>
+        <view class="repair-item__detail" wx:if="{{item.detail}}">{{item.detail}}</view>
+        <view class="repair-item__no">{{item.order_no}}</view>
+      </view>
+      <view wx:if="{{repairTickets.length === 0}}" class="today-empty">
+        <text class="today-empty__icon">🛠</text>
+        <text class="today-empty__text">{{L.repairEmpty}}</text>
+      </view>
     </view>
   </view>
 

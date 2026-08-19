@@ -1,8 +1,8 @@
 // English language pack (full site)
 module.exports = {
   app: {
-    name: 'KHMER AI 2.0',
-    slogan: 'Cambodia Hotel AI Business-Travel Logistics Platform'
+    name: 'KHMER',
+    slogan: 'Cambodia Smart Business-Travel Assistant'
   },
   nav: {
     home: 'Home',
@@ -45,11 +45,11 @@ module.exports = {
     khr: 'KHR'
   },
   home: {
-    title: 'KHMER AI 2.0',
-    appName: 'KHMER AI 2.0',
-    subtitle: 'Cambodia Hotel AI Business-Travel Logistics Platform',
+    title: 'KHMER',
+    appName: 'KHMER',
+    subtitle: 'Cambodia Smart Business-Travel Assistant',
     greeting: 'Hello',
-    slogan: 'From check-in, AI helps enterprises land in Cambodia',
+    slogan: 'From check-in, a smart assistant helps enterprises land in Cambodia',
     scenarios: 'Core Services',
     stay: 'Accommodation',
     stayDesc: 'Hotel · Long-stay · Corporate',
@@ -62,6 +62,8 @@ module.exports = {
     submitTitle: 'Submit a logistics request',
     submitSubtitle: 'Stay · Storage · Delivery · Property, in one sentence',
     submitBtn: 'Start',
+    helpTitle: 'Smart Assistant',
+    helpSubtitle: 'Q&A in Chinese / English / Khmer, anytime',
     todayRate: "Today's Rate",
     lastUpdate: 'Updated',
     settleUSD: 'Settled in US Dollars (USD)',
@@ -70,43 +72,30 @@ module.exports = {
     calContent: 'Buddhist Year {year}\n{date}'
   },
   services: {
-    title: 'Business Services',
-    tabs: ['Hotels', 'Visa Services', 'Tax & Accounting'],
-    refPrice: 'Ref. Price',
-    refFee: 'Ref. Fee',
-    stay: 'Stay',
-    materials: 'Required Documents',
-    includes: 'Includes',
-    note: 'Note',
-    desc: 'Description',
-    consultHotel: 'Create Accommodation Request',
-    consultVisa: 'Create Visa Request',
-    consultTax: 'Create Agency Request',
-    bottomText: 'View all my requests and track progress',
-    contactUs: 'Go to Request Center',
-    shareTitle: 'Cambodia Business Services - Hotels · Visa · Tax',
-    stayPrefix: 'Stay {val}',
-    cyclePrefix: 'Cycle {val}',
-    // Business data (rendered in current language)
-    data: {
-      hotels: [
-        { id: 'h001', name: 'Sofitel Phnom Penh Phokeethra', nameEn: 'Sofitel Phnom Penh Phokeethra', city: 'Phnom Penh', star: 5, refPrice: 'from $170/night', tags: ['Business Center', 'Pool', 'Gym', 'Airport Pickup'], desc: 'Located downtown Phnom Penh near the embassy district, ideal for business trips. 201 rooms with full meeting facilities.' },
-        { id: 'h002', name: 'Raffles Grand Hotel d\'Angkor', nameEn: 'Raffles Grand Hotel d\'Angkor', city: 'Siem Reap', star: 5, refPrice: 'from $210/night', tags: ['Near Angkor Wat', 'Heritage Building', 'Spa', 'Airport Pickup'], desc: 'Only 15 min from Angkor Wat. French colonial style, ideal for business tours + cultural travel.' },
-        { id: 'h003', name: 'Holiday Inn Sihanoukville', nameEn: 'Holiday Inn Sihanoukville', city: 'Sihanoukville', star: 4, refPrice: 'from $105/night', tags: ['Seafront', 'Meeting Rooms', 'Great Value'], desc: 'Core area of Sihanoukville, ideal for SEZ business trips, with medium meeting rooms and business center.' },
-        { id: 'h004', name: 'Pullman Phnom Penh Arcadia', nameEn: 'Pullman Phnom Penh Arcadia', city: 'Phnom Penh', star: 5, refPrice: 'from $138/night', tags: ['High-rise Views', 'Rooftop Pool', 'Business Facilities'], desc: '244 rooms in KK Tower connected to a shopping mall, ideal for long-term business stays.' }
-      ],
-      visaTypes: [
-        { id: 'v001', name: 'Business Visa (EB)', duration: 'Single entry, extendable', refFee: '$70 (service fee incl.)', stayDays: 'from 30 days, renewable', materials: ['Passport original (6+ months)', '2 white-background photos', 'Chinese company business license', 'Cambodian invitation letter', 'Round-trip flight booking'], processingDays: '3-5 working days', note: 'Business visa can be extended in Cambodia to 6/12-month long-term visa' },
-        { id: 'v002', name: 'Work Visa (EB Extension)', duration: '6 or 12 months', refFee: 'from $375 (incl. work permit)', stayDays: '180/365 days', materials: ['Valid passport', 'Work permit (handled by us)', 'Employer contract', 'Health certificate'], processingDays: '7-10 working days', note: 'Work permit is required first; we provide one-stop work permit + work visa service' },
-        { id: 'v003', name: 'e-Visa', duration: 'Single entry', refFee: '$50', stayDays: '30 days', materials: ['Passport scan', 'Digital photo', 'Credit card payment'], processingDays: '3 working days', note: 'Tourism purpose only; cannot be extended to work visa in Cambodia' }
-      ],
-      taxServices: [
-        { id: 't001', name: 'Company Registration', refFee: 'from $875', cycle: '15-20 working days', includes: ['Name approval', 'Business license', 'Tax registration', 'Company seal', 'Bank account assistance'], desc: 'Registration for LLC / PLC company types, with bilingual (CN/KH) document preparation' },
-        { id: 't002', name: 'Monthly Bookkeeping & Filing', refFee: 'from $200/month', cycle: 'Completed before the 10th of each month', includes: ['Bookkeeping', 'VAT filing', 'WHT filing', 'Payroll tax filing', 'Monthly financial statements'], desc: 'Familiar with Cambodia GDT tax system to ensure compliant filing and avoid penalties' },
-        { id: 't003', name: 'Annual Audit Assistance', refFee: 'from $1,250', cycle: 'Within 3 months after fiscal year end', includes: ['Financial data organization', 'Audit document preparation', 'Liaison with auditors', 'Audit report translation'], desc: 'Assist in liaising with registered Cambodian auditors (KICPA) for statutory annual audit' },
-        { id: 't004', name: 'Work Permit Service', refFee: '$300/person', cycle: '10-15 working days', includes: ['Ministry of Labor application', 'Health check appointment', 'Work card processing', 'Foreign quota confirmation'], desc: 'Renewal required before September each year; late penalty $500/person' }
-      ]
-    }
+    title: 'Services & Provider Network',
+    applyBtn: 'Become a Provider',
+    applyTitle: 'Join as Provider',
+    kindLabels: { accommodation: 'Accommodation', supplychain: 'Logistics', property: 'Property' },
+    kindOptions: ['Accommodation', 'Logistics', 'Property'],
+    nameLabel: 'Name',
+    cityLabel: 'City',
+    ratingLabel: 'Rating',
+    priceLabel: 'Price',
+    contactLabel: 'Contact',
+    tagsLabel: 'Tags',
+    consultBtn: 'Create Request',
+    consultOk: 'Request created',
+    submitRequirement: 'My Requests',
+    needName: 'Please enter provider name',
+    applySuccess: 'Application submitted',
+    formName: 'Provider Name',
+    formKind: 'Type',
+    formCity: 'City',
+    formTags: 'Tags (comma separated)',
+    formPrice: 'Price Info',
+    formContact: 'Contact',
+    formDesc: 'Description',
+    shareTitle: 'KHMER - Cambodia Smart Business-Travel Assistant'
   },
   profile: {
     title: 'Profile',
@@ -114,6 +103,7 @@ module.exports = {
     guest: 'Guest',
     language: 'Language',
     about: 'About Us',
+    privacy: 'Privacy Policy',
     feedback: 'Feedback',
     logout: 'Log Out',
     version: 'Version',
@@ -123,13 +113,12 @@ module.exports = {
     logoutContent: 'You will need to log in again',
     loggedOut: 'Logged out',
     loginSuccess: 'Login successful',
-    aboutTitle: 'KHMER AI 2.0',
-    aboutContent: 'v1.0.0\n\nCambodia Hotel AI Business-Travel Logistics Platform:\n• Hotel-entry business-travel logistics\n• Stay · Corporate Logistics · Warehousing · Property\n• WeChat AI launch, one sentence to a request\n• Chinese / English / Khmer trilingual',
+    aboutTitle: 'KHMER',
+    aboutContent: 'v1.0.0\n\nCambodia Smart Business-Travel Assistant:\n• Hotel-entry business-travel logistics\n• Stay · Corporate Logistics · Warehousing · Property\n• WeChat AI launch, one sentence to a request\n• Chinese / English / Khmer trilingual',
     langSwitched: 'Language switched',
     close: 'Close',
     feedbackTip: 'Please give feedback in customer service chat',
-    property: 'Zhongding Property Console',
-    shareTitle: 'KHMER AI 2.0 - Cambodia Hotel AI Business-Travel Logistics Platform'
+    shareTitle: 'KHMER - Cambodia Smart Business-Travel Assistant'
   },
   property: {
     title: 'Zhongding Property Console',
@@ -150,6 +139,7 @@ module.exports = {
     tabToday: 'To-do',
     tabLedger: 'Ledger',
     tabMeter: 'Meter',
+    tabRepair: 'Repair',
     tabUsers: 'Users',
     todayEmpty: 'No pending tasks',
     remain: 'Remaining',
@@ -222,6 +212,19 @@ module.exports = {
     save: 'Save',
     cancel: 'Cancel',
     consult: 'Property System Consultation',
+    repairTitle: 'Repair Ticket',
+    repairType: 'Repair type',
+    repairTypes: ['Water/Elec', 'AC', 'Cleaning', 'Security', 'Other'],
+    repairDetailPlaceholder: 'Describe the issue, e.g. AC not cooling',
+    repairSubmit: 'Submit & report to platform',
+    repairViewCenter: 'View request progress',
+    repairEmpty: 'No repair tickets yet',
+    repairPrefix: 'Repair',
+    repairDefaultDetail: 'Property repair',
+    needRepairType: 'Select repair type',
+    submitting: 'Submitting',
+    repairSubmitted: 'Reported to requests',
+    repairFail: 'Report failed',
     needUsername: 'Please enter username',
     needPassword: 'Please enter password',
     needUsernamePwd: 'Please enter username and password',
@@ -359,6 +362,8 @@ module.exports = {
       candidates: 'Matched providers',
       matchScore: 'Match',
       statusFlow: 'Order progress',
+      stepLabels: ['Pending', 'Matching', 'Accepted', 'Processing', 'Completed'],
+      quote: 'Quote',
       advance: 'Advance status',
       note: 'Note',
       rate: 'Rate',

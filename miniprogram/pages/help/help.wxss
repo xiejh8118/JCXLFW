@@ -1,0 +1,17 @@
+.container { padding: 16px; }
+.help-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.help-title { font-size: 18px; font-weight: 600; color: #B8860B; }
+.help-lang { padding: 4px 10px; background: #f0f0f0; border-radius: 14px; font-size: 12px; }
+
+.ask-box { display: flex; gap: 8px; margin-bottom: 14px; }
+.ask-input { flex: 1; border: 1px solid #ddd; border-radius: 8px; padding: 10px; font-size: 14px; }
+.ask-btn { background: #B8860B; color: #fff; border-radius: 8px; font-size: 13px; padding: 0 16px; }
+
+.answer-card { background: #f7f0dd; border-radius: 10px; padding: 12px; margin-bottom: 16px; }
+.answer-label { font-size: 12px; color: #B8860B; margin-bottom: 4px; font-weight: 600; }
+.answer-text { font-size: 14px; color: #333; line-height: 1.6; }
+
+.faq-title { font-size: 14px; font-weight: 600; margin: 8px 0 10px; border-left: 3px solid #B8860B; padding-left: 8px; }
+.faq-item { background: #fff; border-radius: 10px; padding: 12px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+.faq-q { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 4px; }
+.faq-a { font-size: 13px; color: #666; line-height: 1.6; }

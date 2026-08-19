@@ -117,11 +117,11 @@ function wxLogin() {
 }
 
 /**
- * 获取用户信息
+ * 获取本地缓存的用户信息（非微信 getUserInfo API）
  */
-function getUserInfo() {
+function getCachedUserInfo() {
   const cached = wx.getStorageSync('userInfo');
-  return mockOk('getUserInfo', cached || {
+  return mockOk('getCachedUserInfo', cached || {
     nickName: '游客',
     avatarUrl: '',
     country: '',
@@ -233,6 +233,22 @@ function rateRequirement(id, rating, comment) {
   return ensureLogin().then(() => backendRequest('POST', `/api/requirement/${id}/rate`, { rating, comment }));
 }
 
+// ---- 供应商目录（接后端，dev 免鉴权）----
+function providerList(lang) {
+  return backendRequest('GET', `/api/providers?lang=${lang || 'zh-CN'}`, {}, { auth: false });
+}
+function providerCreate(payload) {
+  return backendRequest('POST', '/api/providers', payload, { auth: false });
+}
+
+// ---- 多语言 FAQ 客服（规则匹配，dev 免鉴权）----
+function faqList(lang) {
+  return backendRequest('GET', `/api/faq?lang=${lang || 'zh-CN'}`, {}, { auth: false });
+}
+function faqAsk(query, lang) {
+  return backendRequest('POST', '/api/faq', { query, lang: lang || 'zh-CN' }, { auth: false });
+}
+
 // ---- 物业工作台状态（公司级共享，云端持久化）----
 function propertyLoad() {
   return backendRequest('GET', '/api/property', {}, { auth: false });
@@ -253,7 +269,7 @@ module.exports = {
   convertCurrency,
   // 用户
   wxLogin,
-  getUserInfo,
+  getCachedUserInfo,
   updateUserInfo,
   // 合规
   getComplianceDocs,
@@ -269,5 +285,10 @@ module.exports = {
   rateRequirement,
   // ===== 物业工作台 =====
   propertyLoad,
-  propertySave
+  propertySave,
+  // ===== 供应商 / FAQ 客服 =====
+  providerList,
+  providerCreate,
+  faqList,
+  faqAsk
 };

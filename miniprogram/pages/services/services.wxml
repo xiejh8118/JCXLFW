@@ -1,136 +1,57 @@
 <!-- pages/services/services.wxml -->
-<!-- 小程序内闭环：服务展示 + 生成需求单，无客服引流 -->
+<!-- 供应商/服务网络：接后端 /api/providers，按类目分组 + 入驻 -->
 
 <view class="container">
-  <!-- 头部 -->
   <view class="svc-header">
     <view class="svc-header__title">{{L.title}}</view>
     <view class="svc-header__lang" bindtap="onLangSwitch">{{languageLabel}}</view>
   </view>
 
-  <!-- 标签切换 -->
-  <view class="svc-tabs">
-    <view
-      class="svc-tab {{activeTab == index ? 'svc-tab--active' : ''}}"
-      wx:for="{{tabs}}"
-      wx:key="*this"
-      data-index="{{index}}"
-      bindtap="onTabChange"
-    >{{item}}</view>
+  <view class="svc-list">
+    <block wx:for="{{groups}}" wx:key="kind" wx:for-item="g">
+      <view class="svc-group__title">{{g.label}}</view>
+      <view class="svc-card" wx:for="{{g.list}}" wx:key="id" wx:for-item="p">
+        <view class="svc-card__name">{{p.name}}</view>
+        <view class="svc-card__sub">{{p.city}} · ★{{p.rating}}</view>
+        <view class="svc-tags">
+          <text class="svc-tag" wx:for="{{p.tags}}" wx:for-item="tag" wx:key="*this">{{tag}}</text>
+        </view>
+        <view class="svc-card__meta">
+          <text>{{L.priceLabel}}: {{p.price_info}}</text>
+          <text>{{L.contactLabel}}: {{p.contact}}</text>
+        </view>
+        <view class="svc-card__desc">{{p.desc}}</view>
+        <button
+          class="req-btn req-btn--outline"
+          data-type="{{p.kind}}"
+          data-title="{{p.name}}"
+          data-detail="{{p.city}} · {{p.tags}}"
+          bindtap="createRequirement"
+        >{{L.consultBtn}}</button>
+      </view>
+    </block>
+    <view wx:if="{{groups.length === 0}}" class="svc-empty">…</view>
   </view>
 
-  <!-- 酒店住宿 -->
-  <view wx:if="{{activeTab == 0}}" class="svc-list">
-    <view class="svc-card" wx:for="{{hotels}}" wx:key="id">
-      <view class="svc-card__head" data-id="{{item.id}}" bindtap="toggleHotel">
-        <view class="svc-card__left">
-          <view class="svc-card__name">{{item.name}}</view>
-          <view class="svc-card__sub">{{item.nameEn}} · {{item.city}}</view>
-        </view>
-        <view class="svc-card__right">
-          <view class="svc-card__price">{{item.refPrice}}</view>
-          <view class="svc-card__label">{{L.refPrice}}</view>
-        </view>
-      </view>
-
-      <!-- 标签 -->
-      <view class="svc-tags">
-        <text class="svc-tag" wx:for="{{item.tags}}" wx:for-item="tag" wx:key="*this">{{tag}}</text>
-      </view>
-
-      <!-- 展开详情 -->
-      <view class="svc-card__body" wx:if="{{expandedHotel == item.id}}">
-        <view class="svc-desc">{{item.desc}}</view>
-      </view>
-
-      <!-- 生成需求单按钮 -->
-      <button
-        class="req-btn req-btn--outline"
-        data-type="accommodation"
-        data-title="{{item.name}}"
-        data-detail="{{item.nameEn}} · {{item.city}} · {{item.refPrice}}"
-        bindtap="createRequirement"
-      >{{L.consultHotel}}</button>
-    </view>
-  </view>
-
-  <!-- 签证服务 -->
-  <view wx:if="{{activeTab == 1}}" class="svc-list">
-    <view class="svc-card" wx:for="{{visaTypes}}" wx:key="id">
-      <view class="svc-card__head" data-id="{{item.id}}" bindtap="toggleVisa">
-        <view class="svc-card__left">
-          <view class="svc-card__name">{{item.name}}</view>
-          <view class="svc-card__sub">{{item.staySub}} · {{item.processingDays}}</view>
-        </view>
-        <view class="svc-card__right">
-          <view class="svc-card__price">{{item.refFee}}</view>
-          <view class="svc-card__label">{{L.refFee}}</view>
-        </view>
-      </view>
-
-      <!-- 展开详情 -->
-      <view class="svc-card__body" wx:if="{{expandedVisa == item.id}}">
-        <view class="svc-section__label">{{L.materials}}</view>
-        <view class="svc-materials">
-          <view class="svc-material__item" wx:for="{{item.materials}}" wx:for-item="mat" wx:key="*this">
-            <text class="svc-material__dot">·</text>
-            <text>{{mat}}</text>
-          </view>
-        </view>
-        <view class="svc-note" wx:if="{{item.note}}">{{item.note}}</view>
-      </view>
-
-      <!-- 生成需求单按钮 -->
-      <button
-        class="req-btn req-btn--outline"
-        data-type="enterprise"
-        data-title="{{item.name}}"
-        data-detail="{{item.duration}} · {{item.stayDays}} · {{item.processingDays}}"
-        bindtap="createRequirement"
-      >{{L.consultVisa}}</button>
-    </view>
-  </view>
-
-  <!-- 财税代办 -->
-  <view wx:if="{{activeTab == 2}}" class="svc-list">
-    <view class="svc-card" wx:for="{{taxServices}}" wx:key="id">
-      <view class="svc-card__head" data-id="{{item.id}}" bindtap="toggleTax">
-        <view class="svc-card__left">
-          <view class="svc-card__name">{{item.name}}</view>
-          <view class="svc-card__sub">{{item.cycleSub}}</view>
-        </view>
-        <view class="svc-card__right">
-          <view class="svc-card__price">{{item.refFee}}</view>
-          <view class="svc-card__label">{{L.refFee}}</view>
-        </view>
-      </view>
-
-      <!-- 展开详情 -->
-      <view class="svc-card__body" wx:if="{{expandedTax == item.id}}">
-        <view class="svc-desc">{{item.desc}}</view>
-        <view class="svc-section__label">{{L.includes}}</view>
-        <view class="svc-includes">
-          <view class="svc-include__item" wx:for="{{item.includes}}" wx:for-item="inc" wx:key="*this">
-            <text class="svc-material__dot">·</text>
-            <text>{{inc}}</text>
-          </view>
-        </view>
-      </view>
-
-      <!-- 生成需求单按钮 -->
-      <button
-        class="req-btn req-btn--outline"
-        data-type="enterprise"
-        data-title="{{item.name}}"
-        data-detail="{{item.cycleSub}} · {{item.refFee}}"
-        bindtap="createRequirement"
-      >{{L.consultTax}}</button>
-    </view>
-  </view>
-
-  <!-- 底部跳转需求单中心 -->
   <view class="svc-bottom">
-    <view class="svc-bottom__text">{{L.bottomText}}</view>
-    <button class="req-btn req-btn--primary" bindtap="goRequirementCenter">{{L.contactUs}}</button>
+    <button class="req-btn req-btn--primary" bindtap="toggleApply">{{L.applyBtn}}</button>
+  </view>
+
+  <!-- 入驻表单弹层 -->
+  <view wx:if="{{showApply}}" class="mask" bindtap="toggleApply">
+    <view class="apply-sheet" catchtap="noop">
+      <view class="apply-title">{{L.applyTitle}}</view>
+      <input class="field" placeholder="{{L.formName}}" value="{{applyForm.name_zh}}" data-f="name_zh" bindinput="onApplyInput" />
+      <picker class="picker" range="{{L.kindOptions}}" bindchange="onKindChange">
+        <view class="picker-val">{{L.kindOptions[kindIndex]}}</view>
+      </picker>
+      <input class="field" placeholder="{{L.formCity}}" value="{{applyForm.city}}" data-f="city" bindinput="onApplyInput" />
+      <input class="field" placeholder="{{L.formTags}}" value="{{applyForm.tags}}" data-f="tags" bindinput="onApplyInput" />
+      <input class="field" placeholder="{{L.formPrice}}" value="{{applyForm.price_info}}" data-f="price_info" bindinput="onApplyInput" />
+      <input class="field" placeholder="{{L.formContact}}" value="{{applyForm.contact}}" data-f="contact" bindinput="onApplyInput" />
+      <textarea class="field area" placeholder="{{L.formDesc}}" value="{{applyForm.desc_zh}}" data-f="desc_zh" bindinput="onApplyInput" />
+      <button class="req-btn req-btn--primary" bindtap="submitApply">{{L.applyTitle}}</button>
+      <button class="req-btn req-btn--outline" bindtap="toggleApply">取消</button>
+    </view>
   </view>
 </view>

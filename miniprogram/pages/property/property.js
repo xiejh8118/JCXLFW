@@ -12,6 +12,7 @@ const LS_ROOMS = 'zd_prop_rooms';
 const LS_RATES = 'zd_prop_rates';
 const LS_USERS = 'zd_prop_users';
 const LS_SESSION = 'zd_prop_session';
+const LS_REPAIR = 'zd_prop_repair';
 
 // ===== 默认配置 =====
 const DEFAULT_WATER_RATE = 0.7;   // $/吨
@@ -163,7 +164,12 @@ Page({
     loginError: '',
 
     // Tab
-    currentTab: 'today', // today / ledger / meter / users
+    currentTab: 'today', // today / ledger / meter / users / repair
+
+    // 报修工单（物业工单增强）
+    repairForm: { room: '', type: '', detail: '' },
+    repairTypeIndex: 0,
+    repairTickets: [],
 
     // 数据
     records: [],        // 原始记录
@@ -225,6 +231,7 @@ Page({
     this.pullCloud();
     if (this.data.isLoggedIn) {
       this.refreshAll();
+      this.loadRepairTickets();
     }
   },
 
@@ -1403,5 +1410,92 @@ Page({
       wx.hideLoading();
       wx.showToast({ title: err.message || '提交失败', icon: 'none' });
     }
+  },
+
+  // ===== 报修工单（物业工单增强）=====
+  loadRepairTickets() {
+    const tickets = wx.getStorageSync(LS_REPAIR) || [];
+    this.setData({ repairTickets: tickets.slice().reverse() });
+  },
+
+  onRepairRoomInput(e) {
+    const val = e.detail.value;
+    this.setData({ 'repairForm.room': val });
+    this.filterRooms(val);
+  },
+
+  onRepairRoomFocus() {
+    if (this.data.repairForm.room) {
+      this.filterRooms(this.data.repairForm.room);
+    }
+  },
+
+  onRepairRoomBlur() {
+    setTimeout(() => { this.setData({ showRoomList: false }); }, 200);
+  },
+
+  onRepairRoomPick(e) {
+    const room = e.currentTarget.dataset.room;
+    if (!room) return;
+    this.setData({ 'repairForm.room': room, showRoomList: false });
+  },
+
+  onRepairTypeChange(e) {
+    const idx = e.detail.value;
+    const types = (this.data.L.repairTypes || []);
+    const type = types[idx] || '';
+    this.setData({ repairTypeIndex: idx, 'repairForm.type': type });
+  },
+
+  onRepairDetail(e) {
+    this.setData({ 'repairForm.detail': e.detail.value });
+  },
+
+  async submitRepair() {
+    const { room, type, detail } = this.data.repairForm;
+    if (!room) { wx.showToast({ title: t('property.needRoom'), icon: 'none' }); return; }
+    const validRoom = this.matchRoom(room);
+    if (!validRoom) {
+      wx.showToast({ title: t('property.roomInvalid'), icon: 'none' });
+      this.filterRooms(room);
+      return;
+    }
+    if (!type) { wx.showToast({ title: t('property.needRepairType'), icon: 'none' }); return; }
+    wx.showLoading({ title: t('property.submitting') });
+    try {
+      const title = '[' + type + '] ' + validRoom + ' ' + (t('property.repairPrefix') || '报修');
+      const res = await api.createRequirement({
+        type: 'property',
+        title,
+        detail: detail || (t('property.repairDefaultDetail') || '物业报修')
+      });
+      const tickets = wx.getStorageSync(LS_REPAIR) || [];
+      tickets.push({
+        id: 'rp' + Date.now().toString(36),
+        room: validRoom,
+        type,
+        detail: detail || '',
+        order_no: res.order_no || '',
+        statusLabel: res.statusLabel || '',
+        at: getToday()
+      });
+      wx.setStorageSync(LS_REPAIR, tickets);
+      this.setData({
+        repairForm: { room: '', type: '', detail: '' },
+        repairTypeIndex: 0,
+        showRoomList: false,
+        repairTickets: tickets.slice().reverse()
+      });
+      wx.hideLoading();
+      wx.showToast({ title: t('property.repairSubmitted'), icon: 'success' });
+    } catch (err) {
+      wx.hideLoading();
+      wx.showToast({ title: err.message || t('property.repairFail'), icon: 'none' });
+    }
+  },
+
+  // 跳转需求单中心，查看报修在平台后台的进度
+  openRequirementCenter() {
+    wx.switchTab({ url: '/pages/requirement/requirement' });
   }
 });

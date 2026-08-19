@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KHMER AI 2.0 · 运营后台</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #f5f6f8; color: #222; }
+  header { background: #B8860B; color: #fff; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+  header h1 { font-size: 18px; margin: 0; }
+  header .ver { font-size: 12px; opacity: .85; }
+  main { max-width: 1080px; margin: 0 auto; padding: 20px; }
+  section { background: #fff; border-radius: 10px; padding: 18px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  h2 { font-size: 16px; margin: 0 0 14px; border-left: 4px solid #B8860B; padding-left: 10px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { border-bottom: 1px solid #eee; padding: 8px 6px; text-align: left; vertical-align: top; }
+  th { color: #888; font-weight: 600; }
+  .tag { display: inline-block; background: #f0f0f0; border-radius: 4px; padding: 1px 6px; margin: 1px; font-size: 11px; }
+  select, input { padding: 5px 6px; border: 1px solid #ccc; border-radius: 5px; font-size: 12px; max-width: 140px; }
+  button { background: #B8860B; color: #fff; border: 0; border-radius: 5px; padding: 6px 12px; cursor: pointer; font-size: 12px; }
+  button:hover { opacity: .9; }
+  .grid { display: grid; grid-template-columns: 1.2fr .8fr .6fr .6fr; gap: 6px; align-items: center; margin-bottom: 8px; }
+  .muted { color: #999; font-size: 12px; }
+  .ok { color: #16a085; }
+  .prov-list { display: flex; flex-wrap: wrap; gap: 8px; }
+  .prov { border: 1px solid #eee; border-radius: 8px; padding: 8px 10px; width: 220px; font-size: 12px; }
+  .prov b { color: #B8860B; }
+</style>
+</head>
+<body>
+<header>
+  <h1>KHMER AI 2.0 · 运营后台</h1>
+  <span class="ver">需求单闭环 / 供应商匹配 / 多语言客服</span>
+</header>
+<main>
+  <section>
+    <h2>需求单（全部）</h2>
+    <div id="reqWrap"><p class="muted">加载中…</p></div>
+  </section>
+  <section>
+    <h2>供应商 / 服务目录</h2>
+    <div class="prov-list" id="provList"><p class="muted">加载中…</p></div>
+  </section>
+</main>
+<script>
+const TOKEN = 'admin-dev';
+const api = (p, opt) => fetch('/api/' + p, Object.assign({
+  headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN }
+}, opt)).then(r => r.json());
+
+const STATUS = ['pending','matching','accepted','processing','completed','rated'];
+const STATUS_ZH = { pending:'待处理', matching:'匹配中', accepted:'已接单', processing:'处理中', completed:'已完成', rated:'已评价' };
+
+function el(html) { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstChild; }
+
+async function loadProviders() {
+  const d = await api('providers');
+  const wrap = document.getElementById('provList');
+  wrap.innerHTML = '';
+  (d.data || []).forEach(p => {
+    const tags = (p.tags || '').split(/[,，]/).map(t => `<span class="tag">${t.trim()}</span>`).join('');
+    wrap.appendChild(el(`<div class="prov"><b>${p.name_zh || p.name || ''}</b><br><span class="muted">${p.kind} · ${p.city} · ★${p.rating}</span><br>${tags}<br><span class="muted">${p.price_info||''} · ${p.contact||''}</span></div>`));
+  });
+}
+
+async function loadReq() {
+  const d = await api('admin/requirements');
+  const wrap = document.getElementById('reqWrap');
+  const rows = d.data || [];
+  if (!rows.length) { wrap.innerHTML = '<p class="muted">暂无需求单</p>'; return; }
+  const table = el('<table><thead><tr><th>订单号</th><th>类型</th><th>需求</th><th>状态</th><th>报价(USD)</th><th>分配供应商</th><th>操作</th></tr></thead><tbody></tbody></table>');
+  const tb = table.querySelector('tbody');
+  rows.forEach(r => {
+    const tr = el('<tr></tr>');
+    tr.innerHTML = `
+      <td>${r.order_no}<br><span class="muted">${new Date(r.created_at).toLocaleString()}</span></td>
+      <td>${r.type}</td>
+      <td><b>${r.title}</b><br><span class="muted">${(r.detail||'').slice(0,60)}</span><br><span class="muted">联系:${r.contact||'-'}</span></td>
+      <td><select data-f="status">${STATUS.map(s=>`<option value="${s}" ${s===r.status?'selected':''}>${STATUS_ZH[s]}</option>`).join('')}</select><br><span class="muted">${r.matched?r.matched.length+'家匹配':''}</span></td>
+      <td><input data-f="quote" value="${r.quote||''}" placeholder="如 1200"></td>
+      <td><input data-f="matchedIds" value="${(r.matched_ids||[]).join(',')}" placeholder="供应商id,逗号"></td>
+      <td><button data-id="${r.id}">保存</button></td>`;
+    tr.querySelector('button').onclick = async (e) => {
+      const id = e.target.dataset.id;
+      const f = {};
+      tr.querySelectorAll('[data-f]').forEach(x => f[x.dataset.f] = x.value);
+      if (f.matchedIds) f.matchedIds = f.matchedIds.split(',').map(s=>s.trim()).filter(Boolean).map(Number);
+      const res = await api('admin/requirement/'+id, { method:'PUT', body: JSON.stringify(f) });
+      if (res.code === 0) { e.target.textContent = '已保存'; setTimeout(()=>e.target.textContent='保存', 1500); loadReq(); }
+      else alert('保存失败: ' + res.message);
+    };
+    tb.appendChild(tr);
+  });
+  wrap.innerHTML = '';
+  wrap.appendChild(table);
+}
+
+loadReq();
+loadProviders();
+setInterval(loadReq, 15000);
+</script>
+</body>
+</html>

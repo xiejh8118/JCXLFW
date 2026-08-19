@@ -4,12 +4,14 @@
     "pages/requirement/requirement",
     "pages/property/property",
     "pages/services/services",
-    "pages/profile/profile"
+    "pages/help/help",
+    "pages/profile/profile",
+    "pages/privacy/privacy"
   ],
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#B8860B",
-    "navigationBarTitleText": "KHMER AI 2.0",
+    "navigationBarTitleText": "柬企海外商旅服务",
     "navigationBarTextStyle": "white",
     "backgroundColor": "#FFF8F0",
     "enableShareAppMessage": true,

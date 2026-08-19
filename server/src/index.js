@@ -30,7 +30,7 @@ const STATUS_LABEL = {
 
 function resolveMatched(ids, lang) {
   if (!Array.isArray(ids) || !ids.length) return [];
-  return db.PROVIDERS.filter(p => ids.includes(p.id)).map(p => ({
+  return db.listProviders().filter(p => ids.includes(p.id)).map(p => ({
     id: p.id, name: db.localizeName(p, lang), kind: p.kind, contact: p.contact, rating: p.rating
   }));
 }
@@ -79,7 +79,7 @@ async function handle(req, res, url, body) {
 
   // 健康检查
   if (p === '/api/health' && req.method === 'GET') {
-    return send(res, 200, { code: 0, data: { service: 'KHMER AI 2.0', version: '1.1.1', status: 'ok', time: Date.now() } });
+    return send(res, 200, { code: 0, data: { service: 'KHMER AI 2.0', version: '2.1.0', status: 'ok', time: Date.now() } });
   }
 
   // 登录：wx.login code -> openid + token
@@ -102,6 +102,36 @@ async function handle(req, res, url, body) {
       const state = db.savePropertyState(body || {});
       return send(res, 200, { code: 0, data: state });
     } catch (e) { return send(res, 500, { code: 500, message: e.message }); }
+  }
+
+  // 供应商目录（GET 列表；POST 入驻，dev 免鉴权）
+  if (p === '/api/providers' && req.method === 'GET') {
+    const lang = url.searchParams.get('lang') || 'zh-CN';
+    return send(res, 200, { code: 0, data: db.listProviders().map(x => ({ ...x, name: db.localizeName(x, lang) })) });
+  }
+  if (p === '/api/providers' && req.method === 'POST') {
+    try {
+      const row = db.insertProvider(body || {});
+      return send(res, 200, { code: 0, data: row });
+    } catch (e) { return send(res, 500, { code: 500, message: e.message }); }
+  }
+  // 供应商匹配（按需求 type）
+  if (p === '/api/providers/match' && req.method === 'GET') {
+    const type = url.searchParams.get('type') || '';
+    const lang = url.searchParams.get('lang') || 'zh-CN';
+    return send(res, 200, { code: 0, data: db.matchProviders(type, lang) });
+  }
+  // 多语言 FAQ（智能客服，规则匹配）
+  if (p === '/api/faq' && req.method === 'GET') {
+    const lang = url.searchParams.get('lang') || 'zh-CN';
+    const suffix = lang === 'en' ? 'en' : lang === 'km' ? 'km' : 'zh';
+    return send(res, 200, { code: 0, data: db.FAQS.map(f => ({ id: f.id, question: f['q_' + suffix], answer: f['a_' + suffix] })) });
+  }
+  if (p === '/api/faq' && req.method === 'POST') {
+    const { query, lang } = body || {};
+    const ans = db.matchFaq(query, lang || 'zh-CN');
+    const fallback = { answer: '暂未匹配到答案，请拨打前台或提交需求单，我们会尽快联系您。' };
+    return send(res, 200, { code: 0, data: ans || fallback });
   }
 
   // 需求单（需登录）
@@ -155,6 +185,52 @@ async function handle(req, res, url, body) {
       return send(res, 200, { code: 0, data: decorate(row, lang) });
     }
     return send(res, 404, { code: 404, message: '路由不存在' });
+  }
+
+  // ===== 后台管理（ADMIN_TOKEN 鉴权）=====
+  if (p.startsWith('/api/admin')) {
+    const at = getToken(req) || url.searchParams.get('token') || '';
+    const adminOk = process.env.ADMIN_TOKEN ? at === process.env.ADMIN_TOKEN : at === 'admin-dev';
+    if (!adminOk) return send(res, 401, { code: 401, message: '无权限' });
+    const lang = url.searchParams.get('lang') || 'zh-CN';
+    if (p === '/api/admin/requirements' && req.method === 'GET') {
+      return send(res, 200, { code: 0, data: db.listAllRequirements().map(r => decorate(r, lang)) });
+    }
+    let m = p.match(/^\/api\/admin\/requirement\/(\d+)$/);
+    if (m && req.method === 'PUT') {
+      const { status, note, matchedIds, quote } = body || {};
+      const patch = {};
+      if (status) {
+        if (!STATUS_FLOW.includes(status)) return send(res, 400, { code: 400, message: '非法状态' });
+        const prev = db.getRequirementAdmin(m[1]);
+        patch.status = status;
+        patch.status_history = [...(prev ? prev.status_history || [] : []), { status, note: note || '', at: Date.now() }];
+      }
+      if (matchedIds) patch.matched_ids = matchedIds;
+      if (quote !== undefined) patch.quote = quote;
+      const updated = db.updateRequirementAdmin(m[1], patch);
+      if (!updated) return send(res, 404, { code: 404, message: '未找到' });
+      return send(res, 200, { code: 0, data: decorate(updated, lang) });
+    }
+    return send(res, 404, { code: 404, message: '路由不存在' });
+  }
+
+  // 管理后台静态页
+  if (p === '/admin' && req.method === 'GET') {
+    try {
+      const html = fs.readFileSync(path.join(__dirname, '..', 'admin.html'), 'utf8');
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      return res.end(html);
+    } catch (e) { return send(res, 500, { code: 500, message: 'admin.html 缺失' }); }
+  }
+
+  // 隐私政策静态页
+  if (p === '/privacy.html' && req.method === 'GET') {
+    try {
+      const html = fs.readFileSync(path.join(__dirname, '..', 'privacy.html'), 'utf8');
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      return res.end(html);
+    } catch (e) { return send(res, 500, { code: 500, message: 'privacy.html 缺失' }); }
   }
 
   return send(res, 404, { code: 404, message: 'Not Found' });

@@ -10,6 +10,8 @@ App({
     this.initCloud();
     // 检查登录状态
     this.checkLogin();
+    // 隐私合规：注册需授权回调，拦截 wx.login 等隐私接口
+    this.initPrivacy();
   },
 
   onShow(options) {
@@ -46,6 +48,19 @@ App({
     if (userInfo) {
       this.globalData.userInfo = userInfo;
     }
+  },
+
+  // 隐私合规：微信要求调用 wx.login 等隐私接口前必须取得用户授权。
+  // 注册该回调后，任一隐私接口被调用且未授权时，微信会弹出官方隐私授权框。
+  initPrivacy() {
+    if (typeof wx.onNeedPrivacyAuthorize !== 'function') return;
+    wx.onNeedPrivacyAuthorize((resolve) => {
+      wx.requirePrivacyAuthorize({
+        success: () => resolve({ event: 'agree' }),
+        fail: () => resolve({ event: 'disagree' }),
+        complete: () => {}
+      });
+    });
   },
 
   // 多语言切换

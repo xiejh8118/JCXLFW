@@ -1,0 +1,25 @@
+<!-- pages/help/help.wxml -->
+<view class="container">
+  <view class="help-header">
+    <view class="help-title">{{L.title}}</view>
+    <view class="help-lang" bindtap="onLangSwitch">{{lang === 'zh-CN' ? '中' : lang === 'en' ? 'EN' : 'ខ'}}</view>
+  </view>
+
+  <view class="ask-box">
+    <input class="ask-input" placeholder="{{L.placeholder}}" value="{{query}}" bindinput="onInput" confirm-type="search" bindconfirm="onAsk" />
+    <button class="ask-btn" bindtap="onAsk" loading="{{loading}}">{{L.askBtn}}</button>
+  </view>
+
+  <view wx:if="{{answer}}" class="answer-card">
+    <view class="answer-label">{{L.answerLabel}}</view>
+    <view class="answer-text">{{answer}}</view>
+  </view>
+
+  <view class="faq-section">
+    <view class="faq-title">{{L.faqLabel}}</view>
+    <view class="faq-item" wx:for="{{faqs}}" wx:key="id" data-q="{{item.question}}" data-a="{{item.answer}}" bindtap="onFaqTap">
+      <view class="faq-q">{{item.question}}</view>
+      <view class="faq-a">{{item.answer}}</view>
+    </view>
+  </view>
+</view>

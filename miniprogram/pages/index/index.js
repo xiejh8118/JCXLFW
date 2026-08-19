@@ -1,4 +1,4 @@
-// pages/index/index.js - 首页（KHMER AI 2.0 柬埔寨酒店 AI 商旅后勤平台）
+// pages/index/index.js - 首页（柬企海外商旅服务 / KHMER 智能商旅助手）
 const { t, getCurrentLang } = require('../../utils/i18n.js');
 const api = require('../../utils/api.js');
 const dateHelper = require('../../utils/date-helper.js');
@@ -17,7 +17,7 @@ Page({
   data: {
     languageLabel: '中文',
 
-    // 4 大场景入口（新定位：以酒店为入口的 AI 商旅后勤平台）
+    // 4 大场景入口（新定位：以酒店为入口的智能商旅后勤平台）
     scenarios: [
       { id: 'stay', icon: '🏨', page: '/pages/services/services', color: '#B8860B', rqType: '' },
       { id: 'logistics', icon: '📋', page: '/pages/requirement/requirement', color: '#3498DB', rqType: 'enterprise' },
@@ -30,14 +30,16 @@ Page({
     rateUpdateTime: '',
 
     sectionTitles: {
-      appName: 'KHMER AI 2.0',
-      subtitle: '柬埔寨酒店 AI 商旅后勤平台',
+      appName: '柬企海外商旅服务',
+      subtitle: '柬埔寨智能商旅服务助手',
       greeting: '你好',
-      slogan: '从入住开始，AI 帮企业在柬埔寨落地',
+      slogan: '从入住开始，智能帮企业在柬埔寨落地',
       scenarios: '核心服务',
       submitTitle: '提交商旅后勤需求',
       submitSubtitle: '住宿 · 仓储 · 配送 · 物业，一句话说清',
       submitBtn: '开始提交',
+      helpTitle: '智能客服',
+      helpSubtitle: '中 / 英 / 高棉三语问答，随时答疑',
       todayRate: '今日汇率',
       lastUpdate: '更新于',
       disclaimer: '本平台提供需求整理、供应商匹配与客服确认，不直接替代持证酒店、物流或经营主体。'
@@ -80,6 +82,8 @@ Page({
       submitTitle: t('home.submitTitle'),
       submitSubtitle: t('home.submitSubtitle'),
       submitBtn: t('home.submitBtn'),
+      helpTitle: t('home.helpTitle'),
+      helpSubtitle: t('home.helpSubtitle'),
       todayRate: t('home.todayRate'),
       lastUpdate: t('home.lastUpdate'),
       settleUSD: t('home.settleUSD'),
@@ -141,6 +145,11 @@ Page({
   // CTA：提交需求单（tabBar 页）
   onSubmitRequirement() {
     wx.switchTab({ url: '/pages/requirement/requirement' });
+  },
+
+  // 智能客服入口（普通页，navigateTo）
+  onOpenHelp() {
+    wx.navigateTo({ url: '/pages/help/help' });
   },
 
   showCalendarTool() {

@@ -15,9 +15,9 @@
   <!-- 工具入口 -->
   <view class="section">
     <view class="quick-grid">
-      <view class="quick-item" bindtap="onMenuTap" data-page="/pages/property/property">
-        <view class="quick-item__icon" style="background:#E67E2215;">🏢</view>
-        <view class="quick-item__name">{{L.property}}</view>
+      <view class="quick-item" bindtap="onMenuTap" data-id="privacy" data-page="/pages/privacy/privacy">
+        <view class="quick-item__icon" style="background:#2C3E5015;">🔒</view>
+        <view class="quick-item__name">{{L.privacy}}</view>
       </view>
       <view class="quick-item" bindtap="onMenuTap" data-id="language">
         <view class="quick-item__icon" style="background:#8E44AD15;">🌐</view>

@@ -8,6 +8,14 @@ function nextOf(status) {
   return (i >= 0 && i < FLOW.length - 1) ? FLOW[i + 1] : null;
 }
 
+// 闭环进度步骤（rated 视作已完成阶段的末态）
+const STEPS = ['pending', 'matching', 'accepted', 'processing', 'completed'];
+function progressOf(status) {
+  if (status === 'rated') return STEPS.length - 1;
+  const i = STEPS.indexOf(status);
+  return i >= 0 ? i : 0;
+}
+
 Page({
   data: {
     L: {}, list: [], loading: false,
@@ -50,7 +58,7 @@ Page({
     this.setData({ loading: true });
     try {
       const list = await api.listRequirements({ lang: (app.globalData && app.globalData.language) || 'zh-CN' });
-      this.setData({ list: list.map(o => ({ ...o, nextStatus: nextOf(o.status) })), loading: false });
+      this.setData({ list: list.map(o => ({ ...o, nextStatus: nextOf(o.status), progress: progressOf(o.status) })), loading: false });
     } catch (e) {
       this.setData({ loading: false });
       wx.showToast({ title: e.message || '加载失败', icon: 'none' });
