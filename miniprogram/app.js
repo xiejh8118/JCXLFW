@@ -29,6 +29,12 @@ App({
       console.error('请使用 2.2.3 或以上的基础库以使用云能力');
       return;
     }
+    // 微信官方：云开发暂不支持境外主体；且 wx.cloud 无法连接腾讯云国际版 CloudBase（账号与资源完全隔离）。
+    // 本项目后端走 server/ 自建服务（境外服务器 + HTTPS + request 合法域名），此处默认跳过云初始化。
+    if (!this.globalData.cloudEnv || this.globalData.cloudEnv === 'cloud-env-id') {
+      console.log('未配置云环境，跳过云开发初始化（后端走 server/ 自建服务）');
+      return;
+    }
     wx.cloud.init({
       env: this.globalData.cloudEnv,
       traceUser: true
@@ -56,6 +62,7 @@ App({
   },
 
   globalData: {
+    // TODO: 改为腾讯云国际版 CloudBase 控制台创建的环境 ID（如 khmer-xxxx）
     cloudEnv: 'cloud-env-id',
     language: 'zh-CN',
     userInfo: null,

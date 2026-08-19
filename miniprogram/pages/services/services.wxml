@@ -1,10 +1,10 @@
 <!-- pages/services/services.wxml -->
-<!-- 合规版服务展示页：纯信息展示 + 客服咨询，无在线交易 -->
+<!-- 小程序内闭环：服务展示 + 生成需求单，无客服引流 -->
 
 <view class="container">
   <!-- 头部 -->
   <view class="svc-header">
-    <view class="svc-header__title">商务服务</view>
+    <view class="svc-header__title">{{L.title}}</view>
     <view class="svc-header__lang" bindtap="onLangSwitch">{{languageLabel}}</view>
   </view>
 
@@ -29,7 +29,7 @@
         </view>
         <view class="svc-card__right">
           <view class="svc-card__price">{{item.refPrice}}</view>
-          <view class="svc-card__label">参考价</view>
+          <view class="svc-card__label">{{L.refPrice}}</view>
         </view>
       </view>
 
@@ -43,12 +43,14 @@
         <view class="svc-desc">{{item.desc}}</view>
       </view>
 
-      <!-- 客服咨询按钮 -->
-      <contact-bar
-        text="咨询房源详情"
-        source="hotel_{{item.id}}"
-        type="outline"
-      />
+      <!-- 生成需求单按钮 -->
+      <button
+        class="req-btn req-btn--outline"
+        data-type="accommodation"
+        data-title="{{item.name}}"
+        data-detail="{{item.nameEn}} · {{item.city}} · {{item.refPrice}}"
+        bindtap="createRequirement"
+      >{{L.consultHotel}}</button>
     </view>
   </view>
 
@@ -58,17 +60,17 @@
       <view class="svc-card__head" data-id="{{item.id}}" bindtap="toggleVisa">
         <view class="svc-card__left">
           <view class="svc-card__name">{{item.name}}</view>
-          <view class="svc-card__sub">停留 {{item.stayDays}} · {{item.processingDays}}</view>
+          <view class="svc-card__sub">{{item.staySub}} · {{item.processingDays}}</view>
         </view>
         <view class="svc-card__right">
           <view class="svc-card__price">{{item.refFee}}</view>
-          <view class="svc-card__label">参考费用</view>
+          <view class="svc-card__label">{{L.refFee}}</view>
         </view>
       </view>
 
       <!-- 展开详情 -->
       <view class="svc-card__body" wx:if="{{expandedVisa == item.id}}">
-        <view class="svc-section__label">所需材料</view>
+        <view class="svc-section__label">{{L.materials}}</view>
         <view class="svc-materials">
           <view class="svc-material__item" wx:for="{{item.materials}}" wx:for-item="mat" wx:key="*this">
             <text class="svc-material__dot">·</text>
@@ -78,12 +80,14 @@
         <view class="svc-note" wx:if="{{item.note}}">{{item.note}}</view>
       </view>
 
-      <!-- 客服咨询按钮 -->
-      <contact-bar
-        text="咨询签证办理"
-        source="visa_{{item.id}}"
-        type="outline"
-      />
+      <!-- 生成需求单按钮 -->
+      <button
+        class="req-btn req-btn--outline"
+        data-type="enterprise"
+        data-title="{{item.name}}"
+        data-detail="{{item.duration}} · {{item.stayDays}} · {{item.processingDays}}"
+        bindtap="createRequirement"
+      >{{L.consultVisa}}</button>
     </view>
   </view>
 
@@ -93,18 +97,18 @@
       <view class="svc-card__head" data-id="{{item.id}}" bindtap="toggleTax">
         <view class="svc-card__left">
           <view class="svc-card__name">{{item.name}}</view>
-          <view class="svc-card__sub">周期 {{item.cycle}}</view>
+          <view class="svc-card__sub">{{item.cycleSub}}</view>
         </view>
         <view class="svc-card__right">
           <view class="svc-card__price">{{item.refFee}}</view>
-          <view class="svc-card__label">参考费用</view>
+          <view class="svc-card__label">{{L.refFee}}</view>
         </view>
       </view>
 
       <!-- 展开详情 -->
       <view class="svc-card__body" wx:if="{{expandedTax == item.id}}">
         <view class="svc-desc">{{item.desc}}</view>
-        <view class="svc-section__label">服务包含</view>
+        <view class="svc-section__label">{{L.includes}}</view>
         <view class="svc-includes">
           <view class="svc-include__item" wx:for="{{item.includes}}" wx:for-item="inc" wx:key="*this">
             <text class="svc-material__dot">·</text>
@@ -113,22 +117,20 @@
         </view>
       </view>
 
-      <!-- 客服咨询按钮 -->
-      <contact-bar
-        text="咨询代办服务"
-        source="tax_{{item.id}}"
-        type="outline"
-      />
+      <!-- 生成需求单按钮 -->
+      <button
+        class="req-btn req-btn--outline"
+        data-type="enterprise"
+        data-title="{{item.name}}"
+        data-detail="{{item.cycleSub}} · {{item.refFee}}"
+        bindtap="createRequirement"
+      >{{L.consultTax}}</button>
     </view>
   </view>
 
-  <!-- 底部通用咨询 -->
+  <!-- 底部跳转需求单中心 -->
   <view class="svc-bottom">
-    <view class="svc-bottom__text">需要其他服务或有定制需求？</view>
-    <contact-bar
-      text="联系客服咨询"
-      source="general"
-      type="primary"
-    />
+    <view class="svc-bottom__text">{{L.bottomText}}</view>
+    <button class="req-btn req-btn--primary" bindtap="goRequirementCenter">{{L.contactUs}}</button>
   </view>
 </view>

@@ -41,7 +41,7 @@ page {
 /* ========== 通用布局 ========== */
 .container {
   min-height: 100vh;
-  padding-bottom: 20rpx;
+  padding-bottom: 120rpx;
 }
 
 .page-header {

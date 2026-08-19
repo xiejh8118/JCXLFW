@@ -1,14 +1,12 @@
-# Windows
-[Dd]esktop.ini
-Thumbs.db
-$RECYCLE.BIN/
+# 本地记忆 / 工作区配置（不提交）
+.workbuddy/
 
-# macOS
-.DS_Store
-.fseventsd
-.Spotlight-V100
-.TemporaryItems
-.Trashes
+# 小程序上传私钥与本地配置
+miniprogram/project.private.config.json
 
-# Node.js
-node_modules/
+# 后端运行时数据（云端持久化，非源码）
+server/data/*.json
+
+# 日志
+*.log
+npm-debug.log*

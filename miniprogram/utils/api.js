@@ -1,6 +1,11 @@
 /**
- * api.js - 云函数调用封装
+ * api.js - 后端调用封装
  * 统一管理所有后端接口调用
+ *
+ * 海外主体（本项目 appid 为境外主体）不支持微信云开发/云托管，wx.cloud 仅可连接
+ * 微信云开发环境（国内 TCB），且与腾讯云国际版 CloudBase 账号/资源完全隔离。
+ * 因此旧版云函数调用已全部降级为本地安全返回；KHMER 2.0 核心能力（需求单/匹配/后勤服务）
+ * 走 server/ 自托管后端（境外服务器 + HTTPS + request 合法域名）。
  */
 
 const APP = getApp();
@@ -12,182 +17,228 @@ const CONFIG = {
   retryDelay: 1000
 };
 
-/**
- * 通用云函数调用
- * @param {string} name - 云函数名称
- * @param {object} data - 请求参数
- * @param {object} options - 额外配置
- */
-function callCloudFunction(name, data = {}, options = {}) {
-  const { showLoading = false, loadingText = '加载中...' } = options;
-
-  if (showLoading) {
-    wx.showLoading({ title: loadingText, mask: true });
-  }
-
-  return wx.cloud.callFunction({
-    name,
-    data: {
-      ...data,
-      language: APP.globalData.language,
-      timestamp: Date.now()
-    }
-  }).then(res => {
-    if (showLoading) wx.hideLoading();
-    if (res.result && res.result.code === 0) {
-      return res.result.data;
-    } else {
-      throw new Error(res.result?.message || '请求失败');
-    }
-  }).catch(err => {
-    if (showLoading) wx.hideLoading();
-    console.error(`[API] ${name} 调用失败:`, err);
-    throw err;
-  });
-}
-
-/**
- * 带重试的云函数调用
- */
-function callWithRetry(name, data, options = {}) {
-  const maxRetries = options.retryTimes || CONFIG.retryTimes;
-  let lastError;
-
-  return (async function retry(attempt) {
-    try {
-      return await callCloudFunction(name, data, options);
-    } catch (err) {
-      lastError = err;
-      if (attempt < maxRetries) {
-        await sleep(CONFIG.retryDelay);
-        return retry(attempt + 1);
-      }
-      throw lastError;
-    }
-  })(0);
-}
-
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// ==================== 税务相关 ====================
+function unavailable(name) {
+  console.warn(`[API] ${name} 因海外主体不支持云开发，已降级为不可用`);
+  return Promise.reject(new Error('该功能在境外版暂不可用'));
+}
+
+function mockOk(name, data) {
+  console.warn(`[API] ${name} 因海外主体不支持云开发，已返回本地占位数据`);
+  return Promise.resolve(data);
+}
+
+// ==================== 税务相关（已降级）====================
 
 /**
  * 云端税务计算（保护核心算法）
- * @param {object} params - { type, amount, category, currency }
+ * 海外主体无法使用云函数，返回占位结果。
  */
 function calcTax(params) {
-  return callCloudFunction('calcTax', params, { showLoading: true });
+  const amount = Number(params && params.amount) || 0;
+  return mockOk('calcTax', {
+    tax: 0,
+    net: amount,
+    rate: 0,
+    note: '境外版暂不支持云端税务计算'
+  });
 }
 
 /**
  * 获取最新税率表
  */
 function getTaxRates() {
-  return callCloudFunction('getTaxRates');
+  return mockOk('getTaxRates', []);
 }
 
-// ==================== 发票相关 ====================
+// ==================== 发票相关（已降级）====================
 
 /**
  * 发送发票
- * @param {object} params - { orderId, email, telegramId }
  */
 function sendInvoice(params) {
-  return callCloudFunction('sendInvoice', params, {
-    showLoading: true,
-    loadingText: '发送中...'
-  });
+  return unavailable('sendInvoice');
 }
 
 /**
  * 获取发票列表
  */
 function getInvoiceList(params = {}) {
-  return callCloudFunction('getInvoiceList', params);
+  return mockOk('getInvoiceList', { list: [], total: 0 });
 }
 
-// ==================== 汇率相关 ====================
+// ==================== 汇率相关（本地缓存）====================
+
+function getExchangeRates() {
+  return (APP && APP.globalData && APP.globalData.exchangeRates) || {
+    USD_KHR: 4100,
+    CNY_KHR: 570
+  };
+}
 
 /**
  * 获取实时汇率
  */
 function getExchangeRate() {
-  return callWithRetry('getExchangeRate', {}, { retryTimes: 1 });
+  return mockOk('getExchangeRate', getExchangeRates());
 }
 
 /**
  * 货币换算
  */
 function convertCurrency(amount, from, to) {
-  return callCloudFunction('convertCurrency', { amount, from, to });
+  const rates = getExchangeRates();
+  const key = `${from}_${to}`;
+  const rate = rates[key] || 1;
+  return mockOk('convertCurrency', {
+    amount: Number(amount) || 0,
+    from,
+    to,
+    rate,
+    result: (Number(amount) || 0) * rate
+  });
 }
 
-// ==================== 用户相关 ====================
+// ==================== 用户相关（本地匿名）====================
 
 /**
  * 微信登录
+ * 海外主体无法使用云函数 wxLogin，返回本地匿名会话，避免页面登录流程报错。
  */
 function wxLogin() {
-  return new Promise((resolve, reject) => {
-    wx.login({
-      success: res => {
-        if (res.code) {
-          callCloudFunction('wxLogin', { code: res.code })
-            .then(resolve)
-            .catch(reject);
-        } else {
-          reject(new Error('登录失败'));
-        }
-      },
-      fail: reject
-    });
-  });
+  const localToken = 'local-' + Date.now();
+  const localOpenid = 'local-openid';
+  wx.setStorageSync('token', localToken);
+  wx.setStorageSync('openid', localOpenid);
+  return mockOk('wxLogin', { token: localToken, openid: localOpenid });
 }
 
 /**
  * 获取用户信息
  */
 function getUserInfo() {
-  return callCloudFunction('getUserInfo');
+  const cached = wx.getStorageSync('userInfo');
+  return mockOk('getUserInfo', cached || {
+    nickName: '游客',
+    avatarUrl: '',
+    country: '',
+    language: (APP && APP.globalData && APP.globalData.language) || 'zh-CN'
+  });
 }
 
 /**
  * 更新用户信息
  */
 function updateUserInfo(userInfo) {
-  return callCloudFunction('updateUserInfo', { userInfo });
+  if (userInfo) wx.setStorageSync('userInfo', userInfo);
+  return mockOk('updateUserInfo', { success: true });
 }
 
-// ==================== 合规文档相关 ====================
+// ==================== 合规文档相关（已降级）====================
 
 /**
  * 获取合规文档列表
  */
 function getComplianceDocs(params = {}) {
-  return callCloudFunction('getComplianceDocs', params);
+  return mockOk('getComplianceDocs', []);
 }
 
 /**
  * 提交合规申请
  */
 function submitComplianceDoc(docData) {
-  return callCloudFunction('submitComplianceDoc', { docData }, {
-    showLoading: true
-  });
+  return unavailable('submitComplianceDoc');
 }
 
-// ==================== 通用 ====================
+// ==================== 通用（已降级）====================
 
 /**
  * 文件上传
  */
 function uploadFile(filePath, folder = 'general') {
-  return wx.cloud.uploadFile({
-    cloudPath: `${folder}/${Date.now()}_${Math.random().toString(36).slice(2)}.${filePath.split('.').pop()}`,
-    filePath
+  return mockOk('uploadFile', {
+    fileID: '',
+    status: 'unavailable',
+    note: '境外版暂不支持云端文件上传'
   });
+}
+
+// ==================== 自托管后端（KHMER 2.0 / 编号 KHMER-1.1.1）====================
+// 后端源码见 ../server/（零依赖 Node，node src/index.js 即可启动）。
+// cloudfunctions/khmerApi/ 保留为备用，若未来微信开放境外主体云开发可直接切换。
+const BACKEND_BASE = 'https://www.ccbuyhub.com';
+// 上线前必须：1) 替换为真实境外 HTTPS 域名；2) 小程序后台「开发设置-服务器域名」加入 request 合法域名。
+const BACKEND_CONFIGURED = !/(example\.com|localhost|127\.0\.0\.1|0\.0\.0\.0|192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.)/i.test(BACKEND_BASE);
+
+function backendRequest(method, path, data = {}, options = {}) {
+  const { auth = true } = options;
+  if (!BACKEND_CONFIGURED) {
+    console.warn('[API] 后端域名未配置（仍为占位符），请部署 server/ 并填入真实 HTTPS 域名');
+    return Promise.reject(new Error('服务连接失败，请稍后重试'));
+  }
+  return new Promise((resolve, reject) => {
+    const header = { 'Content-Type': 'application/json' };
+    if (auth) {
+      const token = wx.getStorageSync('token');
+      if (token) header['Authorization'] = 'Bearer ' + token;
+    }
+    wx.request({
+      url: BACKEND_BASE + path,
+      method,
+      data,
+      header,
+      success: res => {
+        if (res.statusCode === 200 && res.data && res.data.code === 0) resolve(res.data.data);
+        else if (res.statusCode === 401) reject(new Error((res.data && res.data.message) || '未登录'));
+        else reject(new Error((res.data && res.data.message) || '请求失败'));
+      },
+      fail: err => reject(new Error(err.errMsg || '网络错误'))
+    });
+  });
+}
+
+// 静默登录：wx.login -> 后端 code2Session 换 token
+async function ensureLogin() {
+  const cached = wx.getStorageSync('token');
+  if (cached) return cached;
+  const code = await new Promise((resolve, reject) => {
+    wx.login({ success: r => r.code ? resolve(r.code) : reject(new Error('登录失败')), fail: reject });
+  });
+  const data = await backendRequest('POST', '/api/auth/login', { code }, { auth: false });
+  wx.setStorageSync('token', data.token);
+  wx.setStorageSync('openid', data.openid);
+  return data.token;
+}
+
+// ---- 需求单闭环 ----
+function createRequirement(payload) {
+  return ensureLogin().then(() => backendRequest('POST', '/api/requirement', payload));
+}
+function listRequirements(params = {}) {
+  let path = `/api/requirement?lang=${params.lang || 'zh-CN'}`;
+  if (params.status) path += `&status=${params.status}`;
+  if (params.type) path += `&type=${params.type}`;
+  return ensureLogin().then(() => backendRequest('GET', path));
+}
+function getRequirement(id, lang) {
+  return ensureLogin().then(() => backendRequest('GET', `/api/requirement/${id}?lang=${lang || 'zh-CN'}`));
+}
+function updateRequirementStatus(id, status, note, matchedIds) {
+  return ensureLogin().then(() => backendRequest('PUT', `/api/requirement/${id}/status`, { status, note, matchedIds }));
+}
+function rateRequirement(id, rating, comment) {
+  return ensureLogin().then(() => backendRequest('POST', `/api/requirement/${id}/rate`, { rating, comment }));
+}
+
+// ---- 物业工作台状态（公司级共享，云端持久化）----
+function propertyLoad() {
+  return backendRequest('GET', '/api/property', {}, { auth: false });
+}
+function propertySave(state) {
+  return backendRequest('POST', '/api/property', state, { auth: false });
 }
 
 module.exports = {
@@ -208,5 +259,15 @@ module.exports = {
   getComplianceDocs,
   submitComplianceDoc,
   // 通用
-  uploadFile
+  uploadFile,
+  // ===== KHMER 2.0 后端 =====
+  ensureLogin,
+  createRequirement,
+  listRequirements,
+  getRequirement,
+  updateRequirementStatus,
+  rateRequirement,
+  // ===== 物业工作台 =====
+  propertyLoad,
+  propertySave
 };

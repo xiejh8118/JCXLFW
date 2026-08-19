@@ -1,0 +1,15 @@
+[Unit]
+Description=KHMER AI 2.0 Backend
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/khmer-ai
+EnvironmentFile=/opt/khmer-ai/.env
+ExecStart=/usr/bin/node /opt/khmer-ai/src/index.js
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

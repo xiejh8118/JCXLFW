@@ -1,4 +1,4 @@
-<!-- pages/profile/profile.wxml - 个人中心 -->
+<!-- pages/profile/profile.wxml - 个人中心（三语，文案取 L） -->
 <view class="container">
   <!-- 用户信息区 -->
   <view class="profile-header">
@@ -8,28 +8,24 @@
     </block>
     <block wx:else>
       <view class="profile-avatar profile-avatar--empty">👤</view>
-      <view class="btn btn--outline mt-20" style="color:#FFF;border-color:rgba(255,255,255,0.5);" bindtap="onLogin">登录 / 注册</view>
+      <view class="btn btn--outline mt-20" style="color:#FFF;border-color:rgba(255,255,255,0.5);" bindtap="onLogin">{{L.login}}</view>
     </block>
   </view>
 
   <!-- 工具入口 -->
   <view class="section">
     <view class="quick-grid">
-      <view class="quick-item" bindtap="onMenuTap" data-page="/pages/tax-tool/tax-tool">
-        <view class="quick-item__icon" style="background:#E74C3C15;">🧮</view>
-        <view class="quick-item__name">税务</view>
-      </view>
-      <view class="quick-item" bindtap="onMenuTap" data-page="/pages/compliance/compliance">
-        <view class="quick-item__icon" style="background:#3498DB15;">📋</view>
-        <view class="quick-item__name">合规</view>
+      <view class="quick-item" bindtap="onMenuTap" data-page="/pages/property/property">
+        <view class="quick-item__icon" style="background:#E67E2215;">🏢</view>
+        <view class="quick-item__name">{{L.property}}</view>
       </view>
       <view class="quick-item" bindtap="onMenuTap" data-id="language">
         <view class="quick-item__icon" style="background:#8E44AD15;">🌐</view>
-        <view class="quick-item__name">语言</view>
+        <view class="quick-item__name">{{L.lang}}</view>
       </view>
       <view class="quick-item" bindtap="onMenuTap" data-id="about">
         <view class="quick-item__icon" style="background:#16A08515;">ℹ️</view>
-        <view class="quick-item__name">关于</view>
+        <view class="quick-item__name">{{L.aboutShort}}</view>
       </view>
     </view>
   </view>
@@ -37,44 +33,49 @@
   <!-- 菜单列表 -->
   <view class="section">
     <view class="menu-list card">
-      <view
-        class="menu-item flex-between"
-        wx:for="{{menuItems}}"
-        wx:key="id"
-        data-id="{{item.id}}"
-        data-page="{{item.page}}"
-        bindtap="onMenuTap"
-      >
-        <view class="flex-center">
-          <text class="menu-item__icon mr-20">{{item.icon}}</text>
-          <text>{{item.label}}</text>
+      <block wx:for="{{menuItems}}" wx:key="id">
+        <!-- 客服反馈：用真 button open-type="contact"，避免"即将上线"占位 -->
+        <button wx:if="{{item.type === 'contact'}}" class="menu-item flex-between menu-item--btn" open-type="contact" hover-class="none">
+          <view class="flex-center">
+            <text class="menu-item__icon mr-20">{{item.icon}}</text>
+            <text>{{item.label}}</text>
+          </view>
+          <view class="flex-center">
+            <text class="text-hint">→</text>
+          </view>
+        </button>
+        <view wx:else class="menu-item flex-between" data-id="{{item.id}}" data-page="{{item.page}}" bindtap="onMenuTap">
+          <view class="flex-center">
+            <text class="menu-item__icon mr-20">{{item.icon}}</text>
+            <text>{{item.label}}</text>
+          </view>
+          <view class="flex-center">
+            <text wx:if="{{item.id === 'language'}}" class="text-hint text-sm mr-10">{{currentLanguage === 'zh-CN' ? '中文' : currentLanguage === 'en' ? 'English' : 'ភាសាខ្មែរ'}}</text>
+            <text class="text-hint">→</text>
+          </view>
         </view>
-        <view class="flex-center">
-          <text wx:if="{{item.id === 'language'}}" class="text-hint text-sm mr-10">{{currentLanguage === 'zh-CN' ? '中文' : currentLanguage === 'en' ? 'English' : 'ភាសាខ្មែរ'}}</text>
-          <text class="text-hint">→</text>
-        </view>
-      </view>
+      </block>
     </view>
   </view>
 
   <!-- 退出登录 -->
   <view class="section" wx:if="{{isLoggedIn}}">
     <view class="btn btn--outline btn--block" style="color:var(--danger);border-color:var(--danger);" bindtap="onLogout">
-      退出登录
+      {{L.logout}}
     </view>
   </view>
 
   <!-- 版本 -->
   <view class="text-center mt-30 mb-30">
-    <text class="text-hint text-sm" bindtap="onVersionTap">v1.0.0 · 柬企海外商务工具</text>
+    <text class="text-hint text-sm" bindtap="onVersionTap">v1.0.0 · {{L.aboutTitle}}</text>
   </view>
 
   <!-- 语言选择弹窗 -->
   <view class="modal-mask" wx:if="{{showLangPicker}}" bindtap="onLangPickerClose">
     <view class="modal-content" catchtap="">
       <view class="modal-header flex-between p-20">
-        <view class="fw-bold">语言 / Language / ភាសា</view>
-        <view class="text-primary" bindtap="onLangPickerClose">关闭</view>
+        <view class="fw-bold">{{L.language}} / Language / ភាសា</view>
+        <view class="text-primary" bindtap="onLangPickerClose">{{L.close}}</view>
       </view>
       <view class="p-20">
         <view

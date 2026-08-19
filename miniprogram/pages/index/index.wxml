@@ -1,11 +1,12 @@
-<!-- pages/index/index.wxml - 首页 -->
+<!-- pages/index/index.wxml - 首页（KHMER AI 2.0 柬埔寨酒店 AI 商旅后勤平台） -->
 <view class="container">
   <!-- 顶部头部 -->
   <view class="index-header">
     <view class="index-header__row">
       <view>
-        <view class="index-header__greeting">សួស្តី / 你好</view>
+        <view class="index-header__greeting">{{sectionTitles.greeting}}</view>
         <view class="index-header__title">{{sectionTitles.appName}}</view>
+        <view class="index-header__subtitle">{{sectionTitles.subtitle}}</view>
       </view>
       <view class="index-header__lang" bindtap="onLangSwitch">
         <text>{{languageLabel}}</text>
@@ -13,83 +14,55 @@
     </view>
   </view>
 
-  <!-- 商务服务入口（跳转服务展示页，合规：仅信息展示） -->
-  <view class="svc-banner" bindtap="onServiceTap">
-    <view class="svc-banner__left">
-      <view class="svc-banner__title">{{serviceBanner.title}}</view>
-      <view class="svc-banner__subtitle">{{serviceBanner.subtitle}}</view>
-    </view>
-    <view class="svc-banner__arrow">❯</view>
+  <!-- 平台定位一句话 -->
+  <view class="platform-banner">
+    <text class="platform-banner__text">{{sectionTitles.slogan}}</text>
   </view>
 
-  <!-- 合规体检入口（核心获客工具：免费 → 报告 → 客服承接） -->
-  <view class="checkup-banner" bindtap="onCheckupTap">
-    <view class="checkup-banner__badge">{{checkupBanner.tag}}</view>
-    <view class="checkup-banner__body">
-      <view class="checkup-banner__title">{{checkupBanner.title}}</view>
-      <view class="checkup-banner__subtitle">{{checkupBanner.subtitle}}</view>
-    </view>
-    <view class="checkup-banner__arrow">❯</view>
-  </view>
-
-  <!-- 合规资讯 -->
+  <!-- 4 大场景 -->
   <view class="section">
-    <view class="section__title">{{sectionTitles.quickServices}}</view>
-    <view class="service-grid">
+    <view class="section__title">{{sectionTitles.scenarios}}</view>
+    <view class="scenario-grid">
       <view
-        class="service-item"
-        wx:for="{{quickServices}}"
+        class="scenario-item"
+        wx:for="{{scenarios}}"
         wx:key="id"
         data-page="{{item.page}}"
         data-id="{{item.id}}"
+        data-rqtype="{{item.rqType}}"
         bindtap="onItemTap"
       >
-        <view class="service-item__icon" style="background: {{item.color}}20;">
+        <view class="scenario-item__icon" style="background: {{item.color}}20;">
           <text>{{item.icon}}</text>
         </view>
-        <view class="service-item__name">{{item.name}}</view>
+        <view class="scenario-item__name">{{item.name}}</view>
+        <view class="scenario-item__desc">{{item.desc}}</view>
       </view>
     </view>
   </view>
 
-  <!-- 汇率换算（点击展开） -->
-  <view class="section" wx:if="{{exchangeRateShown}}">
-    <currency-calc />
-  </view>
-
-  <!-- 实用工具 -->
+  <!-- 快捷提交需求单 -->
   <view class="section">
-    <view class="section__title">{{sectionTitles.tools}}</view>
-    <view class="tool-grid">
-      <view
-        class="tool-item"
-        wx:for="{{tools}}"
-        wx:key="id"
-        data-page="{{item.page}}"
-        data-id="{{item.id}}"
-        bindtap="onItemTap"
-      >
-        <view class="tool-item__icon" style="background: {{item.color}}15;">
-          <text>{{item.icon}}</text>
-        </view>
-        <view class="tool-item__name">{{item.name}}</view>
+    <view class="cta-card" bindtap="onSubmitRequirement">
+      <view class="cta-card__left">
+        <view class="cta-card__title">{{sectionTitles.submitTitle}}</view>
+        <view class="cta-card__subtitle">{{sectionTitles.submitSubtitle}}</view>
       </view>
+      <view class="cta-card__btn">{{sectionTitles.submitBtn}} ></view>
     </view>
   </view>
 
-  <!-- 今日汇率卡片 -->
+  <!-- 今日汇率（美元基准） -->
   <view class="section">
     <view class="section__title">{{sectionTitles.todayRate}}</view>
     <view class="rate-card card">
-      <view class="rate-row flex-between">
-        <view class="rate-pair">
-          <text class="rate-currency">USD → KHR</text>
-          <text class="rate-value">{{rates.USD_KHR}}</text>
-        </view>
-        <view class="rate-pair">
-          <text class="rate-currency">CNY → KHR</text>
-          <text class="rate-value">{{rates.CNY_KHR}}</text>
-        </view>
+      <view class="rate-main">
+        <text class="rate-base">1 USD</text>
+        <text class="rate-eq">≈</text>
+        <text class="rate-big">{{rates.USD_KHR}} KHR</text>
+      </view>
+      <view class="rate-sub text-hint text-sm">
+        1 CNY ≈ {{rates.CNY_KHR}} KHR · {{sectionTitles.settleUSD}}
       </view>
       <view class="rate-update text-hint text-sm" wx:if="{{rateUpdateTime}}">
         {{sectionTitles.lastUpdate}} {{rateUpdateTime}}
@@ -97,23 +70,6 @@
     </view>
   </view>
 
-  <!-- 会员中心入口 -->
-  <view class="member-entry" bindtap="onMemberTap">
-    <view class="member-entry__icon">👑</view>
-    <view class="member-entry__body">
-      <view class="member-entry__title">{{memberEntry.title}}</view>
-      <view class="member-entry__subtitle">{{memberEntry.subtitle}}</view>
-    </view>
-    <view class="member-entry__arrow">❯</view>
-  </view>
-
-  <!-- 中鼎物业入口 -->
-  <view class="property-entry" bindtap="onPropertyTap">
-    <view class="property-entry__icon">🏢</view>
-    <view class="property-entry__body">
-      <view class="property-entry__title">{{propertyEntry.title}}</view>
-      <view class="property-entry__subtitle">{{propertyEntry.subtitle}}</view>
-    </view>
-    <view class="property-entry__arrow">❯</view>
-  </view>
+  <!-- 免责声明 -->
+  <view class="disclaimer">{{sectionTitles.disclaimer}}</view>
 </view>

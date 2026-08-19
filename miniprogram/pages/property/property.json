@@ -1,7 +1,4 @@
 {
   "navigationBarTitleText": "中鼎物业工作台",
-  "usingComponents": {
-    "contact-bar": "/components/contact-bar/contact-bar"
-  },
   "enablePullDownRefresh": true
 }

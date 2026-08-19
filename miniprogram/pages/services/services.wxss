@@ -171,7 +171,34 @@
   line-height: 1.5;
 }
 
-/* 底部通用咨询 */
+/* 需求单按钮（替代客服咨询） */
+.req-btn {
+  width: 100%;
+  margin: 20rpx 0 0;
+  padding: 18rpx 0;
+  font-size: 28rpx;
+  border-radius: 12rpx;
+  line-height: 1.4;
+  border: none;
+  background: transparent;
+}
+
+.req-btn::after {
+  border: none;
+}
+
+.req-btn--outline {
+  color: #B8860B;
+  background: #FFF8F0;
+  border: 2rpx solid #B8860B;
+}
+
+.req-btn--primary {
+  color: #fff;
+  background: #B8860B;
+}
+
+/* 底部跳转需求单中心 */
 .svc-bottom {
   margin-top: 40rpx;
   padding: 32rpx 24rpx;

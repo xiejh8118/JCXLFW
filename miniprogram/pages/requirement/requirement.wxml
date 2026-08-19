@@ -1,0 +1,40 @@
+<view class="page">
+  <view class="header">
+    <view class="title">{{L.requirement.title}}</view>
+    <text class="new-btn" bindtap="toggleForm">{{showForm ? L.requirement.cancel : L.requirement.newOrder}}</text>
+  </view>
+
+  <view wx:if="{{showForm}}" class="form">
+    <view class="form-row">
+      <text class="label">{{L.requirement.chooseType}}</text>
+      <picker class="picker" range="{{typeNames}}" bindchange="onTypeChange">
+        <view class="picker-val">{{L.requirement.types[form.type]}}</view>
+      </picker>
+    </view>
+    <input class="field" placeholder="{{L.requirement.titlePlaceholder}}" value="{{form.title}}" data-f="title" bindinput="onField" />
+    <textarea class="field area" placeholder="{{L.requirement.detailPlaceholder}}" value="{{form.detail}}" data-f="detail" bindinput="onField" />
+    <input class="field" placeholder="{{L.requirement.contactPlaceholder}}" value="{{form.contact}}" data-f="contact" bindinput="onField" />
+    <button class="btn-primary" bindtap="submit">{{L.requirement.submit}}</button>
+  </view>
+
+  <view wx:if="{{loading}}" class="tip">...</view>
+  <view wx:elif="{{list.length === 0}}" class="empty">{{L.requirement.empty}}</view>
+
+  <view wx:for="{{list}}" wx:key="id" class="card">
+    <view class="card-top">
+      <text class="order-no">{{item.order_no}}</text>
+      <text class="type-tag">{{L.requirement.types[item.type]}}</text>
+      <text class="status {{item.status}}">{{item.statusLabel}}</text>
+    </view>
+    <view class="card-title">{{item.title}}</view>
+    <view wx:if="{{item.detail}}" class="card-detail">{{item.detail}}</view>
+    <view wx:if="{{item.matched.length}}" class="matched">
+      <text class="m-label">{{L.requirement.candidates}}：</text>
+      <text wx:for="{{item.matched}}" wx:for-item="m" wx:key="id" class="m-name">{{m.name}} </text>
+    </view>
+    <view class="card-actions">
+      <button wx:if="{{item.status === 'completed'}}" class="btn-rate" size="mini" bindtap="rate" data-id="{{item.id}}">{{L.requirement.rate}}</button>
+      <button wx:elif="{{item.nextStatus}}" class="btn-advance" size="mini" bindtap="advance" data-id="{{item.id}}" data-next="{{item.nextStatus}}">{{L.requirement.advance}} · {{L.requirement.statusLabels[item.nextStatus]}}</button>
+    </view>
+  </view>
+</view>

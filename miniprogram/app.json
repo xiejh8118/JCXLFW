@@ -1,18 +1,15 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/services/services",
-    "pages/checkup/checkup",
-    "pages/member/member",
-    "pages/tax-tool/tax-tool",
-    "pages/compliance/compliance",
+    "pages/requirement/requirement",
     "pages/property/property",
+    "pages/services/services",
     "pages/profile/profile"
   ],
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#B8860B",
-    "navigationBarTitleText": "柬企海外商务服务",
+    "navigationBarTitleText": "KHMER AI 2.0",
     "navigationBarTextStyle": "white",
     "backgroundColor": "#FFF8F0",
     "enableShareAppMessage": true,
@@ -24,42 +21,18 @@
     "backgroundColor": "#FFFFFF",
     "borderStyle": "black",
     "list": [
-      {
-        "pagePath": "pages/index/index",
-        "text": "首页",
-        "iconPath": "images/tab-home.png",
-        "selectedIconPath": "images/tab-home-active.png"
-      },
-      {
-        "pagePath": "pages/tax-tool/tax-tool",
-        "text": "税务",
-        "iconPath": "images/tab-tax.png",
-        "selectedIconPath": "images/tab-tax-active.png"
-      },
-      {
-        "pagePath": "pages/compliance/compliance",
-        "text": "合规",
-        "iconPath": "images/tab-compliance.png",
-        "selectedIconPath": "images/tab-compliance-active.png"
-      },
-      {
-        "pagePath": "pages/profile/profile",
-        "text": "我的",
-        "iconPath": "images/tab-profile.png",
-        "selectedIconPath": "images/tab-profile-active.png"
-      }
+      { "pagePath": "pages/index/index", "text": "首页" },
+      { "pagePath": "pages/requirement/requirement", "text": "需求单" },
+      { "pagePath": "pages/profile/profile", "text": "我的" }
     ]
   },
   "usingComponents": {
     "currency-calc": "/components/currency-calc/currency-calc",
-    "invoice-gen": "/components/invoice-gen/invoice-gen",
-    "contact-bar": "/components/contact-bar/contact-bar"
+    "invoice-gen": "/components/invoice-gen/invoice-gen"
   },
   "sitemapLocation": "sitemap.json",
   "lazyCodeLoading": "requiredComponents",
   "permission": {
-    "scope.userLocation": {
-      "desc": "用于汇率时区参考"
-    }
+    "scope.userLocation": { "desc": "用于汇率时区参考" }
   }
 }

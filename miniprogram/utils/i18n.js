@@ -60,6 +60,50 @@ function t(key, params) {
 }
 
 /**
+ * 获取整个命名空间对象（页面级文案树）
+ * 页面用法：this.setData({ L: getScope('property') })，WXML 用 {{L.xxx}}
+ * 支持数组/嵌套对象，未找到时回退中文
+ */
+function getScope(ns) {
+  const locale = locales[currentLocale] || locales['zh-CN'];
+  const val = getNestedValue(locale, ns);
+  if (val !== undefined) return val;
+  return getNestedValue(locales['zh-CN'], ns) || {};
+}
+
+/**
+ * 三语数据对象取值：pick({ zh:'中文', en:'English', km:'ភាសាខ្មែរ' })
+ * 按当前语言返回对应值，缺省回退 zh
+ */
+function pick(obj, fallback) {
+  if (obj === null || obj === undefined) return fallback || '';
+  if (typeof obj !== 'object') return obj;
+  const lang = currentLocale === 'zh-CN' ? 'zh' : currentLocale;
+  const v = obj[lang];
+  if (v !== undefined && v !== null && v !== '') return v;
+  return obj.zh !== undefined ? obj.zh : (fallback || '');
+}
+
+/**
+ * 递归转换三语数据对象（数组/嵌套对象中的 {zh,en,km} 全部按当前语言展开）
+ * 页面用法：this.setData({ list: pickDeep(rawList) })
+ */
+function pickDeep(obj) {
+  if (Array.isArray(obj)) return obj.map(pickDeep);
+  if (obj && typeof obj === 'object') {
+    // 是三语对象 {zh,en,km}（且没有业务字段）→ 直接 pick
+    if (obj.zh !== undefined && (obj.en !== undefined || obj.km !== undefined) &&
+        !('id' in obj) && !('key' in obj)) {
+      return pick(obj);
+    }
+    const out = {};
+    Object.keys(obj).forEach(k => { out[k] = pickDeep(obj[k]); });
+    return out;
+  }
+  return obj;
+}
+
+/**
  * 获取嵌套对象值
  */
 function getNestedValue(obj, path) {
@@ -82,6 +126,12 @@ function getSupportedLanguages() {
 module.exports = {
   initI18n,
   getCurrentLang,
+  // 兼容别名（部分页面曾误用 getLang/setLang）
+  getLang: getCurrentLang,
+  setLang: initI18n,
   t,
+  getScope,
+  pick,
+  pickDeep,
   getSupportedLanguages
 };

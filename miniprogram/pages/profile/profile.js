@@ -1,10 +1,11 @@
-// pages/profile/profile.js - 个人中心
-const { t, getCurrentLang, getSupportedLanguages } = require('../../utils/i18n.js');
+// pages/profile/profile.js - 个人中心（三语，文案取 L）
+const { t, getScope, getCurrentLang, getSupportedLanguages } = require('../../utils/i18n.js');
 
 const APP = getApp();
 
 Page({
   data: {
+    L: getScope('profile'),
     userInfo: null,
     isLoggedIn: false,
 
@@ -13,33 +14,36 @@ Page({
     supportedLanguages: [],
     showLangPicker: false,
 
-    // 菜单项
-    menuItems: [
-      { id: 'invoices', icon: '🧾', label: '我的发票', page: '' },
-      { id: 'favorites', icon: '⭐', label: '我的收藏', page: '' },
-      { id: 'compliance', icon: '📝', label: '合规文档', page: '/pages/compliance/compliance' },
-      { id: 'language', icon: '🌐', label: '语言设置', page: '' },
-      { id: 'feedback', icon: '💬', label: '意见反馈', page: '' }
-    ]
+    // 菜单项（只放当前真实可用/可体验的入口，避免审核因"即将上线"被拒）
+    menuItems: []
   },
 
   onLoad() {
     this.initLanguages();
+    this.refreshLang();
   },
 
   onShow() {
     this.checkLogin();
-    wx.setNavigationBarTitle({ title: t('profile.title') });
-    this.updateLabels();
+    this.refreshLang();
   },
 
   onLanguageChange() {
-    wx.setNavigationBarTitle({ title: t('profile.title') });
-    this.updateLabels();
+    this.refreshLang();
   },
 
-  updateLabels() {
-    this.setData({ currentLanguage: getCurrentLang() });
+  refreshLang() {
+    const L = getScope('profile');
+    this.setData({
+      L,
+      currentLanguage: getCurrentLang(),
+      menuItems: [
+        { id: 'property', icon: '🏢', label: L.property, page: '/pages/property/property' },
+        { id: 'language', icon: '🌐', label: L.language, page: '' },
+        { id: 'feedback', icon: '💬', label: L.feedback, page: '', type: 'contact' }
+      ]
+    });
+    wx.setNavigationBarTitle({ title: L.title });
   },
 
   initLanguages() {
@@ -53,21 +57,13 @@ Page({
     }
   },
 
-  // 登录
+  // 登录（本地游客态，不采集头像昵称，避免隐私合规风险）
   onLogin() {
-    wx.getUserProfile({
-      desc: '用于完善会员资料',
-      success: (res) => {
-        const userInfo = res.userInfo;
-        APP.globalData.userInfo = userInfo;
-        wx.setStorageSync('userInfo', userInfo);
-        this.setData({ userInfo, isLoggedIn: true });
-        wx.showToast({ title: '登录成功', icon: 'success' });
-      },
-      fail: (err) => {
-        console.log('取消登录', err);
-      }
-    });
+    const userInfo = { nickName: t('profile.guest'), avatarUrl: '' };
+    APP.globalData.userInfo = userInfo;
+    wx.setStorageSync('userInfo', userInfo);
+    this.setData({ userInfo, isLoggedIn: true });
+    wx.showToast({ title: t('profile.loginSuccess'), icon: 'success' });
   },
 
   // 菜单点击
@@ -78,21 +74,22 @@ Page({
         this.setData({ showLangPicker: true });
         break;
       case 'feedback':
-        wx.showToast({ title: '意见反馈功能即将上线', icon: 'none' });
+        // 真 button open-type="contact" 已在 WXML 中处理，这里兜底
+        wx.showToast({ title: t('profile.feedbackTip'), icon: 'none' });
         break;
       case 'about':
         wx.showModal({
-          title: '柬企海外商务工具',
-          content: 'v1.0.0\n\n为在柬埔寨商务人士提供实用工具：\n• 柬埔寨税规计算 (VAT/WHT/薪资)\n• 实时汇率 (USD/KHR/CNY)\n• 合规文档查询 (签证/劳工证/公司注册)\n• 佛历/公历转换',
+          title: t('profile.aboutTitle'),
+          content: t('profile.aboutContent'),
           showCancel: false,
-          confirmText: '知道了'
+          confirmText: t('common.know')
         });
         break;
       default:
         if (page) {
           wx.navigateTo({ url: page });
         } else {
-          wx.showToast({ title: '即将上线', icon: 'none' });
+          wx.showToast({ title: t('profile.comingSoon'), icon: 'none' });
         }
     }
   },
@@ -105,7 +102,7 @@ Page({
       currentLanguage: code,
       showLangPicker: false
     });
-    wx.showToast({ title: '语言已切换', icon: 'success' });
+    wx.showToast({ title: t('profile.langSwitched'), icon: 'success' });
   },
 
   onLangPickerClose() {
@@ -115,14 +112,14 @@ Page({
   // 退出登录
   onLogout() {
     wx.showModal({
-      title: '确认退出',
-      content: '退出后需要重新登录',
+      title: t('profile.logoutTitle'),
+      content: t('profile.logoutContent'),
       success: (res) => {
         if (res.confirm) {
           APP.globalData.userInfo = null;
           wx.removeStorageSync('userInfo');
           this.setData({ userInfo: null, isLoggedIn: false });
-          wx.showToast({ title: '已退出', icon: 'success' });
+          wx.showToast({ title: t('profile.loggedOut'), icon: 'success' });
         }
       }
     });
@@ -130,13 +127,13 @@ Page({
 
   // 复制版本号
   onVersionTap() {
-    wx.setClipboardData({ data: 'v1.0.0 - Cambodia Business Toolkit' });
-    wx.showToast({ title: '已复制', icon: 'success' });
+    wx.setClipboardData({ data: 'KHMER AI 2.0 - v1.0.0' });
+    wx.showToast({ title: t('common.copied'), icon: 'success' });
   },
 
   onShareAppMessage() {
     return {
-      title: '柬企海外商务服务 - 柬埔寨企业一站式工具',
+      title: t('profile.shareTitle'),
       path: '/pages/index/index'
     };
   }

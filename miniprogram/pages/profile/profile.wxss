@@ -75,6 +75,22 @@
   font-size: 36rpx;
 }
 
+/* 真 button 样式重置，让它和 menu-item 视觉一致 */
+.menu-item--btn {
+  width: 100%;
+  margin: 0;
+  padding: 28rpx 24rpx;
+  line-height: inherit;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  font-size: 28rpx;
+  text-align: left;
+}
+.menu-item--btn::after {
+  border: none;
+}
+
 /* 语言选择 */
 .lang-item {
   padding: 24rpx 16rpx;

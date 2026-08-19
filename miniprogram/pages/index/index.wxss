@@ -108,68 +108,6 @@
   color: #CCC;
 }
 
-/* 会员中心入口 */
-.member-entry {
-  display: flex;
-  align-items: center;
-  background: linear-gradient(135deg, #6B3A0A 0%, #B8860B 100%);
-  border-radius: 16rpx;
-  padding: 28rpx;
-  margin: 20rpx 0 40rpx;
-}
-.member-entry__icon {
-  font-size: 48rpx;
-  margin-right: 20rpx;
-}
-.member-entry__body {
-  flex: 1;
-}
-.member-entry__title {
-  font-size: 30rpx;
-  font-weight: 500;
-  color: #FFF;
-  margin-bottom: 4rpx;
-}
-.member-entry__subtitle {
-  font-size: 22rpx;
-  color: rgba(255,255,255,0.75);
-}
-.member-entry__arrow {
-  font-size: 28rpx;
-  color: rgba(255,255,255,0.6);
-}
-
-/* 中鼎物业入口 */
-.property-entry {
-  display: flex;
-  align-items: center;
-  background: linear-gradient(135deg, #096dd9 0%, #1890ff 100%);
-  border-radius: 16rpx;
-  padding: 28rpx;
-  margin: 0 0 40rpx;
-}
-.property-entry__icon {
-  font-size: 48rpx;
-  margin-right: 20rpx;
-}
-.property-entry__body {
-  flex: 1;
-}
-.property-entry__title {
-  font-size: 30rpx;
-  font-weight: 500;
-  color: #FFF;
-  margin-bottom: 4rpx;
-}
-.property-entry__subtitle {
-  font-size: 22rpx;
-  color: rgba(255,255,255,0.75);
-}
-.property-entry__arrow {
-  font-size: 28rpx;
-  color: rgba(255,255,255,0.6);
-}
-
 /* 服务网格 */
 .service-grid {
   display: grid;
@@ -277,5 +215,132 @@
 
 .rate-update {
   text-align: right;
+}
+
+/* 美元基准展示 */
+.rate-main {
+  display: flex;
+  align-items: baseline;
+  gap: 12rpx;
+  margin-bottom: 12rpx;
+}
+.rate-base {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--primary);
+}
+.rate-eq {
+  font-size: 26rpx;
+  color: var(--text-hint);
+}
+.rate-big {
+  font-size: 42rpx;
+  font-weight: 800;
+  color: var(--primary);
+}
+.rate-sub {
+  line-height: 1.5;
+}
+
+/* ===== 新定位样式（KHMER AI 2.0） ===== */
+
+/* 平台定位横幅 */
+.platform-banner {
+  margin: 24rpx 24rpx 8rpx;
+  padding: 24rpx 28rpx;
+  background: linear-gradient(135deg, #B8860B 0%, #D4A017 100%);
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 12rpx rgba(184,134,11,0.25);
+}
+.platform-banner__text {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.5;
+}
+
+/* 场景网格（4 大场景，2 列） */
+.scenario-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+}
+.scenario-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 28rpx 28rpx 32rpx;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow);
+}
+.scenario-item:active {
+  transform: scale(0.97);
+}
+.scenario-item__icon {
+  width: 84rpx;
+  height: 84rpx;
+  border-radius: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+  margin-bottom: 16rpx;
+}
+.scenario-item__name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 6rpx;
+}
+.scenario-item__desc {
+  font-size: 22rpx;
+  color: var(--text-hint);
+}
+
+/* 需求单 CTA */
+.cta-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32rpx 32rpx;
+  background: linear-gradient(135deg, #2C3E50 0%, #34495E 100%);
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 16rpx rgba(44,62,80,0.25);
+}
+.cta-card:active {
+  transform: scale(0.98);
+}
+.cta-card__left {
+  flex: 1;
+}
+.cta-card__title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 8rpx;
+}
+.cta-card__subtitle {
+  font-size: 22rpx;
+  color: rgba(255,255,255,0.75);
+}
+.cta-card__btn {
+  flex-shrink: 0;
+  margin-left: 20rpx;
+  background: #B8860B;
+  color: #fff;
+  font-size: 26rpx;
+  font-weight: 600;
+  padding: 16rpx 28rpx;
+  border-radius: 30rpx;
+}
+
+/* 免责声明 */
+.disclaimer {
+  margin: 32rpx 24rpx 40rpx;
+  font-size: 20rpx;
+  color: var(--text-hint);
+  line-height: 1.6;
+  text-align: center;
 }
 

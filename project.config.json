@@ -1,5 +1,5 @@
 {
-  "description": "为在柬中资企业提供商务信息查询、税务计算工具及合规资讯服务",
+  "description": "柬埔寨酒店 AI 商旅后勤平台：以酒店为入口，提供住宿、企业后勤、物流仓储、物业工单一站式服务",
   "packOptions": {
     "ignore": [
       {
@@ -54,10 +54,8 @@
   },
   "compileType": "miniprogram",
   "libVersion": "3.17.0",
-  "appid": "wx65d010c0adf26291",
+  "appid": "wx05aeb867e67c8f9c",
   "projectname": "cambodia-biz-travel",
-  "cloudfunctionRoot": "cloudfunctions/",
-  "cloudbaseRoot": "cloudfunctions/",
   "miniprogramRoot": "miniprogram/",
   "condition": {},
   "editorSetting": {

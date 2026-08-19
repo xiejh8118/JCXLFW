@@ -1,9 +1,0 @@
-{
-  "name": "getExchangeRate",
-  "version": "1.0.0",
-  "description": "实时汇率获取",
-  "main": "index.js",
-  "dependencies": {
-    "wx-server-sdk": "latest"
-  }
-}
