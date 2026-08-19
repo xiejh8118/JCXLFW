@@ -72,9 +72,9 @@
     <text wx:if="{{lastUpdate}}">{{lastUpdate}} 更新</text>
   </view>
 
-  <!-- 复制 -->
+  <!-- 结果提示 -->
   <view class="flex-between mt-10" wx:if="{{!embedded && result !== null}}">
     <view></view>
-    <view class="text-primary text-sm" bindtap="onCopyResult">📋 复制结果</view>
+    <view class="text-primary text-sm" bindtap="onCopyResult">📋 查看结果</view>
   </view>
 </view>

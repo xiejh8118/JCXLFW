@@ -125,10 +125,9 @@ Page({
     });
   },
 
-  // 复制版本号
+  // 显示版本号（不调用剪切板，避免微信误识别为读取剪切板）
   onVersionTap() {
-    wx.setClipboardData({ data: '柬企海外商旅服务 - v1.0.0' });
-    wx.showToast({ title: t('common.copied'), icon: 'success' });
+    wx.showToast({ title: '柬企海外商旅服务 v1.0.0', icon: 'none' });
   },
 
   onShareAppMessage() {
