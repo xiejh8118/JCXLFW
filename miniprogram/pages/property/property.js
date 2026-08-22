@@ -12,6 +12,7 @@ const LS_ROOMS = 'zd_prop_rooms';
 const LS_RATES = 'zd_prop_rates';
 const LS_USERS = 'zd_prop_users';
 const LS_SESSION = 'zd_prop_session';
+const LS_REPAIR = 'zd_prop_repair';
 
 // ===== 默认配置 =====
 const DEFAULT_WATER_RATE = 0.7;   // $/吨
@@ -107,6 +108,9 @@ function todayStr() {
   return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
 }
 
+// 矢量 PDF 布局收集器：drawReceipt/drawLowElecNotice 绘制时同步收集，供后端 pdfkit 重排（可选中文字）
+let pdfItemsCollector = null;
+
 // Canvas 辅助：画线
 function drawLine(ctx, x1, y1, x2, y2, color, width) {
   ctx.beginPath();
@@ -115,6 +119,13 @@ function drawLine(ctx, x1, y1, x2, y2, color, width) {
   ctx.strokeStyle = color || '#333';
   ctx.lineWidth = width || 0.5;
   ctx.stroke();
+  if (pdfItemsCollector) {
+    pdfItemsCollector.push({
+      type: 'line', x1, y1, x2, y2,
+      color: color || '#333333',
+      width: width || 0.5
+    });
+  }
 }
 
 // Canvas 辅助：画文字（默认 left/top 对齐）
@@ -125,6 +136,18 @@ function drawText(ctx, text, x, y, opts) {
   ctx.textAlign = o.align || 'left';
   ctx.textBaseline = o.baseline || 'top';
   ctx.fillText(String(text), x, y);
+  if (pdfItemsCollector) {
+    pdfItemsCollector.push({
+      type: 'text',
+      text: String(text),
+      x, y,
+      size: o.size || 10,
+      color: o.color || '#333333',
+      align: o.align || 'left',
+      baseline: o.baseline || 'top',
+      bold: !!o.bold
+    });
+  }
 }
 
 function genId() {
@@ -163,7 +186,12 @@ Page({
     loginError: '',
 
     // Tab
-    currentTab: 'today', // today / ledger / meter / users
+    currentTab: 'today', // today / ledger / meter / users / repair
+
+    // 报修工单（物业工单增强）
+    repairForm: { room: '', type: '', detail: '' },
+    repairTypeIndex: 0,
+    repairTickets: [],
 
     // 数据
     records: [],        // 原始记录
@@ -225,6 +253,7 @@ Page({
     this.pullCloud();
     if (this.data.isLoggedIn) {
       this.refreshAll();
+      this.loadRepairTickets();
     }
   },
 
@@ -987,7 +1016,104 @@ Page({
     });
   },
 
-  // ===== 生成账单图片（本地 Canvas 绘制，替代云函数 PDF）=====
+  // ===== 生成账单 PDF（云端封装，直接可打印；失败回退本地图片预览）=====
+  // 把 Canvas 图片转 Base64 → 后端生成单页 A4 PDF → 写临时文件，回调返回本地 pdf 路径（失败为 null）
+  uploadToPdf(tempFilePath, meta, cb) {
+    wx.getFileSystemManager().readFile({
+      filePath: tempFilePath,
+      encoding: 'base64',
+      success: (r2) => {
+        api.propertyPdf({
+          imageBase64: r2.data,
+          width: meta.width || 595,
+          height: meta.height || 842,
+          kind: meta.kind || 'bill'
+        }).then((arrayBuffer) => {
+          const pdfPath = `${wx.env.USER_DATA_PATH}/${meta.kind || 'bill'}_${Date.now()}.pdf`;
+          wx.getFileSystemManager().writeFile({
+            filePath: pdfPath,
+            data: arrayBuffer,
+            success: () => cb(pdfPath),
+            fail: () => cb(null)
+          });
+        }).catch(() => cb(null));
+      },
+      fail: () => cb(null)
+    });
+  },
+
+  // 转发 PDF 文件（微信文件消息）给好友/文件传输助手 → 电脑端可直接打开打印。
+  // 这是不依赖 wx.openDocument 右上角「⋯」的可靠打印入口（Android 预览器不渲染「⋯」）。
+  sharePdfFile(pdfPath, kind) {
+    wx.shareFileMessage({
+      filePath: pdfPath,
+      fileName: kind === 'notice' ? 'Electricity-Notice.pdf' : 'Property-Bill.pdf',
+      fail: () => {
+        // 分享取消或失败：退回打开预览（iOS 预览内右上角「⋯」可转发/用其他应用打开打印）
+        this.openPdfPreview(pdfPath, null);
+      }
+    });
+  },
+
+  // 打开 PDF 预览；失败回退图片预览
+  openPdfPreview(pdfPath, fallbackImage) {
+    wx.openDocument({
+      filePath: pdfPath,
+      fileType: 'pdf',
+      showMenu: true,
+      fail: () => {
+        if (fallbackImage) {
+          wx.previewImage({ urls: [fallbackImage], current: fallbackImage });
+          wx.showToast({ title: t('property.openPdfFail'), icon: 'none' });
+        }
+      }
+    });
+  },
+
+  // 统一出 PDF：矢量版（可选中文字）→ 失败回退图片封装 PDF → 再失败回退图片预览
+  buildPdf({ kind, items, fallbackImage, width = 595, height = 842 }) {
+    // 拿到本地 pdf 路径后：弹「转发/打印 / 打开预览」
+    const showActions = (pdfPath) => {
+      const L = this.data.L || getScope('property');
+      wx.showActionSheet({
+        itemList: [L.forwardPrint, L.openPreview],
+        success: (r) => {
+          if (r.tapIndex === 0) this.sharePdfFile(pdfPath, kind);
+          else this.openPdfPreview(pdfPath, fallbackImage);
+        },
+        fail: () => this.openPdfPreview(pdfPath, fallbackImage)
+      });
+    };
+    // ArrayBuffer → 写临时文件 → 弹操作
+    const writePdf = (arrayBuffer) => {
+      const pdfPath = `${wx.env.USER_DATA_PATH}/${kind}_${Date.now()}.pdf`;
+      wx.getFileSystemManager().writeFile({
+        filePath: pdfPath,
+        data: arrayBuffer,
+        success: () => showActions(pdfPath),
+        fail: () => this.fallbackImagePreview(fallbackImage)
+      });
+    };
+    // 旧方案：Canvas 图片封装 PDF
+    const tryImagePdf = () => {
+      this.uploadToPdf(fallbackImage, { width, height, kind }, (pdfPath) => {
+        if (pdfPath) showActions(pdfPath);
+        else this.fallbackImagePreview(fallbackImage);
+      });
+    };
+    if (items && items.length) {
+      api.propertyPdfV2({ items, width, height, kind }).then(writePdf).catch(tryImagePdf);
+    } else {
+      tryImagePdf();
+    }
+  },
+
+  // 最终兜底：图片预览（长按保存/转发打印）
+  fallbackImagePreview(img) {
+    wx.previewImage({ urls: [img], current: img });
+    wx.showToast({ title: t('property.longPressTip'), icon: 'none', duration: 2500 });
+  },
+
   onGenPdf(e) {
     const id = e.currentTarget.dataset.id;
     const records = wx.getStorageSync(LS_RECORDS) || [];
@@ -998,24 +1124,18 @@ Page({
     const operator = (this.data.currentUser && this.data.currentUser.username) || t('property.defaultOperator');
 
     wx.showLoading({ title: t('property.generatingBill'), mask: true });
-    this.drawReceipt(r, calc, operator, (tempFilePath) => {
+    this.drawReceipt(r, calc, operator, (tempFilePath, items) => {
       wx.hideLoading();
       if (!tempFilePath) {
         wx.showToast({ title: t('property.genFail'), icon: 'none' });
         return;
       }
-      // 预览图片：长按可保存到相册 / 转发，用于打印
-      wx.previewImage({
-        urls: [tempFilePath],
-        current: tempFilePath,
-        success: () => {
-          wx.showToast({ title: t('property.longPressTip'), icon: 'none', duration: 2500 });
-        }
-      });
+      // 优先矢量 PDF（文字可选中/搜索）→ 失败回退图片封装 PDF → 再失败回退图片预览
+      this.buildPdf({ kind: 'bill', items, fallbackImage: tempFilePath });
     });
   },
 
-  // 低电量提醒单：生成「电费充值提醒单」图片打印给客户
+  // 低电量提醒单：生成「电费充值提醒单」PDF 打印给客户（失败回退图片预览）
   onPrintLowElec(e) {
     const id = e.currentTarget.dataset.id;
     const records = wx.getStorageSync(LS_RECORDS) || [];
@@ -1025,20 +1145,13 @@ Page({
     const operator = (this.data.currentUser && this.data.currentUser.username) || t('property.defaultOperator');
 
     wx.showLoading({ title: t('property.generatingNotice'), mask: true });
-    this.drawLowElecNotice(r, operator, (tempFilePath) => {
+    this.drawLowElecNotice(r, operator, (tempFilePath, items) => {
       wx.hideLoading();
       if (!tempFilePath) {
         wx.showToast({ title: t('property.genFail'), icon: 'none' });
         return;
       }
-      // 预览图片：长按可保存到相册 / 转发，用于打印
-      wx.previewImage({
-        urls: [tempFilePath],
-        current: tempFilePath,
-        success: () => {
-          wx.showToast({ title: t('property.longPressTip'), icon: 'none', duration: 2500 });
-        }
-      });
+      this.buildPdf({ kind: 'notice', items, fallbackImage: tempFilePath });
     });
   },
 
@@ -1052,10 +1165,14 @@ Page({
         const canvas = res[0].node;
         const ctx = canvas.getContext('2d');
 
+        // 收集矢量 PDF 布局（文本/线/矩形/LOGO），供后端重排为可选中文字的 PDF
+        const pdfItems = [];
+        pdfItemsCollector = pdfItems;
+
         // A4 逻辑尺寸（72dpi），按设备像素比放大保证打印清晰
         const W = 595;
         const H = 842;
-        const dpr = wx.getSystemInfoSync().pixelRatio || 2;
+        const dpr = Math.max(wx.getSystemInfoSync().pixelRatio || 2, 3);
         canvas.width = W * dpr;
         canvas.height = H * dpr;
         ctx.scale(dpr, dpr);
@@ -1122,6 +1239,8 @@ Page({
         ctx.strokeStyle = '#333';
         ctx.lineWidth = 0.5;
         ctx.strokeRect(MARGIN_L, tableTop, CONTENT_W, headerH);
+        pdfItems.push({ type: 'rect', x: MARGIN_L, y: tableTop, w: CONTENT_W, h: headerH, fill: '#f5f5f5' });
+        pdfItems.push({ type: 'rect', x: MARGIN_L, y: tableTop, w: CONTENT_W, h: headerH, stroke: '#333333', width: 0.5 });
         cols.forEach(c => drawLine(ctx, c.x, tableTop, c.x, tableTop + headerH, '#333', 0.5));
         drawLine(ctx, MARGIN_R, tableTop, MARGIN_R, tableTop + headerH, '#333', 0.5);
         headers.forEach((h, i) => {
@@ -1150,6 +1269,8 @@ Page({
         ctx.strokeStyle = '#333';
         ctx.lineWidth = 0.5;
         ctx.strokeRect(MARGIN_L, y, CONTENT_W, rowH);
+        pdfItems.push({ type: 'rect', x: MARGIN_L, y: y, w: CONTENT_W, h: rowH, fill: '#fff8f0' });
+        pdfItems.push({ type: 'rect', x: MARGIN_L, y: y, w: CONTENT_W, h: rowH, stroke: '#333333', width: 0.5 });
         drawText(ctx, t('property.billTotalUpper'), MARGIN_L + 10, y + rowH / 2, { size: 10.5, color: '#1a1a1a', baseline: 'middle' });
         drawText(ctx, fmtMoney(calc.total), cols[5].x + cols[5].w - 8, y + rowH / 2, { size: 12, color: '#d4380d', align: 'right', baseline: 'middle' });
 
@@ -1180,11 +1301,26 @@ Page({
         drawText(ctx, t('property.lblOperator') + ': ' + operator + '  |  ' + t('property.lblPrintTime') + ': ' + nowZh(), MARGIN_L + CONTENT_W / 2, y, { size: 8, color: '#aaa', align: 'center' });
 
         // ===== 导出图片（LOGO 异步加载后补画） =====
+        let logoDrawW = logoW;
+        let logoDrawH = logoH;
         const finish = () => {
+          // 结束收集，返回布局给回调
+          pdfItemsCollector = null;
           wx.canvasToTempFilePath({
             canvas,
-            success: (r2) => cb(r2.tempFilePath),
-            fail: () => cb(null)
+            success: (r2) => {
+              // LOGO 转 base64 一并交给后端矢量排版
+              wx.getFileSystemManager().readFile({
+                filePath: '/images/logo.png',
+                encoding: 'base64',
+                success: (lg) => {
+                  pdfItems.push({ type: 'image', x: logoX, y: logoY, w: logoDrawW, h: logoDrawH, base64: lg.data });
+                  cb(r2.tempFilePath, pdfItems);
+                },
+                fail: () => cb(r2.tempFilePath, pdfItems)
+              });
+            },
+            fail: () => cb(null, pdfItems)
           });
         };
         try {
@@ -1196,6 +1332,8 @@ Page({
               const ih = logo.height || 131;
               const dh = logoH;
               const dw = iw * (dh / ih);
+              logoDrawW = dw;
+              logoDrawH = dh;
               ctx.drawImage(logo, logoX, logoY, dw, dh);
             } catch (e) {}
             finish();
@@ -1218,10 +1356,14 @@ Page({
         const canvas = res[0].node;
         const ctx = canvas.getContext('2d');
 
+        // 收集矢量 PDF 布局（文本/线/矩形/LOGO），供后端重排为可选中文字的 PDF
+        const pdfItems = [];
+        pdfItemsCollector = pdfItems;
+
         // A4 逻辑尺寸（72dpi），按设备像素比放大保证打印清晰
         const W = 595;
         const H = 842;
-        const dpr = wx.getSystemInfoSync().pixelRatio || 2;
+        const dpr = Math.max(wx.getSystemInfoSync().pixelRatio || 2, 3);
         canvas.width = W * dpr;
         canvas.height = H * dpr;
         ctx.scale(dpr, dpr);
@@ -1269,6 +1411,8 @@ Page({
         ctx.strokeStyle = '#fa541c';
         ctx.lineWidth = 1.2;
         ctx.strokeRect(MARGIN_L, warnTop, CONTENT_W, warnH);
+        pdfItems.push({ type: 'rect', x: MARGIN_L, y: warnTop, w: CONTENT_W, h: warnH, fill: '#fff2e8' });
+        pdfItems.push({ type: 'rect', x: MARGIN_L, y: warnTop, w: CONTENT_W, h: warnH, stroke: '#fa541c', width: 1.2 });
 
         drawText(ctx, t('property.noticeSub'), MARGIN_L + CONTENT_W / 2, warnTop + 16, { size: 14, color: '#fa541c', bold: true, align: 'center' });
         drawText(ctx, t('property.noticeCur'), MARGIN_L + CONTENT_W / 2, warnTop + 40, { size: 11, color: '#8c8c8c', align: 'center' });
@@ -1290,6 +1434,8 @@ Page({
         ctx.strokeStyle = '#333';
         ctx.lineWidth = 0.5;
         ctx.strokeRect(MARGIN_L, y, CONTENT_W, headerH);
+        pdfItems.push({ type: 'rect', x: MARGIN_L, y: y, w: CONTENT_W, h: headerH, fill: '#f5f5f5' });
+        pdfItems.push({ type: 'rect', x: MARGIN_L, y: y, w: CONTENT_W, h: headerH, stroke: '#333333', width: 0.5 });
         cols.forEach(c => drawLine(ctx, c.x, y, c.x, y + headerH, '#333', 0.5));
         drawLine(ctx, MARGIN_R, y, MARGIN_R, y + headerH, '#333', 0.5);
         headers.forEach((h, i) => {
@@ -1343,11 +1489,26 @@ Page({
         drawText(ctx, t('property.lblOperator') + ': ' + operator + '  |  ' + t('property.lblPrintTime') + ': ' + nowZh(), MARGIN_L + CONTENT_W / 2, y, { size: 8, color: '#aaa', align: 'center' });
 
         // ===== 导出图片（LOGO 异步加载后补画） =====
+        let logoDrawW = logoW;
+        let logoDrawH = logoH;
         const finish = () => {
+          // 结束收集，返回布局给回调
+          pdfItemsCollector = null;
           wx.canvasToTempFilePath({
             canvas,
-            success: (r2) => cb(r2.tempFilePath),
-            fail: () => cb(null)
+            success: (r2) => {
+              // LOGO 转 base64 一并交给后端矢量排版
+              wx.getFileSystemManager().readFile({
+                filePath: '/images/logo.png',
+                encoding: 'base64',
+                success: (lg) => {
+                  pdfItems.push({ type: 'image', x: logoX, y: logoY, w: logoDrawW, h: logoDrawH, base64: lg.data });
+                  cb(r2.tempFilePath, pdfItems);
+                },
+                fail: () => cb(r2.tempFilePath, pdfItems)
+              });
+            },
+            fail: () => cb(null, pdfItems)
           });
         };
         try {
@@ -1358,6 +1519,8 @@ Page({
               const ih = logo.height || 131;
               const dh = logoH;
               const dw = iw * (dh / ih);
+              logoDrawW = dw;
+              logoDrawH = dh;
               ctx.drawImage(logo, logoX, logoY, dw, dh);
             } catch (e) {}
             finish();
@@ -1403,5 +1566,92 @@ Page({
       wx.hideLoading();
       wx.showToast({ title: err.message || '提交失败', icon: 'none' });
     }
+  },
+
+  // ===== 报修工单（物业工单增强）=====
+  loadRepairTickets() {
+    const tickets = wx.getStorageSync(LS_REPAIR) || [];
+    this.setData({ repairTickets: tickets.slice().reverse() });
+  },
+
+  onRepairRoomInput(e) {
+    const val = e.detail.value;
+    this.setData({ 'repairForm.room': val });
+    this.filterRooms(val);
+  },
+
+  onRepairRoomFocus() {
+    if (this.data.repairForm.room) {
+      this.filterRooms(this.data.repairForm.room);
+    }
+  },
+
+  onRepairRoomBlur() {
+    setTimeout(() => { this.setData({ showRoomList: false }); }, 200);
+  },
+
+  onRepairRoomPick(e) {
+    const room = e.currentTarget.dataset.room;
+    if (!room) return;
+    this.setData({ 'repairForm.room': room, showRoomList: false });
+  },
+
+  onRepairTypeChange(e) {
+    const idx = e.detail.value;
+    const types = (this.data.L.repairTypes || []);
+    const type = types[idx] || '';
+    this.setData({ repairTypeIndex: idx, 'repairForm.type': type });
+  },
+
+  onRepairDetail(e) {
+    this.setData({ 'repairForm.detail': e.detail.value });
+  },
+
+  async submitRepair() {
+    const { room, type, detail } = this.data.repairForm;
+    if (!room) { wx.showToast({ title: t('property.needRoom'), icon: 'none' }); return; }
+    const validRoom = this.matchRoom(room);
+    if (!validRoom) {
+      wx.showToast({ title: t('property.roomInvalid'), icon: 'none' });
+      this.filterRooms(room);
+      return;
+    }
+    if (!type) { wx.showToast({ title: t('property.needRepairType'), icon: 'none' }); return; }
+    wx.showLoading({ title: t('property.submitting') });
+    try {
+      const title = '[' + type + '] ' + validRoom + ' ' + (t('property.repairPrefix') || '报修');
+      const res = await api.createRequirement({
+        type: 'property',
+        title,
+        detail: detail || (t('property.repairDefaultDetail') || '物业报修')
+      });
+      const tickets = wx.getStorageSync(LS_REPAIR) || [];
+      tickets.push({
+        id: 'rp' + Date.now().toString(36),
+        room: validRoom,
+        type,
+        detail: detail || '',
+        order_no: res.order_no || '',
+        statusLabel: res.statusLabel || '',
+        at: getToday()
+      });
+      wx.setStorageSync(LS_REPAIR, tickets);
+      this.setData({
+        repairForm: { room: '', type: '', detail: '' },
+        repairTypeIndex: 0,
+        showRoomList: false,
+        repairTickets: tickets.slice().reverse()
+      });
+      wx.hideLoading();
+      wx.showToast({ title: t('property.repairSubmitted'), icon: 'success' });
+    } catch (err) {
+      wx.hideLoading();
+      wx.showToast({ title: err.message || t('property.repairFail'), icon: 'none' });
+    }
+  },
+
+  // 跳转需求单中心，查看报修在平台后台的进度
+  openRequirementCenter() {
+    wx.switchTab({ url: '/pages/requirement/requirement' });
   }
 });

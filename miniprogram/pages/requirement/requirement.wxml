@@ -14,6 +14,7 @@
     <input class="field" placeholder="{{L.requirement.titlePlaceholder}}" value="{{form.title}}" data-f="title" bindinput="onField" />
     <textarea class="field area" placeholder="{{L.requirement.detailPlaceholder}}" value="{{form.detail}}" data-f="detail" bindinput="onField" />
     <input class="field" placeholder="{{L.requirement.contactPlaceholder}}" value="{{form.contact}}" data-f="contact" bindinput="onField" />
+    <input class="field" placeholder="{{L.requirement.roomPlaceholder}}" value="{{form.room_no}}" data-f="room_no" bindinput="onField" />
     <button class="btn-primary" bindtap="submit">{{L.requirement.submit}}</button>
   </view>
 
@@ -23,18 +24,51 @@
   <view wx:for="{{list}}" wx:key="id" class="card">
     <view class="card-top">
       <text class="order-no">{{item.order_no}}</text>
-      <text class="type-tag">{{L.requirement.types[item.type]}}</text>
+      <text class="type-tag">{{item.moduleLabel || L.requirement.types[item.type]}}</text>
       <text class="status {{item.status}}">{{item.statusLabel}}</text>
+      <text wx:if="{{item.overdue}}" class="overdue-badge">超时</text>
     </view>
     <view class="card-title">{{item.title}}</view>
     <view wx:if="{{item.detail}}" class="card-detail">{{item.detail}}</view>
+    <view wx:if="{{item.room_no}}" class="card-room">房号：{{item.room_no}}</view>
+
+    <!-- 住宿房态（仅住宿类需求单，运营台建档后可见）-->
+    <view wx:if="{{item.roomStay}}" class="stay-box">
+      <view class="stay-row">
+        <text class="stay-label">{{L.requirement.stayStatus}}：</text>
+        <text class="stay-status status--{{item.roomStay.status}}">{{item.roomStay.statusLabel}}</text>
+      </view>
+      <view class="stay-row" wx:if="{{item.roomStay.checkInText}}">🛎 {{L.requirement.stayCheckedIn}}：{{item.roomStay.checkInText}}</view>
+      <view class="stay-row" wx:if="{{item.roomStay.checkOutText}}">🚪 {{L.requirement.stayCheckedOut}}：{{item.roomStay.checkOutText}}</view>
+      <view class="stay-pay" wx:if="{{item.roomStay.payment.amount || item.roomStay.payment.paid}}">
+        💰 {{L.requirement.stayPayment}}：{{L.requirement.stayAmount}} {{item.roomStay.payment.amount}} / {{L.requirement.stayPaid}} {{item.roomStay.payment.paid}}<text wx:if="{{item.roomStay.payment.method}}"> ({{item.roomStay.payment.method}})</text>
+      </view>
+    </view>
+
+    <view wx:if="{{item.slaText}}" class="sla-text {{item.overdue ? 'overdue' : ''}}">{{item.slaText}}</view>
+
+    <!-- 闭环进度 -->
+    <view class="progress">
+      <view class="progress-step {{index <= item.progress ? 'done' : ''}}" wx:for="{{L.requirement.stepLabels}}" wx:for-item="s" wx:for-index="index" wx:key="*this">
+        <view class="progress-dot">{{index < item.progress ? '✓' : index + 1}}</view>
+        <text class="progress-text">{{s}}</text>
+      </view>
+    </view>
+
     <view wx:if="{{item.matched.length}}" class="matched">
       <text class="m-label">{{L.requirement.candidates}}：</text>
       <text wx:for="{{item.matched}}" wx:for-item="m" wx:key="id" class="m-name">{{m.name}} </text>
     </view>
+
+    <view wx:if="{{item.quote}}" class="quote-box">
+      <text class="quote-label">{{L.requirement.quote}}</text>
+      <text class="quote-value">{{item.quote}}</text>
+    </view>
+
+    <view wx:if="{{item.status === 'pending' && !item.matched.length}}" class="waiting">{{L.requirement.waitingMatch}}</view>
     <view class="card-actions">
-      <button wx:if="{{item.status === 'completed'}}" class="btn-rate" size="mini" bindtap="rate" data-id="{{item.id}}">{{L.requirement.rate}}</button>
-      <button wx:elif="{{item.nextStatus}}" class="btn-advance" size="mini" bindtap="advance" data-id="{{item.id}}" data-next="{{item.nextStatus}}">{{L.requirement.advance}} · {{L.requirement.statusLabels[item.nextStatus]}}</button>
+      <button wx:if="{{item.action}}" class="btn-action" size="mini" bindtap="action" data-id="{{item.id}}" data-target="{{item.action.target}}">{{L.requirement[item.action.label]}}</button>
+      <button wx:if="{{item.canReturn}}" class="btn-action btn-return" size="mini" bindtap="action" data-id="{{item.id}}" data-target="returned">{{L.requirement.returnBtn}}</button>
     </view>
   </view>
 </view>

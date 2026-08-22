@@ -1,34 +1,37 @@
 /* app.wxss - 全局样式 */
 
-/* ========== CSS 变量（柬埔寨主题色） ========== */
+/* ========== CSS 变量（米白+香槟金轻奢商务风） ========== */
 page {
-  --primary: #B8860B;           /* 暗金色 - 吴哥窟金 */
-  --primary-light: #D4A843;     /* 浅金色 */
-  --primary-dark: #8B6508;      /* 深金色 */
-  --accent: #E67E22;            /* 橙色 - 僧袍橙 */
-  --accent-light: #F0C27A;
+  --primary: #3A342E;           /* 一级标题/主文字 - 暖深棕 */
+  --primary-light: #59524A;     /* 二级正文 */
+  --primary-dark: #9E6F53;      /* 辅助强调棕红，只做点缀 */
+  --accent: #C8A878;            /* 香槟金 - 主按钮/图标/强调 */
+  --accent-light: #E8D9C3;      /* 香槟金浅 - 边框/弱强调 */
+  --gold: #C8A878;              /* 品牌香槟金 */
+  --gold-light: #F7EFE3;        /* 极浅香槟底 */
   --success: #27AE60;           /* 热带绿 */
   --danger: #E74C3C;            /* 警示红 */
   --warning: #F39C12;           /* 警告黄 */
-  --info: #3498DB;              /* 信息蓝 */
+  --info: #9E6F53;              /* 信息棕红 */
 
-  --bg-primary: #FFF8F0;        /* 米白底色 */
-  --bg-card: #FFFFFF;
-  --bg-secondary: #F5F0E8;
+  --bg-primary: #F8F5F0;        /* 暖米白页面底色 */
+  --bg-card: #FFFFFF;           /* 纯白卡片 */
+  --bg-secondary: #F7EFE3;      /* 极浅香槟辅助底 */
 
-  --text-primary: #2C1810;      /* 深褐文字 */
-  --text-secondary: #8B7355;    /* 浅褐文字 */
-  --text-hint: #B8A890;         /* 提示文字 */
+  --text-primary: #3A342E;      /* 一级标题 */
+  --text-secondary: #59524A;    /* 二级正文 */
+  --text-hint: #8C8276;         /* 辅助小字 */
 
-  --border-color: #E8DCC8;
-  --shadow: 0 2rpx 16rpx rgba(184, 134, 11, 0.08);
+  --border-color: #E8D9C3;
+  --shadow: 0 4rpx 12rpx rgba(120, 95, 65, 0.08);
 
   --radius-sm: 8rpx;
   --radius-md: 16rpx;
   --radius-lg: 24rpx;
 
-  --font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 
-    'PingFang SC', 'Microsoft YaHei', sans-serif;
+  /* 圆润优先：苹方/鸿蒙圆体在前，避免 Helvetica/SF 硬朗字形 */
+  --font-family: 'PingFang SC', 'HarmonyOS Sans SC', 'Source Han Sans SC',
+    'Microsoft YaHei', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
 
   font-family: var(--font-family);
   font-size: 28rpx;
@@ -46,18 +49,18 @@ page {
 
 .page-header {
   padding: 32rpx 30rpx 24rpx;
-  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+  background: linear-gradient(135deg, #F8F5F0, #F3EBDF);
 }
 
 .page-header__title {
   font-size: 40rpx;
   font-weight: 700;
-  color: #FFFFFF;
+  color: var(--text-primary);
 }
 
 .page-header__subtitle {
   font-size: 24rpx;
-  color: rgba(255,255,255,0.8);
+  color: var(--text-hint);
   margin-top: 8rpx;
 }
 
@@ -66,12 +69,12 @@ page {
 }
 
 .section__title {
-  font-size: 32rpx;
-  font-weight: 600;
+  font-size: 30rpx;
+  font-weight: 500;
   color: var(--text-primary);
   margin-bottom: 20rpx;
   padding-left: 16rpx;
-  border-left: 6rpx solid var(--primary);
+  border-left: 6rpx solid var(--gold);
 }
 
 /* ========== 卡片 ========== */
@@ -111,19 +114,19 @@ page {
 }
 
 .btn--primary {
-  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+  background: linear-gradient(135deg, var(--gold), var(--accent-light));
   color: #FFFFFF;
 }
 
 .btn--outline {
   background: transparent;
-  color: var(--primary);
-  border: 2rpx solid var(--primary);
+  color: var(--gold);
+  border: 2rpx solid var(--gold);
 }
 
 .btn--accent {
-  background: linear-gradient(135deg, var(--accent), var(--accent-light));
-  color: #FFFFFF;
+  background: linear-gradient(135deg, var(--accent-light), var(--gold-light));
+  color: var(--text-primary);
 }
 
 .btn--sm {
@@ -170,7 +173,7 @@ page {
 }
 
 .form-input:focus {
-  border-color: var(--primary);
+  border-color: var(--gold);
   background: var(--bg-card);
 }
 
@@ -197,8 +200,8 @@ page {
 }
 
 .tag--primary {
-  background: rgba(184, 134, 11, 0.1);
-  color: var(--primary);
+  background: rgba(200, 168, 120, 0.12);
+  color: var(--gold);
 }
 
 .tag--success {

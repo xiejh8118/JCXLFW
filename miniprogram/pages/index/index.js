@@ -1,154 +1,108 @@
-// pages/index/index.js - 首页
-const { t, getCurrentLang } = require('../../utils/i18n.js');
+// pages/index/index.js - 首页（柬企海外商旅服务 / KHMER 智能商旅助手）
+const { t } = require('../../utils/i18n.js');
 const api = require('../../utils/api.js');
 const dateHelper = require('../../utils/date-helper.js');
 
 const APP = getApp();
 
-const LANG_LABELS = {
-  'zh-CN': '中文',
-  'en': 'EN',
-  'km': 'ខ្មែរ'
-};
-
-const LANG_ORDER = ['zh-CN', 'en', 'km'];
-
 Page({
   data: {
-    // 语言
-    languageLabel: '中文',
-
-    // 业务板块（真实功能页，纯本地计算/静态内容，不涉及 AI 类目）
-    quickServices: [
-      { id: 'visa', icon: '🛂', page: '/pages/compliance/compliance?tab=visa', color: '#9B59B6', name: '签证' },
-      { id: 'workpermit', icon: '📄', page: '/pages/compliance/compliance?tab=workpermit', color: '#3498DB', name: '劳工证' },
-      { id: 'company', icon: '🏢', page: '/pages/compliance/compliance?tab=business', color: '#E67E22', name: '公司注册' },
-      { id: 'invoice', icon: '🧾', page: '/pages/compliance/compliance?tab=taxreg', color: '#16A085', name: '税务登记' }
-    ],
-
-    // 实用工具
-    tools: [
-      { id: 'vat', icon: '🧮', page: '/pages/tax-tool/tax-tool?type=vat', color: '#E74C3C', name: 'VAT' },
-      { id: 'wht', icon: '📊', page: '/pages/tax-tool/tax-tool?type=wht', color: '#F39C12', name: 'WHT' },
-      { id: 'exchange', icon: '💱', page: '', color: '#8E44AD', name: '汇率' },
-      { id: 'calendar', icon: '📅', page: '', color: '#2ECC71', name: '佛历' }
+    // 4 大核心服务入口（智能派单收纳进 AI 中枢，多语言助手在「我的」设置）
+    scenarios: [
+      { id: 'hotel', icon: '🏨', page: '/pages/services/services' },
+      { id: 'repair', icon: '🔧', page: '/pages/property/property' },
+      { id: 'reception', icon: '📞', page: '/pages/help/help' },
+      { id: 'order', icon: '📋', page: '/pages/requirement/requirement' }
     ],
 
     exchangeRateShown: true,
-
-    // 今日汇率
-    rates: {
-      USD_KHR: 4100,
-      CNY_KHR: 570
-    },
+    rates: { USD_KHR: 4100, CNY_KHR: 570 },
     rateUpdateTime: '',
 
-    // 商务服务入口（跳转到服务展示页）
-    serviceBanner: {
-      title: '酒店 · 签证 · 财税',
-      subtitle: '一站式柬埔寨商务服务',
-      page: '/pages/services/services'
-    },
-
-    // 合规体检入口（核心获客工具 → 生成报告 → 唤起客服）
-    checkupBanner: {
-      title: '企业合规体检',
-      subtitle: '6项风险扫描 · 60秒出报告',
-      tag: '免费',
-      page: '/pages/checkup/checkup'
-    },
-
-    // 节标题（预计算避免 WXML 函数调用）
     sectionTitles: {
-      appName: '柬企海外商务服务',
-      quickServices: '合规资讯',
-      tools: '实用工具',
+      appName: '柬企海外商旅服务',
+      subtitle: '柬埔寨智能商旅服务助手',
+      greeting: '你好',
+      scenarios: '核心服务',
+      aiHubTitle: 'AI 智能服务中枢',
+      aiHubTags: '自动派单 · 一键报修 · 三语响应',
+      aiHubBtn: '立即咨询',
       todayRate: '今日汇率',
-      lastUpdate: '更新于'
-    }
+      lastUpdate: '更新于',
+      disclaimer: '本平台提供需求整理、供应商匹配与客服确认，不直接替代持证酒店、物流或经营主体。'
+    },
+    calendar: { greg: '', beYear: '', khmerDate: '' }
   },
 
   onLoad() {
-    this.updateLanguageLabel();
     this.updateTranslations();
     this.loadExchangeRate();
   },
 
   onShow() {
-    this.updateLanguageLabel();
     this.updateTranslations();
+    this.computeCalendar();
   },
 
   onLanguageChange() {
-    this.updateLanguageLabel();
     this.updateTranslations();
   },
 
-  // 更新右上角语言标签
-  updateLanguageLabel() {
-    const lang = getCurrentLang();
-    this.setData({ languageLabel: LANG_LABELS[lang] || '中文' });
-  },
-
   updateTranslations() {
-    const services = this.data.quickServices.map(s => ({ ...s, name: t(`home.${s.id}`) }));
-    const tools = this.data.tools.map(item => ({ ...item, name: t(`home.${item.id}`) }));
+    const scenarios = this.data.scenarios.map(s => ({
+      ...s,
+      name: t('home.' + s.id),
+      desc: t('home.' + s.id + 'Desc')
+    }));
     const sectionTitles = {
       appName: t('home.appName'),
-      quickServices: t('home.quickServices'),
-      tools: t('home.tools'),
+      subtitle: t('home.subtitle'),
+      greeting: t('home.greeting'),
+      scenarios: t('home.scenarios'),
+      aiHubTitle: t('home.aiHubTitle'),
+      aiHubTags: t('home.aiHubTags'),
+      aiHubBtn: t('home.aiHubBtn'),
       todayRate: t('home.todayRate'),
       lastUpdate: t('home.lastUpdate'),
-      greeting: t('home.greeting'),
-      svcBannerTitle: t('home.svcBannerTitle'),
-      svcBannerSubtitle: t('home.svcBannerSubtitle'),
-      checkupTitle: t('home.checkupTitle'),
-      checkupSubtitle: t('home.checkupSubtitle'),
-      checkupTag: t('home.checkupTag')
+      settleUSD: t('home.settleUSD'),
+      disclaimer: t('home.disclaimer')
     };
-    this.setData({
-      quickServices: services,
-      tools,
-      sectionTitles,
-      serviceBanner: { ...this.data.serviceBanner, title: sectionTitles.svcBannerTitle, subtitle: sectionTitles.svcBannerSubtitle },
-      checkupBanner: { ...this.data.checkupBanner, title: sectionTitles.checkupTitle, subtitle: sectionTitles.checkupSubtitle, tag: sectionTitles.checkupTag }
-    });
+    this.setData({ scenarios, sectionTitles });
     wx.setNavigationBarTitle({ title: t('home.title') });
   },
 
-  // 首页右上角语言切换：弹出中文/英文/柬文三语选择
-  onLangSwitch() {
-    const self = this;
-    const itemList = ['中文', 'English', 'ភាសាខ្មែរ'];
-    wx.showActionSheet({
-      itemList,
-      success(res) {
-        const lang = LANG_ORDER[res.tapIndex];
-        if (lang && lang !== getCurrentLang()) {
-          APP.switchLanguage(lang);
-        }
-      }
-    });
+  // 场景/工具点击：tabBar 页用 switchTab（不带参），普通页 navigateTo
+  onItemTap(e) {
+    const { page, rqtype } = e.currentTarget.dataset;
+    if (!page) return;
+    const tabPages = ['/pages/index/index', '/pages/requirement/requirement', '/pages/profile/profile'];
+    const basePath = page.split('?')[0];
+    if (tabPages.indexOf(basePath) >= 0) {
+      // tabBar 页 switchTab 不支持带参，需求单类型通过 globalData 透传预填
+      if (rqtype) { APP.globalData.pendingRequirementType = rqtype; }
+      wx.switchTab({ url: basePath });
+    } else {
+      wx.navigateTo({ url: page });
+    }
   },
 
-  // 加载今日汇率
   async loadExchangeRate() {
+    // 1. 先读本地缓存立即渲染（首屏 0 网络等待）
+    const cached = wx.getStorageSync('api_cache_exchange_rate');
+    if (cached && cached.data) {
+      this.setData({ rates: cached.data });
+    }
+    // 2. 再请求后端（cache-first：命中缓存直接返回，否则用内置默认值并写回缓存）
     try {
       const res = await api.getExchangeRate();
       const rates = {
         USD_KHR: res?.USD_KHR || APP.globalData.exchangeRates.USD_KHR,
         CNY_KHR: res?.CNY_KHR || APP.globalData.exchangeRates.CNY_KHR
       };
-      this.setData({
-        rates,
-        rateUpdateTime: this.formatRateTime()
-      });
+      this.setData({ rates, rateUpdateTime: this.formatRateTime() });
       APP.globalData.exchangeRates = rates;
     } catch (err) {
-      this.setData({
-        rates: APP.globalData.exchangeRates,
-        rateUpdateTime: this.formatRateTime()
-      });
+      this.setData({ rates: APP.globalData.exchangeRates, rateUpdateTime: this.formatRateTime() });
     }
   },
 
@@ -159,40 +113,24 @@ Page({
     return `${h}:${m}`;
   },
 
-  // 工具/服务点击
-  onItemTap(e) {
-    const { page, id } = e.currentTarget.dataset;
-    if (id === 'exchange') {
-      this.setData({ exchangeRateShown: !this.data.exchangeRateShown });
-      return;
-    }
-    if (id === 'calendar') {
-      this.showCalendarTool();
-      return;
-    }
-    if (page) {
-      // 判断是 tabBar 页面还是普通页面
-      const tabPages = ['/pages/index/index', '/pages/requirement/requirement', '/pages/profile/profile'];
-      const basePath = page.split('?')[0];
-      if (tabPages.indexOf(basePath) >= 0) {
-        wx.switchTab({ url: basePath });
-      } else {
-        wx.navigateTo({ url: page });
-      }
-    }
+  // CTA：提交需求单（tabBar 页）
+  onSubmitRequirement() {
+    wx.switchTab({ url: '/pages/requirement/requirement' });
   },
 
-  // 商务服务入口
-  onServiceTap() {
-    wx.navigateTo({ url: this.data.serviceBanner.page });
+  // 智能客服入口（普通页，navigateTo）
+  onOpenHelp() {
+    wx.navigateTo({ url: '/pages/help/help' });
   },
 
-  // 合规体检入口
-  onCheckupTap() {
-    wx.navigateTo({ url: this.data.checkupBanner.page });
+  computeCalendar() {
+    const today = new Date();
+    const beYear = dateHelper.gregorianToBuddhist(today);
+    const khmerDate = dateHelper.formatDate(today, 'khmer');
+    const greg = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    this.setData({ calendar: { greg, beYear, khmerDate } });
   },
 
-  // 佛历转换弹窗
   showCalendarTool() {
     const today = new Date();
     const beYear = dateHelper.gregorianToBuddhist(today);
@@ -205,13 +143,11 @@ Page({
     });
   },
 
-  // 下拉刷新
   onPullDownRefresh() {
-    this.updateTranslations();
-    this.loadExchangeRate();
-    wx.stopPullDownRefresh();
+    this.loadExchangeRate().then(() => wx.stopPullDownRefresh());
   },
 
+  // 分享：转发给好友/群 + 朋友圈（内容型入口页）
   onShareAppMessage() {
     return {
       title: t('home.shareTitle'),
@@ -220,9 +156,6 @@ Page({
   },
 
   onShareTimeline() {
-    return {
-      title: t('home.shareTimeline'),
-      query: ''
-    };
+    return { title: t('home.shareTitleShort'), query: '' };
   }
 });

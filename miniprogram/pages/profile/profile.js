@@ -38,11 +38,11 @@ Page({
       L,
       currentLanguage: getCurrentLang(),
       menuItems: [
-        { id: 'member', icon: '👑', label: L.member, page: '/pages/member/member' },
-        { id: 'property', icon: '🏢', label: L.property, page: '/pages/property/property' },
-        { id: 'compliance', icon: '📝', label: L.complianceDocs, page: '/pages/compliance/compliance' },
+        { id: 'operator', icon: '📋', label: L.operatorWorkbench, page: '/pages/operator/operator' },
+        { id: 'privacy', icon: '🔒', label: L.privacy, page: '/pages/privacy/privacy' },
         { id: 'language', icon: '🌐', label: L.language, page: '' },
-        { id: 'feedback', icon: '💬', label: L.feedback, page: '', type: 'contact' }
+        { id: 'feedback', icon: '💬', label: L.feedback, page: '', type: 'contact' },
+        { id: 'about', icon: 'ℹ️', label: L.about, page: '' }
       ]
     });
     wx.setNavigationBarTitle({ title: L.title });
@@ -59,21 +59,13 @@ Page({
     }
   },
 
-  // 登录
+  // 登录（本地游客态，不采集头像昵称，避免隐私合规风险）
   onLogin() {
-    wx.getUserProfile({
-      desc: t('profile.loginDesc'),
-      success: (res) => {
-        const userInfo = res.userInfo;
-        APP.globalData.userInfo = userInfo;
-        wx.setStorageSync('userInfo', userInfo);
-        this.setData({ userInfo, isLoggedIn: true });
-        wx.showToast({ title: t('profile.loginSuccess'), icon: 'success' });
-      },
-      fail: (err) => {
-        console.log('取消登录', err);
-      }
-    });
+    const userInfo = { nickName: t('profile.guest'), avatarUrl: '' };
+    APP.globalData.userInfo = userInfo;
+    wx.setStorageSync('userInfo', userInfo);
+    this.setData({ userInfo, isLoggedIn: true });
+    wx.showToast({ title: t('profile.loginSuccess'), icon: 'success' });
   },
 
   // 菜单点击
@@ -135,10 +127,9 @@ Page({
     });
   },
 
-  // 复制版本号
+  // 显示版本号（不调用剪切板，避免微信误识别为读取剪切板）
   onVersionTap() {
-    wx.setClipboardData({ data: 'v1.0.0 - Cambodia Business Toolkit' });
-    wx.showToast({ title: t('common.copied'), icon: 'success' });
+    wx.showToast({ title: '柬企海外商旅服务 v1.0.0', icon: 'none' });
   },
 
   onShareAppMessage() {

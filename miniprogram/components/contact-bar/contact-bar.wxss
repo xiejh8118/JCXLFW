@@ -16,9 +16,9 @@
   box-sizing: border-box;
 }
 
-/* 主按钮 — 金色实底 */
+/* 主按钮 — 香槟金实底 */
 .contact-btn--primary {
-  background: #B8860B;
+  background: var(--gold);
   color: #fff;
   height: 88rpx;
 }
@@ -30,8 +30,8 @@
 /* 描边按钮 */
 .contact-btn--outline {
   background: transparent;
-  color: #B8860B;
-  border: 2rpx solid #B8860B;
+  color: var(--gold);
+  border: 2rpx solid var(--gold);
   height: 80rpx;
 }
 
@@ -41,8 +41,8 @@
 
 /* 迷你按钮 */
 .contact-btn--mini {
-  background: #B8860B15;
-  color: #B8860B;
+  background: rgba(200, 168, 120, 0.12);
+  color: var(--gold);
   height: 64rpx;
   font-size: 24rpx;
   border-radius: 32rpx;
@@ -55,7 +55,7 @@
 /* 文字链接（内嵌场景） */
 .contact-btn--link {
   background: transparent;
-  color: #B8860B;
+  color: var(--gold);
   height: auto;
   min-height: 48rpx;
   font-size: 26rpx;

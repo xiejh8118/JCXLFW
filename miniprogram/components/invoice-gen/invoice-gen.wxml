@@ -70,12 +70,12 @@
 
         <view class="flex-between mb-20">
           <text>包含高棉文</text>
-          <switch checked="{{includeKhmer}}" bindchange="onKhmerToggle" color="#B8860B"/>
+          <switch checked="{{includeKhmer}}" bindchange="onKhmerToggle" color="#1B3A5F"/>
         </view>
 
         <view class="flex-between">
           <text>税务印章</text>
-          <switch checked="{{includeStamp}}" bindchange="onStampToggle" color="#B8860B"/>
+          <switch checked="{{includeStamp}}" bindchange="onStampToggle" color="#1B3A5F"/>
         </view>
       </view>
 

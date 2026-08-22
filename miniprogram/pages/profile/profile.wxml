@@ -12,28 +12,6 @@
     </block>
   </view>
 
-  <!-- 工具入口 -->
-  <view class="section">
-    <view class="quick-grid">
-      <view class="quick-item" bindtap="onMenuTap" data-page="/pages/tax-tool/tax-tool">
-        <view class="quick-item__icon" style="background:#E74C3C15;">🧮</view>
-        <view class="quick-item__name">{{L.tax}}</view>
-      </view>
-      <view class="quick-item" bindtap="onMenuTap" data-page="/pages/compliance/compliance">
-        <view class="quick-item__icon" style="background:#3498DB15;">📋</view>
-        <view class="quick-item__name">{{L.compliance}}</view>
-      </view>
-      <view class="quick-item" bindtap="onMenuTap" data-id="language">
-        <view class="quick-item__icon" style="background:#8E44AD15;">🌐</view>
-        <view class="quick-item__name">{{L.lang}}</view>
-      </view>
-      <view class="quick-item" bindtap="onMenuTap" data-id="about">
-        <view class="quick-item__icon" style="background:#16A08515;">ℹ️</view>
-        <view class="quick-item__name">{{L.aboutShort}}</view>
-      </view>
-    </view>
-  </view>
-
   <!-- 菜单列表 -->
   <view class="section">
     <view class="menu-list card">

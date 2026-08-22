@@ -178,13 +178,11 @@ Component({
       return `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
     },
 
-    // 复制结果
+    // 显示结果（不调用剪切板，避免微信误识别为读取剪切板）
     onCopyResult() {
       if (!this.data.result) return;
-      const toCur = this.data.currencies.find(c => c.code === this.data.toCurrency);
       const text = `${this.data.amount} ${this.data.fromCurrency} = ${this.data.result} ${this.data.toCurrency}`;
-      wx.setClipboardData({ data: text });
-      wx.showToast({ title: '已复制', icon: 'success' });
+      wx.showToast({ title: text, icon: 'none' });
     },
 
     // 刷新汇率

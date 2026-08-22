@@ -10,6 +10,10 @@ App({
     this.initCloud();
     // 检查登录状态
     this.checkLogin();
+    // 隐私合规：注册需授权回调，拦截 wx.login 等隐私接口
+    this.initPrivacy();
+    // 新版本强制更新提示
+    this.checkUpdate();
   },
 
   onShow(options) {
@@ -48,6 +52,43 @@ App({
     }
   },
 
+  // 隐私合规：微信要求调用 wx.login 等隐私接口前必须取得用户授权。
+  // 注册该回调后，任一隐私接口被调用且未授权时，微信会弹出官方隐私授权框。
+  initPrivacy() {
+    if (typeof wx.onNeedPrivacyAuthorize !== 'function') return;
+    wx.onNeedPrivacyAuthorize((resolve) => {
+      wx.requirePrivacyAuthorize({
+        success: () => resolve({ event: 'agree' }),
+        fail: () => resolve({ event: 'disagree' }),
+        complete: () => {}
+      });
+    });
+  },
+
+  // 小程序版本更新：检测到新版本下载完成后强制弹窗重启
+  checkUpdate() {
+    if (typeof wx.getUpdateManager !== 'function') return;
+    const updateManager = wx.getUpdateManager();
+    updateManager.onCheckForUpdate((res) => {
+      console.log('[app] update check:', res.hasUpdate);
+    });
+    updateManager.onUpdateReady(() => {
+      wx.showModal({
+        title: '更新提示',
+        content: '新版本已准备好，是否立即重启应用？',
+        showCancel: false,
+        success: () => updateManager.applyUpdate()
+      });
+    });
+    updateManager.onUpdateFailed(() => {
+      wx.showToast({
+        title: '新版本下载失败，请删除小程序后重新打开',
+        icon: 'none',
+        duration: 4000
+      });
+    });
+  },
+
   // 多语言切换
   switchLanguage(lang) {
     this.globalData.language = lang;
@@ -62,7 +103,7 @@ App({
   },
 
   globalData: {
-    // TODO: 改为腾讯云国际版 CloudBase 控制台创建的环境 ID（如 khmer-ai-xxxx）
+    // TODO: 改为腾讯云国际版 CloudBase 控制台创建的环境 ID（如 khmer-xxxx）
     cloudEnv: 'cloud-env-id',
     language: 'zh-CN',
     userInfo: null,

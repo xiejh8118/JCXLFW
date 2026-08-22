@@ -1,114 +1,117 @@
 // pages/services/services.js
-// 合规版服务展示页 — 纯信息展示，所有交易通过客服会话完成
+// 供应商 / 服务网络 — 接后端 /api/providers（住宿 / 物流仓储 / 物业）
 
 const i18n = require('../../utils/i18n.js');
 const api = require('../../utils/api.js');
 const { getScope, t } = i18n;
 
+const KINDS = ['accommodation', 'supplychain', 'property'];
+
 Page({
   data: {
-    // 当前语言
     lang: 'zh-CN',
     languageLabel: '中文',
     L: getScope('services'),
-
-    // 服务标签页
-    activeTab: 0,
-
-    // 服务数据（随语言刷新）
-    tabs: [],
-    hotels: [],
-    visaTypes: [],
-    taxServices: [],
-
-    // 当前展开的服务详情
-    expandedHotel: '',
-    expandedVisa: '',
-    expandedTax: ''
-  },
-
-  onLoad(options) {
-    if (options.source) {
-      // 从客服消息卡片进入，可定位到对应服务
-      const tabMap = { hotel: 0, visa: 1, tax: 2 };
-      this.setData({ activeTab: tabMap[options.source] || 0 });
-    }
-    this.updateLanguage();
+    groups: [],
+    showApply: false,
+    applyForm: { name_zh: '', kind: 'accommodation', city: '', tags: '', price_info: '', contact: '', desc_zh: '' },
+    kindIndex: 0
   },
 
   onShow() {
     this.updateLanguage();
+    this.loadProviders();
   },
 
   onLanguageChange() {
     this.updateLanguage();
+    this.loadProviders();
   },
 
   updateLanguage() {
     const lang = i18n.getLang();
     const labels = { 'zh-CN': '中文', 'en': 'EN', 'km': 'ខ្មែរ' };
-    const L = getScope('services');
-    const visaTypes = (L.data.visaTypes || []).map(v => ({
-      ...v,
-      staySub: (L.stayPrefix || '').replace('{val}', v.stayDays)
-    }));
-    const taxServices = (L.data.taxServices || []).map(s => ({
-      ...s,
-      cycleSub: (L.cyclePrefix || '').replace('{val}', s.cycle)
-    }));
-    this.setData({
-      lang,
-      languageLabel: labels[lang] || '中文',
-      L,
-      tabs: L.tabs,
-      hotels: L.data.hotels,
-      visaTypes,
-      taxServices
-    });
-    wx.setNavigationBarTitle({ title: L.title });
+    this.setData({ lang, languageLabel: labels[lang] || '中文', L: getScope('services') });
+    wx.setNavigationBarTitle({ title: getScope('services').title });
   },
 
-  // 切换标签
-  onTabChange(e) {
-    this.setData({ activeTab: e.currentTarget.dataset.index });
+  async loadProviders() {
+    try {
+      const d = await api.providerList(this.data.lang);
+      const list = d.data || [];
+      const groups = KINDS.map(k => ({
+        kind: k,
+        label: this.data.L.kindLabels[k] || k,
+        list: list.filter(p => p.kind === k)
+      })).filter(g => g.list.length);
+      this.setData({ groups });
+    } catch (e) {
+      console.warn('loadProviders', e);
+    }
   },
 
-  // 展开/收起酒店详情
-  toggleHotel(e) {
-    const id = e.currentTarget.dataset.id;
-    this.setData({ expandedHotel: this.data.expandedHotel === id ? '' : id });
-  },
-
-  // 展开/收起签证详情
-  toggleVisa(e) {
-    const id = e.currentTarget.dataset.id;
-    this.setData({ expandedVisa: this.data.expandedVisa === id ? '' : id });
-  },
-
-  // 展开/收起财税服务详情
-  toggleTax(e) {
-    const id = e.currentTarget.dataset.id;
-    this.setData({ expandedTax: this.data.expandedTax === id ? '' : id });
-  },
-
-  // 语言切换
   onLangSwitch() {
     const langs = ['zh-CN', 'en', 'km'];
-    const current = langs.indexOf(this.data.lang);
-    const next = langs[(current + 1) % langs.length];
+    const next = langs[(langs.indexOf(this.data.lang) + 1) % langs.length];
     i18n.setLang(next);
     this.updateLanguage();
+    this.loadProviders();
   },
 
-  // 小程序内生成需求单，替代客服咨询按钮，避免被判定为引流
+  toggleApply() {
+    this.setData({ showApply: !this.data.showApply });
+  },
+
+  noop() {},
+
+  onApplyInput(e) {
+    const f = e.currentTarget.dataset.f;
+    this.setData({ ['applyForm.' + f]: e.detail.value });
+  },
+
+  onKindChange(e) {
+    const idx = e.detail.value;
+    this.setData({ kindIndex: idx, 'applyForm.kind': KINDS[idx] });
+  },
+
+  async submitApply() {
+    const f = this.data.applyForm;
+    if (!f.name_zh) {
+      wx.showToast({ title: this.data.L.needName, icon: 'none' });
+      return;
+    }
+    wx.showLoading({ title: '提交中' });
+    try {
+      const payload = {
+        name_zh: f.name_zh, name_en: f.name_zh, name_km: f.name_zh,
+        kind: f.kind, city: f.city,
+        tags: f.tags, price_info: f.price_info, contact: f.contact,
+        desc_zh: f.desc_zh, desc_en: f.desc_zh, desc_km: f.desc_zh
+      };
+      await api.providerCreate(payload);
+      wx.hideLoading();
+      wx.showToast({ title: this.data.L.applySuccess, icon: 'success' });
+      this.setData({
+        showApply: false,
+        applyForm: { name_zh: '', kind: 'accommodation', city: '', tags: '', price_info: '', contact: '', desc_zh: '' },
+        kindIndex: 0
+      });
+      this.loadProviders();
+    } catch (e) {
+      wx.hideLoading();
+      wx.showToast({ title: (e.message) || '提交失败', icon: 'none' });
+    }
+  },
+
+  // 小程序内生成需求单（接后端闭环）
   async createRequirement(e) {
     const { type, title, detail } = e.currentTarget.dataset;
     if (!title) return;
     wx.showLoading({ title: '提交中' });
     try {
-      await api.createRequirement({ type, title: title.trim(), detail });
+      await api.createRequirement({ type, title: String(title).trim(), detail: detail || '' });
       wx.hideLoading();
-      wx.showToast({ title: '已生成需求单', icon: 'success' });
+      wx.showToast({ title: this.data.L.consultOk, icon: 'success' });
       setTimeout(() => {
         wx.switchTab({ url: '/pages/requirement/requirement' });
       }, 800);
@@ -118,17 +121,18 @@ Page({
     }
   },
 
-  // 底部跳转需求单中心
   goRequirementCenter() {
     wx.switchTab({ url: '/pages/requirement/requirement' });
   },
 
   onShareAppMessage() {
-    const tabs = ['hotel', 'visa', 'tax'];
-    const tab = tabs[this.data.activeTab] || 'hotel';
     return {
       title: t('services.shareTitle'),
-      path: '/pages/services/services?source=' + tab
+      path: '/pages/services/services'
     };
+  },
+
+  onShareTimeline() {
+    return { title: t('services.shareTitleShort'), query: '' };
   }
 });

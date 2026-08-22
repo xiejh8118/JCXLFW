@@ -1,0 +1,10 @@
+<!-- pages/privacy/privacy.wxml - 隐私政策 -->
+<view class="privacy">
+  <view class="privacy__title">{{title}}</view>
+  <view class="privacy__updated">{{updated}}</view>
+  <view class="privacy__block" wx:for="{{blocks}}" wx:key="h">
+    <view class="privacy__h">{{item.h}}</view>
+    <view class="privacy__p">{{item.p}}</view>
+  </view>
+  <view class="privacy__foot">柬企海外商旅服务 · KHMER</view>
+</view>
