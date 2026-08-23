@@ -1,7 +1,7 @@
 /* pages/privacy/privacy.wxss */
 .privacy {
   padding: 32rpx 36rpx 80rpx;
-  background: #FFF8F0;
+  background: var(--bg-primary);
   min-height: 100vh;
   box-sizing: border-box;
 }
@@ -24,7 +24,7 @@
 .privacy__h {
   font-size: 30rpx;
   font-weight: 600;
-  color: #B8860B;
+  color: var(--primary);
   margin-bottom: 10rpx;
 }
 .privacy__p {

@@ -7,6 +7,13 @@ miniprogram/project.private.config.json
 # 后端运行时数据（云端持久化，非源码）
 server/data/*.json
 
+# 依赖（避免把 node_modules 推上 GitHub）
+node_modules/
+server/node_modules/
+
+# 嵌套的旧仓库副本（JCXLFW 子目录本身是独立 git 仓库，单独管理）
+JCXLFW/
+
 # 日志
 *.log
 npm-debug.log*

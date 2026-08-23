@@ -6,32 +6,30 @@
     "pages/services/services",
     "pages/help/help",
     "pages/profile/profile",
-    "pages/privacy/privacy"
+    "pages/privacy/privacy",
+    "pages/operator/operator"
   ],
   "window": {
-    "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#B8860B",
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#F8F5F0",
     "navigationBarTitleText": "柬企海外商旅服务",
-    "navigationBarTextStyle": "white",
-    "backgroundColor": "#FFF8F0",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#F8F5F0",
     "enableShareAppMessage": true,
     "enableShareTimeline": true
   },
   "tabBar": {
-    "color": "#999999",
-    "selectedColor": "#B8860B",
+    "color": "#8C8276",
+    "selectedColor": "#C8A878",
     "backgroundColor": "#FFFFFF",
-    "borderStyle": "black",
+    "borderStyle": "white",
     "list": [
       { "pagePath": "pages/index/index", "text": "首页" },
       { "pagePath": "pages/requirement/requirement", "text": "需求单" },
       { "pagePath": "pages/profile/profile", "text": "我的" }
     ]
   },
-  "usingComponents": {
-    "currency-calc": "/components/currency-calc/currency-calc",
-    "invoice-gen": "/components/invoice-gen/invoice-gen"
-  },
+  "usingComponents": {},
   "sitemapLocation": "sitemap.json",
   "lazyCodeLoading": "requiredComponents",
   "permission": {

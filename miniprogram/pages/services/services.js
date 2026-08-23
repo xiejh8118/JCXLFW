@@ -130,5 +130,9 @@ Page({
       title: t('services.shareTitle'),
       path: '/pages/services/services'
     };
+  },
+
+  onShareTimeline() {
+    return { title: t('services.shareTitleShort'), query: '' };
   }
 });

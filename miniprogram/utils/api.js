@@ -21,6 +21,32 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// ==================== 请求缓存层（内存 + 本地存储双缓存）====================
+const _memCache = {};
+const _PREFIX = 'api_cache_';
+
+// 读取有效缓存（未过期）
+function cacheGet(key) {
+  const m = _memCache[key];
+  if (m && m.expire > Date.now()) return m.data;
+  try {
+    const s = wx.getStorageSync(_PREFIX + key);
+    if (s && s.expire > Date.now()) {
+      _memCache[key] = s;
+      return s.data;
+    }
+  } catch (e) { /* ignore */ }
+  return undefined;
+}
+
+// 写入缓存（带 TTL，ms）
+function cacheSet(key, data, ttlMs) {
+  const expire = Date.now() + (ttlMs || 5 * 60 * 1000);
+  const item = { data, expire };
+  _memCache[key] = item;
+  try { wx.setStorageSync(_PREFIX + key, item); } catch (e) { /* ignore */ }
+}
+
 function unavailable(name) {
   console.warn(`[API] ${name} 因海外主体不支持云开发，已降级为不可用`);
   return Promise.reject(new Error('该功能在境外版暂不可用'));
@@ -80,10 +106,15 @@ function getExchangeRates() {
 }
 
 /**
- * 获取实时汇率
+ * 获取实时汇率（带本地缓存，先返回缓存再尝试更新）
+ * 当前后端未提供汇率接口，使用内置默认值，并写入本地缓存供首页 cache-first 渲染。
  */
 function getExchangeRate() {
-  return mockOk('getExchangeRate', getExchangeRates());
+  const cached = cacheGet('exchange_rate');
+  if (cached !== undefined) return Promise.resolve(cached);
+  const defaultRates = getExchangeRates();
+  cacheSet('exchange_rate', defaultRates, 30 * 60 * 1000);
+  return Promise.resolve(defaultRates);
 }
 
 /**
@@ -174,29 +205,72 @@ const BACKEND_BASE = 'https://www.ccbuyhub.com';
 const BACKEND_CONFIGURED = !/(example\.com|localhost|127\.0\.0\.1|0\.0\.0\.0|192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.)/i.test(BACKEND_BASE);
 
 function backendRequest(method, path, data = {}, options = {}) {
-  const { auth = true } = options;
+  const {
+    auth = true,
+    token: customToken = '',
+    useCache = false,
+    cacheTtl = 5 * 60 * 1000,
+    timeout = 15000,
+    retries = 2,
+    retryDelay = 800
+  } = options;
+
   if (!BACKEND_CONFIGURED) {
     console.warn('[API] 后端域名未配置（仍为占位符），请部署 server/ 并填入真实 HTTPS 域名');
     return Promise.reject(new Error('服务连接失败，请稍后重试'));
   }
-  return new Promise((resolve, reject) => {
-    const header = { 'Content-Type': 'application/json' };
-    if (auth) {
-      const token = wx.getStorageSync('token');
-      if (token) header['Authorization'] = 'Bearer ' + token;
+
+  const cacheKey = `${method}:${path}:${JSON.stringify(data)}`;
+
+  // cache-first：命中未过期缓存直接返回，跳过网络
+  if (useCache) {
+    const cached = cacheGet(cacheKey);
+    if (cached !== undefined) {
+      console.log('[API] cache hit:', cacheKey);
+      return Promise.resolve(cached);
     }
-    wx.request({
-      url: BACKEND_BASE + path,
-      method,
-      data,
-      header,
-      success: res => {
-        if (res.statusCode === 200 && res.data && res.data.code === 0) resolve(res.data.data);
-        else if (res.statusCode === 401) reject(new Error((res.data && res.data.message) || '未登录'));
-        else reject(new Error((res.data && res.data.message) || '请求失败'));
-      },
-      fail: err => reject(new Error(err.errMsg || '网络错误'))
-    });
+  }
+
+  return new Promise((resolve, reject) => {
+    let attempt = 0;
+    const header = { 'Content-Type': 'application/json' };
+
+    const fire = () => {
+      if (customToken) {
+        header['Authorization'] = 'Bearer ' + customToken;
+      } else if (auth) {
+        const token = wx.getStorageSync('token');
+        if (token) header['Authorization'] = 'Bearer ' + token;
+      }
+      wx.request({
+        url: BACKEND_BASE + path,
+        method,
+        data,
+        header,
+        timeout,
+        success: res => {
+          if (res.statusCode === 200 && res.data && res.data.code === 0) {
+            if (useCache) cacheSet(cacheKey, res.data.data, cacheTtl);
+            resolve(res.data.data);
+          } else if (res.statusCode === 401) {
+            reject(new Error((res.data && res.data.message) || '未登录'));
+          } else {
+            // 业务错误不重试，直接失败
+            reject(new Error((res.data && res.data.message) || '请求失败'));
+          }
+        },
+        fail: err => {
+          attempt += 1;
+          if (attempt <= retries) {
+            console.warn(`[API] 请求失败，第 ${attempt} 次重试:`, path);
+            setTimeout(fire, retryDelay * attempt);
+          } else {
+            reject(new Error(err.errMsg || '网络错误'));
+          }
+        }
+      });
+    };
+    fire();
   });
 }
 
@@ -221,6 +295,7 @@ function listRequirements(params = {}) {
   let path = `/api/requirement?lang=${params.lang || 'zh-CN'}`;
   if (params.status) path += `&status=${params.status}`;
   if (params.type) path += `&type=${params.type}`;
+  if (params.module) path += `&module=${params.module}`;
   return ensureLogin().then(() => backendRequest('GET', path));
 }
 function getRequirement(id, lang) {
@@ -233,9 +308,46 @@ function rateRequirement(id, rating, comment) {
   return ensureLogin().then(() => backendRequest('POST', `/api/requirement/${id}/rate`, { rating, comment }));
 }
 
+// ---- 运营工作台（ADMIN_TOKEN 鉴权）----
+function adminRequirementList(token, lang, module) {
+  let path = `/api/admin/requirements?lang=${lang || 'zh-CN'}`;
+  if (module) path += `&module=${module}`;
+  return backendRequest('GET', path, {}, { auth: false, token });
+}
+function adminRequirementUpdate(id, { status, note, matchedIds, quote, assignedTo, remark }, token) {
+  return backendRequest('PUT', `/api/admin/requirement/${id}`, { status, note, matchedIds, quote, assignedTo, remark }, { auth: false, token });
+}
+
+// ---- 房态管理（住宿闭环：建档/入住/退房/收款）----
+function adminRoomStayList(token, { status, lang } = {}) {
+  let path = `/api/admin/room-stays?lang=${lang || 'zh-CN'}`;
+  if (status) path += `&status=${status}`;
+  return backendRequest('GET', path, {}, { auth: false, token });
+}
+function adminRoomStayCreate(payload, token) {
+  return backendRequest('POST', '/api/admin/room-stay', payload, { auth: false, token });
+}
+function adminRoomStayUpdate(id, payload, token) {
+  return backendRequest('PUT', `/api/admin/room-stay/${id}`, payload, { auth: false, token });
+}
+
+// ---- 双向触达：微信订阅消息授权（需在小程序后台配置模板 ID 并填入下方常量）----
+// 上线前必须：在微信公众平台申请「工单状态变更」类订阅消息模板，将模板 ID 填入此处。
+const SUB_TEMPLATE_ID = ''; // ← 填写你的订阅消息模板 ID
+function requestSubscribeMsg() {
+  if (!SUB_TEMPLATE_ID || !wx.requestSubscribeMessage) return;
+  try {
+    wx.requestSubscribeMessage({
+      tmplIds: [SUB_TEMPLATE_ID],
+      success() {},
+      fail() {}
+    });
+  } catch (e) { /* 用户拒绝或不支持时不阻塞主流程 */ }
+}
+
 // ---- 供应商目录（接后端，dev 免鉴权）----
 function providerList(lang) {
-  return backendRequest('GET', `/api/providers?lang=${lang || 'zh-CN'}`, {}, { auth: false });
+  return backendRequest('GET', `/api/providers?lang=${lang || 'zh-CN'}`, {}, { auth: false, useCache: true, cacheTtl: 30 * 60 * 1000 });
 }
 function providerCreate(payload) {
   return backendRequest('POST', '/api/providers', payload, { auth: false });
@@ -243,18 +355,69 @@ function providerCreate(payload) {
 
 // ---- 多语言 FAQ 客服（规则匹配，dev 免鉴权）----
 function faqList(lang) {
-  return backendRequest('GET', `/api/faq?lang=${lang || 'zh-CN'}`, {}, { auth: false });
+  return backendRequest('GET', `/api/faq?lang=${lang || 'zh-CN'}`, {}, { auth: false, useCache: true, cacheTtl: 60 * 60 * 1000 });
 }
 function faqAsk(query, lang) {
   return backendRequest('POST', '/api/faq', { query, lang: lang || 'zh-CN' }, { auth: false });
 }
 
+// ---- 大模型对话（后端代理 OpenAI 兼容接口；未配置时 fallback 走规则 FAQ）----
+function llmChat(messages, lang) {
+  return backendRequest('POST', '/api/llm/chat', { messages, lang: lang || 'zh-CN' }, { auth: false });
+}
+
 // ---- 物业工作台状态（公司级共享，云端持久化）----
 function propertyLoad() {
-  return backendRequest('GET', '/api/property', {}, { auth: false });
+  return backendRequest('GET', '/api/property', {}, { auth: false, useCache: true, cacheTtl: 5 * 60 * 1000 });
 }
 function propertySave(state) {
   return backendRequest('POST', '/api/property', state, { auth: false });
+}
+
+// ---- 物业账单/提醒单 PDF（云端生成，直接可打印）----
+// 前端 Canvas 出图 → Base64 → 后端封装为单页 A4 PDF → 返回 ArrayBuffer
+function propertyPdf({ imageBase64, width, height, kind = 'bill' }) {
+  return new Promise((resolve, reject) => {
+    if (!BACKEND_CONFIGURED) {
+      console.warn('[API] 后端域名未配置，无法生成 PDF');
+      return reject(new Error('服务连接失败，请稍后重试'));
+    }
+    wx.request({
+      url: BACKEND_BASE + '/api/property/pdf',
+      method: 'POST',
+      data: { imageBase64, width, height, kind },
+      header: { 'Content-Type': 'application/json' },
+      responseType: 'arraybuffer',
+      success: res => {
+        if (res.statusCode === 200 && res.data) resolve(res.data);
+        else reject(new Error('PDF 生成失败'));
+      },
+      fail: err => reject(new Error(err.errMsg || '网络错误'))
+    });
+  });
+}
+
+// ---- 物业账单/提醒单 PDF（矢量版：可选中文字）----
+// 前端上传「布局描述 items」→ 后端 pdfkit+harfbuzz 排版 → 返回 ArrayBuffer
+function propertyPdfV2({ items, width, height, kind = 'bill' }) {
+  return new Promise((resolve, reject) => {
+    if (!BACKEND_CONFIGURED) {
+      console.warn('[API] 后端域名未配置，无法生成 PDF');
+      return reject(new Error('服务连接失败，请稍后重试'));
+    }
+    wx.request({
+      url: BACKEND_BASE + '/api/property/pdf-v2',
+      method: 'POST',
+      data: { items, width, height, kind },
+      header: { 'Content-Type': 'application/json' },
+      responseType: 'arraybuffer',
+      success: res => {
+        if (res.statusCode === 200 && res.data) resolve(res.data);
+        else reject(new Error('PDF 生成失败'));
+      },
+      fail: err => reject(new Error(err.errMsg || '网络错误'))
+    });
+  });
 }
 
 module.exports = {
@@ -283,12 +446,25 @@ module.exports = {
   getRequirement,
   updateRequirementStatus,
   rateRequirement,
+  // ===== 运营工作台 =====
+  adminRequirementList,
+  adminRequirementUpdate,
+  // ===== 房态管理（住宿闭环）=====
+  adminRoomStayList,
+  adminRoomStayCreate,
+  adminRoomStayUpdate,
+  // ===== 双向触达 =====
+  requestSubscribeMsg,
+  SUB_TEMPLATE_ID,
   // ===== 物业工作台 =====
   propertyLoad,
   propertySave,
-  // ===== 供应商 / FAQ 客服 =====
+  propertyPdf,
+  propertyPdfV2,
+  // ===== 供应商 / FAQ 客服 / 大模型 =====
   providerList,
   providerCreate,
   faqList,
-  faqAsk
+  faqAsk,
+  llmChat
 };

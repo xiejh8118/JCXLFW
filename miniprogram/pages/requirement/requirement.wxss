@@ -1,28 +1,33 @@
-.page { min-height: 100vh; background: #FFF8F0; padding-bottom: 40rpx; }
-.header { display: flex; align-items: center; justify-content: space-between; padding: 28rpx 32rpx; background: #B8860B; color: #fff; }
+.page { min-height: 100vh; background: var(--bg-primary); padding-bottom: 40rpx; }
+.header { display: flex; align-items: center; justify-content: space-between; padding: 28rpx 32rpx; background: linear-gradient(90deg, #F8F5F0, #F3EBDF); color: var(--text-primary); border-bottom: 1rpx solid #E8D9C3; }
 .title { font-size: 36rpx; font-weight: 700; }
-.new-btn { font-size: 26rpx; background: rgba(255,255,255,.2); padding: 8rpx 24rpx; border-radius: 30rpx; }
+.new-btn { font-size: 26rpx; background: var(--gold); color: #fff; padding: 8rpx 24rpx; border-radius: 30rpx; }
 .form { background: #fff; margin: 20rpx; border-radius: 16rpx; padding: 24rpx; }
 .form-row { display: flex; align-items: center; margin-bottom: 16rpx; }
 .label { font-size: 26rpx; color: #666; width: 140rpx; }
 .picker { flex: 1; background: #f5f5f5; border-radius: 10rpx; padding: 16rpx 20rpx; font-size: 28rpx; }
-.field { width: 100%; background: #f5f5f5; border-radius: 10rpx; padding: 18rpx 20rpx; font-size: 28rpx; margin-bottom: 16rpx; box-sizing: border-box; }
-.area { height: 140rpx; }
-.btn-primary { background: #B8860B; color: #fff; font-size: 28rpx; border-radius: 12rpx; margin-top: 8rpx; }
+.field { width: 100%; background: #f5f5f5; border-radius: 10rpx; padding: 0 20rpx; font-size: 28rpx; min-height: 84rpx; line-height: 84rpx; margin-bottom: 16rpx; box-sizing: border-box; }
+.field.area { padding: 18rpx 20rpx; line-height: 1.5; min-height: 140rpx; height: 140rpx; }
+.btn-primary { background: var(--gold); color: #fff; font-size: 28rpx; border-radius: 12rpx; margin-top: 8rpx; }
 .tip, .empty { text-align: center; color: #999; font-size: 26rpx; margin-top: 80rpx; }
 .card { background: #fff; margin: 20rpx; border-radius: 16rpx; padding: 24rpx; box-shadow: 0 2rpx 10rpx rgba(0,0,0,.04); }
 .card-top { display: flex; align-items: center; }
 .order-no { font-size: 24rpx; color: #999; }
-.type-tag { font-size: 22rpx; color: #B8860B; background: #fff3e0; padding: 4rpx 14rpx; border-radius: 20rpx; margin: 0 12rpx; }
+.type-tag { font-size: 22rpx; color: var(--primary); background: #E8EEF4; padding: 4rpx 14rpx; border-radius: 20rpx; margin: 0 12rpx; }
 .status { font-size: 22rpx; padding: 4rpx 14rpx; border-radius: 20rpx; margin-left: auto; }
 .status.pending { color: #888; background: #eee; }
 .status.matching { color: #1565c0; background: #e3f2fd; }
 .status.accepted { color: #2e7d32; background: #e8f5e9; }
-.status.processing { color: #ef6c00; background: #fff3e0; }
+.status.processing { color: #d35400; background: #FEF3E2; }
 .status.completed { color: #6a1b9a; background: #f3e5f5; }
 .status.rated { color: #455a64; background: #eceff1; }
+.status.returned { color: #b71c1c; background: #fdecea; }
 .card-title { font-size: 30rpx; font-weight: 600; margin-top: 14rpx; }
 .card-detail { font-size: 26rpx; color: #666; margin-top: 8rpx; }
+.card-room { font-size: 24rpx; color: #8a6d3b; margin-top: 8rpx; }
+.overdue-badge { font-size: 20rpx; color: #fff; background: #d32f2f; padding: 4rpx 12rpx; border-radius: 20rpx; margin-left: 10rpx; }
+.sla-text { font-size: 22rpx; color: #2e7d32; margin-top: 8rpx; }
+.sla-text.overdue { color: #d32f2f; }
 
 /* 闭环进度 */
 .progress { display: flex; align-items: flex-start; margin-top: 18rpx; }
@@ -38,29 +43,41 @@
   z-index: 0;
 }
 .progress-step:first-child::before { display: none; }
-.progress-step.done::before { background: #B8860B; }
+.progress-step.done::before { background: var(--gold); }
 .progress-dot {
   width: 36rpx; height: 36rpx; line-height: 36rpx; text-align: center;
   border-radius: 50%; background: #e0e0e0; color: #fff; font-size: 20rpx;
   position: relative; z-index: 1;
 }
-.progress-step.done .progress-dot { background: #B8860B; }
+.progress-step.done .progress-dot { background: var(--gold); }
 .progress-text { font-size: 18rpx; color: #999; margin-top: 6rpx; text-align: center; }
-.progress-step.done .progress-text { color: #B8860B; }
+.progress-step.done .progress-text { color: var(--gold); }
 
 .matched { font-size: 24rpx; color: #555; margin-top: 10rpx; }
 .m-label { color: #999; }
-.m-name { color: #B8860B; }
+.m-name { color: var(--primary); }
 
 /* 报价 */
 .quote-box {
   display: flex; align-items: center; justify-content: space-between;
   margin-top: 14rpx; padding: 14rpx 18rpx;
-  background: #fff8f0; border: 1rpx solid #f0e0c0; border-radius: 10rpx;
+  background: #F0F4F8; border: 1rpx solid var(--border-color); border-radius: 10rpx;
 }
 .quote-label { font-size: 24rpx; color: #999; }
-.quote-value { font-size: 28rpx; font-weight: 600; color: #B8860B; }
+.quote-value { font-size: 28rpx; font-weight: 600; color: var(--primary); }
 
-.card-actions { margin-top: 16rpx; }
-.btn-advance { background: #B8860B; color: #fff; font-size: 24rpx; }
-.btn-rate { background: #6a1b9a; color: #fff; font-size: 24rpx; }
+.card-actions { margin-top: 16rpx; display: flex; gap: 14rpx; flex-wrap: wrap; }
+.btn-action { background: var(--gold); color: #fff; font-size: 24rpx; margin: 0; }
+
+/* 住宿房态展示（客人端）*/
+.stay-box { margin-top: 14rpx; padding: 16rpx 20rpx; background: linear-gradient(160deg,#F9EED6,#FCF6EA); border-radius: 12rpx; border-left: 6rpx solid var(--gold); }
+.stay-row { font-size: 24rpx; color: var(--text-secondary); margin-bottom: 6rpx; line-height: 1.4; }
+.stay-label { color: var(--gold); font-weight: 600; }
+.stay-status { padding: 2rpx 14rpx; border-radius: 16rpx; font-size: 22rpx; font-weight: 600; }
+.stay-pay { font-size: 24rpx; color: var(--text-primary); margin-top: 6rpx; }
+.status--reserved { color: #1565c0; background: #e3f2fd; }
+.status--checked_in { color: var(--success); background: #e8f5e9; }
+.status--checked_out { color: var(--text-hint); background: var(--bg-secondary); }
+.btn-return { background: #fff; color: var(--danger); border: 1rpx solid var(--danger); }
+.btn-advance { background: var(--gold); color: #fff; font-size: 24rpx; }
+.btn-rate { background: var(--success); color: #fff; font-size: 24rpx; }

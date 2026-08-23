@@ -60,6 +60,12 @@ function insertProvider(p) {
 }
 // 需求 type -> 供应商 kind 映射
 const TYPE_TO_KIND = { accommodation: 'accommodation', enterprise: 'accommodation', logistics: 'supplychain', supplychain: 'supplychain', property: 'property', visa: 'accommodation' };
+// 需求 type -> 闭环模块（PDF 四大模块：酒店服务 / 维修报修 / 前台咨询）
+const TYPE_TO_MODULE = { accommodation: 'hotel', supplychain: 'hotel', property: 'repair', enterprise: 'frontdesk', frontdesk: 'frontdesk' };
+// 各模块 SLA（分钟）：酒店/维修 30 分钟未接单预警；前台咨询 24 小时内反馈
+const MODULE_SLA = { hotel: 30, repair: 30, frontdesk: 24 * 60 };
+// 状态流转中（未闭环）才计入超时
+const OPEN_STATUSES = ['pending', 'matching', 'accepted', 'processing', 'returned'];
 function matchProviders(type, lang) {
   const kind = TYPE_TO_KIND[type] || type;
   const arr = loadProviders();
@@ -91,6 +97,23 @@ function localizeName(p, lang) {
   return p.name_zh;
 }
 
+// 供应商对外序列化（B3/B4：tags 转数组、rating 给默认值、按语言返回 desc）
+function serializeProvider(p, lang) {
+  const suffix = lang === 'en' ? 'en' : lang === 'km' ? 'km' : 'zh';
+  const tags = (p.tags || '').split(/[,，]/).map(t => t.trim()).filter(Boolean);
+  return {
+    id: p.id,
+    name: localizeName(p, lang),
+    kind: p.kind,
+    city: p.city || '',
+    tags,                                   // 数组，解决标签逐字符渲染
+    rating: typeof p.rating === 'number' ? p.rating : 0,   // 解决新入驻 rating=undefined
+    price_info: p.price_info || '',
+    contact: p.contact || '',
+    desc: p['desc_' + suffix] || ''         // 解决描述空白
+  };
+}
+
 // ============ 需求单操作 ============
 function genOrderNo() {
   const d = new Date();
@@ -99,16 +122,30 @@ function genOrderNo() {
   return `KHMER-${ymd}-${rand}`;
 }
 
-function insertRequirement({ type, title, detail, contact, openid }) {
+function insertRequirement({ type, title, detail, contact, openid, module, room_no, expected_time, priority }) {
   const now = Date.now();
+  // B1：提交即自动匹配供应商，写入 matched_ids，打通"提交→匹配→查看"闭环
+  const matched_ids = matchProviders(type).map(x => x.id);
+  // 闭环模块归属 + SLA 截止时间（用于超时预警）
+  const mod = module || TYPE_TO_MODULE[type] || 'hotel';
+  const slaMinutes = MODULE_SLA[mod] || 30;
   const row = {
     id: requirements.length ? Math.max(...requirements.map(r => r.id)) + 1 : 1,
     order_no: genOrderNo(),
     type, title, detail: detail || '', contact: contact || '',
     status: 'pending',
+    module: mod,
+    room_no: room_no || '',
+    expected_time: expected_time || '',
+    priority: priority || 'normal',
+    assigned_to: '',
+    return_count: 0,
+    sla_deadline: now + slaMinutes * 60000,
+    sla_alerted: false,
     openid,
-    matched_ids: [],
+    matched_ids,
     quote: '',
+    remark: '',
     status_history: [{ status: 'pending', note: '创建需求单', at: now }],
     created_at: now,
     updated_at: now
@@ -118,12 +155,29 @@ function insertRequirement({ type, title, detail, contact, openid }) {
   return row;
 }
 
-function listRequirements({ openid, status, type }) {
+function listRequirements({ openid, status, type, module }) {
   return requirements.filter(r =>
     r.openid === openid &&
     (!status || r.status === status) &&
-    (!type || r.type === type)
+    (!type || r.type === type) &&
+    (!module || r.module === module)
   ).sort((a, b) => b.created_at - a.created_at);
+}
+
+// 超时扫描：标记已超期且尚未预警的工单（供定时任务统一预警）
+function scanOverdue() {
+  const now = Date.now();
+  let count = 0;
+  for (const r of requirements) {
+    if (r.sla_alerted) continue;
+    if (OPEN_STATUSES.includes(r.status) && r.sla_deadline && now > r.sla_deadline) {
+      r.sla_alerted = true;
+      r.updated_at = now;
+      count++;
+    }
+  }
+  if (count) save();
+  return count;
 }
 
 function getRequirement(id, openid) {
@@ -201,4 +255,72 @@ function matchFaq(query, lang) {
   return { id: best.id, question: best['q_' + suffix], answer: best['a_' + suffix] };
 }
 
-module.exports = { listProviders, getProvider, insertProvider, matchProviders, matchFaq, FAQS, localizeName, insertRequirement, listRequirements, getRequirement, updateRequirement, listAllRequirements, getRequirementAdmin, updateRequirementAdmin, genOrderNo, getPropertyState, savePropertyState };
+// ============ 房态管理（住宿闭环核心：订房→收款→入住→退房）============
+const ROOM_FILE = path.join(DATA_DIR, 'room_stays.json');
+let roomStays = [];
+try {
+  roomStays = JSON.parse(fs.readFileSync(ROOM_FILE, 'utf8') || '[]');
+} catch (e) {
+  roomStays = [];
+}
+function saveRoomStays() {
+  fs.writeFileSync(ROOM_FILE, JSON.stringify(roomStays, null, 2));
+}
+
+function insertRoomStay({ requirement_id, room_no, openid, guest_name, guest_contact, payment }) {
+  const now = Date.now();
+  const row = {
+    id: roomStays.length ? Math.max(...roomStays.map(r => r.id)) + 1 : 1,
+    room_no: room_no || '',
+    requirement_id: requirement_id || null,
+    openid: openid || '',
+    guest_name: guest_name || '',
+    guest_contact: guest_contact || '',
+    status: 'reserved',                 // reserved → checked_in → checked_out
+    check_in_at: 0,
+    check_out_at: 0,
+    payment: payment && typeof payment === 'object'
+      ? { amount: payment.amount || '', paid: payment.paid || '', method: payment.method || '', paid_at: payment.paid_at || 0, received_by: payment.received_by || '' }
+      : { amount: '', paid: '', method: '', paid_at: 0, received_by: '' },
+    created_at: now,
+    updated_at: now
+  };
+  roomStays.push(row);
+  saveRoomStays();
+  return row;
+}
+
+function listRoomStays({ status, room_no, openid } = {}) {
+  return roomStays.filter(r =>
+    (!status || r.status === status) &&
+    (!room_no || r.room_no === room_no) &&
+    (!openid || r.openid === openid)
+  ).sort((a, b) => b.updated_at - a.updated_at);
+}
+
+function getRoomStay(id) {
+  return roomStays.find(r => r.id === Number(id));
+}
+// 通过订房需求单查房态（客人端展示用）
+function getRoomStayByRequirement(requirement_id) {
+  if (!requirement_id) return null;
+  return roomStays.find(r => r.requirement_id === Number(requirement_id)) || null;
+}
+// 通过房号查历史房态（维修单按房号引用展示）
+function getRoomStayByRoom(room_no) {
+  if (!room_no) return [];
+  return roomStays.filter(r => r.room_no === room_no).sort((a, b) => b.updated_at - a.updated_at);
+}
+
+function updateRoomStay(id, patch) {
+  const row = getRoomStay(id);
+  if (!row) return null;
+  // 状态流转自动补时间戳：办理入住 / 退房
+  if (patch.status === 'checked_in' && !patch.check_in_at) patch.check_in_at = Date.now();
+  if (patch.status === 'checked_out' && !patch.check_out_at) patch.check_out_at = Date.now();
+  Object.assign(row, patch, { updated_at: Date.now() });
+  saveRoomStays();
+  return row;
+}
+
+module.exports = { listProviders, getProvider, insertProvider, matchProviders, matchFaq, FAQS, localizeName, serializeProvider, insertRequirement, listRequirements, getRequirement, updateRequirement, listAllRequirements, getRequirementAdmin, updateRequirementAdmin, genOrderNo, getPropertyState, savePropertyState, scanOverdue, TYPE_TO_MODULE, MODULE_SLA, OPEN_STATUSES, insertRoomStay, listRoomStays, getRoomStay, getRoomStayByRequirement, getRoomStayByRoom, updateRoomStay };

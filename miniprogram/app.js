@@ -12,6 +12,8 @@ App({
     this.checkLogin();
     // 隐私合规：注册需授权回调，拦截 wx.login 等隐私接口
     this.initPrivacy();
+    // 新版本强制更新提示
+    this.checkUpdate();
   },
 
   onShow(options) {
@@ -59,6 +61,30 @@ App({
         success: () => resolve({ event: 'agree' }),
         fail: () => resolve({ event: 'disagree' }),
         complete: () => {}
+      });
+    });
+  },
+
+  // 小程序版本更新：检测到新版本下载完成后强制弹窗重启
+  checkUpdate() {
+    if (typeof wx.getUpdateManager !== 'function') return;
+    const updateManager = wx.getUpdateManager();
+    updateManager.onCheckForUpdate((res) => {
+      console.log('[app] update check:', res.hasUpdate);
+    });
+    updateManager.onUpdateReady(() => {
+      wx.showModal({
+        title: '更新提示',
+        content: '新版本已准备好，是否立即重启应用？',
+        showCancel: false,
+        success: () => updateManager.applyUpdate()
+      });
+    });
+    updateManager.onUpdateFailed(() => {
+      wx.showToast({
+        title: '新版本下载失败，请删除小程序后重新打开',
+        icon: 'none',
+        duration: 4000
       });
     });
   },

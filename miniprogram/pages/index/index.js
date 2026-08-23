@@ -1,28 +1,18 @@
 // pages/index/index.js - 首页（柬企海外商旅服务 / KHMER 智能商旅助手）
-const { t, getCurrentLang } = require('../../utils/i18n.js');
+const { t } = require('../../utils/i18n.js');
 const api = require('../../utils/api.js');
 const dateHelper = require('../../utils/date-helper.js');
 
 const APP = getApp();
 
-const LANG_LABELS = {
-  'zh-CN': '中文',
-  'en': 'EN',
-  'km': 'ខ្មែរ'
-};
-
-const LANG_ORDER = ['zh-CN', 'en', 'km'];
-
 Page({
   data: {
-    languageLabel: '中文',
-
-    // 4 大场景入口（新定位：以酒店为入口的智能商旅后勤平台）
+    // 4 大核心服务入口（智能派单收纳进 AI 中枢，多语言助手在「我的」设置）
     scenarios: [
-      { id: 'stay', icon: '🏨', page: '/pages/services/services', color: '#B8860B', rqType: '' },
-      { id: 'logistics', icon: '📋', page: '/pages/requirement/requirement', color: '#3498DB', rqType: 'enterprise' },
-      { id: 'warehouse', icon: '📦', page: '/pages/requirement/requirement', color: '#16A085', rqType: 'supplychain' },
-      { id: 'property', icon: '🔧', page: '/pages/property/property', color: '#E67E22', rqType: '' }
+      { id: 'hotel', icon: '🏨', page: '/pages/services/services' },
+      { id: 'repair', icon: '🔧', page: '/pages/property/property' },
+      { id: 'reception', icon: '📞', page: '/pages/help/help' },
+      { id: 'order', icon: '📋', page: '/pages/requirement/requirement' }
     ],
 
     exchangeRateShown: true,
@@ -33,38 +23,29 @@ Page({
       appName: '柬企海外商旅服务',
       subtitle: '柬埔寨智能商旅服务助手',
       greeting: '你好',
-      slogan: '从入住开始，智能帮企业在柬埔寨落地',
       scenarios: '核心服务',
-      submitTitle: '提交商旅后勤需求',
-      submitSubtitle: '住宿 · 仓储 · 配送 · 物业，一句话说清',
-      submitBtn: '开始提交',
-      helpTitle: '智能客服',
-      helpSubtitle: '中 / 英 / 高棉三语问答，随时答疑',
+      aiHubTitle: 'AI 智能服务中枢',
+      aiHubTags: '自动派单 · 一键报修 · 三语响应',
+      aiHubBtn: '立即咨询',
       todayRate: '今日汇率',
       lastUpdate: '更新于',
       disclaimer: '本平台提供需求整理、供应商匹配与客服确认，不直接替代持证酒店、物流或经营主体。'
-    }
+    },
+    calendar: { greg: '', beYear: '', khmerDate: '' }
   },
 
   onLoad() {
-    this.updateLanguageLabel();
     this.updateTranslations();
     this.loadExchangeRate();
   },
 
   onShow() {
-    this.updateLanguageLabel();
     this.updateTranslations();
+    this.computeCalendar();
   },
 
   onLanguageChange() {
-    this.updateLanguageLabel();
     this.updateTranslations();
-  },
-
-  updateLanguageLabel() {
-    const lang = getCurrentLang();
-    this.setData({ languageLabel: LANG_LABELS[lang] || '中文' });
   },
 
   updateTranslations() {
@@ -77,13 +58,10 @@ Page({
       appName: t('home.appName'),
       subtitle: t('home.subtitle'),
       greeting: t('home.greeting'),
-      slogan: t('home.slogan'),
       scenarios: t('home.scenarios'),
-      submitTitle: t('home.submitTitle'),
-      submitSubtitle: t('home.submitSubtitle'),
-      submitBtn: t('home.submitBtn'),
-      helpTitle: t('home.helpTitle'),
-      helpSubtitle: t('home.helpSubtitle'),
+      aiHubTitle: t('home.aiHubTitle'),
+      aiHubTags: t('home.aiHubTags'),
+      aiHubBtn: t('home.aiHubBtn'),
       todayRate: t('home.todayRate'),
       lastUpdate: t('home.lastUpdate'),
       settleUSD: t('home.settleUSD'),
@@ -93,20 +71,28 @@ Page({
     wx.setNavigationBarTitle({ title: t('home.title') });
   },
 
-  onLangSwitch() {
-    const self = this;
-    wx.showActionSheet({
-      itemList: ['中文', 'English', 'ភាសាខ្មែរ'],
-      success(res) {
-        const lang = LANG_ORDER[res.tapIndex];
-        if (lang && lang !== getCurrentLang()) {
-          APP.switchLanguage(lang);
-        }
-      }
-    });
+  // 场景/工具点击：tabBar 页用 switchTab（不带参），普通页 navigateTo
+  onItemTap(e) {
+    const { page, rqtype } = e.currentTarget.dataset;
+    if (!page) return;
+    const tabPages = ['/pages/index/index', '/pages/requirement/requirement', '/pages/profile/profile'];
+    const basePath = page.split('?')[0];
+    if (tabPages.indexOf(basePath) >= 0) {
+      // tabBar 页 switchTab 不支持带参，需求单类型通过 globalData 透传预填
+      if (rqtype) { APP.globalData.pendingRequirementType = rqtype; }
+      wx.switchTab({ url: basePath });
+    } else {
+      wx.navigateTo({ url: page });
+    }
   },
 
   async loadExchangeRate() {
+    // 1. 先读本地缓存立即渲染（首屏 0 网络等待）
+    const cached = wx.getStorageSync('api_cache_exchange_rate');
+    if (cached && cached.data) {
+      this.setData({ rates: cached.data });
+    }
+    // 2. 再请求后端（cache-first：命中缓存直接返回，否则用内置默认值并写回缓存）
     try {
       const res = await api.getExchangeRate();
       const rates = {
@@ -127,21 +113,6 @@ Page({
     return `${h}:${m}`;
   },
 
-  // 场景/工具点击：tabBar 页用 switchTab（不带参），普通页 navigateTo
-  onItemTap(e) {
-    const { page, rqtype } = e.currentTarget.dataset;
-    if (!page) return;
-    const tabPages = ['/pages/index/index', '/pages/requirement/requirement', '/pages/profile/profile'];
-    const basePath = page.split('?')[0];
-    if (tabPages.indexOf(basePath) >= 0) {
-      // tabBar 页 switchTab 不支持带参，需求单类型通过 globalData 透传预填
-      if (rqtype) { APP.globalData.pendingRequirementType = rqtype; }
-      wx.switchTab({ url: basePath });
-    } else {
-      wx.navigateTo({ url: page });
-    }
-  },
-
   // CTA：提交需求单（tabBar 页）
   onSubmitRequirement() {
     wx.switchTab({ url: '/pages/requirement/requirement' });
@@ -150,6 +121,14 @@ Page({
   // 智能客服入口（普通页，navigateTo）
   onOpenHelp() {
     wx.navigateTo({ url: '/pages/help/help' });
+  },
+
+  computeCalendar() {
+    const today = new Date();
+    const beYear = dateHelper.gregorianToBuddhist(today);
+    const khmerDate = dateHelper.formatDate(today, 'khmer');
+    const greg = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    this.setData({ calendar: { greg, beYear, khmerDate } });
   },
 
   showCalendarTool() {
@@ -166,5 +145,17 @@ Page({
 
   onPullDownRefresh() {
     this.loadExchangeRate().then(() => wx.stopPullDownRefresh());
+  },
+
+  // 分享：转发给好友/群 + 朋友圈（内容型入口页）
+  onShareAppMessage() {
+    return {
+      title: t('home.shareTitle'),
+      path: '/pages/index/index'
+    };
+  },
+
+  onShareTimeline() {
+    return { title: t('home.shareTitleShort'), query: '' };
   }
 });

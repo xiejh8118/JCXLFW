@@ -38,9 +38,11 @@ Page({
       L,
       currentLanguage: getCurrentLang(),
       menuItems: [
+        { id: 'operator', icon: '📋', label: L.operatorWorkbench, page: '/pages/operator/operator' },
         { id: 'privacy', icon: '🔒', label: L.privacy, page: '/pages/privacy/privacy' },
         { id: 'language', icon: '🌐', label: L.language, page: '' },
-        { id: 'feedback', icon: '💬', label: L.feedback, page: '', type: 'contact' }
+        { id: 'feedback', icon: '💬', label: L.feedback, page: '', type: 'contact' },
+        { id: 'about', icon: 'ℹ️', label: L.about, page: '' }
       ]
     });
     wx.setNavigationBarTitle({ title: L.title });

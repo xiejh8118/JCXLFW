@@ -1,0 +1,244 @@
+<!-- pages/operator/operator.wxml - 运营工作台（处理客户需求单 + 房态管理） -->
+<view class="page">
+  <!-- 登录区 -->
+  <view class="login-card" wx:if="{{!isLogin}}">
+    <view class="login-title">{{L.loginTitle}}</view>
+    <view class="login-hint">{{L.workflowHint}}</view>
+    <input
+      class="login-input"
+      type="text"
+      password
+      placeholder="{{L.tokenPlaceholder}}"
+      value="{{token}}"
+      bindinput="onTokenInput"
+    />
+    <button class="btn btn-primary" bindtap="onLogin">{{L.enter}}</button>
+  </view>
+
+  <!-- 列表区 -->
+  <view wx:else>
+    <!-- 顶部 Tab：需求单 / 房态 -->
+    <view class="tab-bar">
+      <view class="tab-bar__item {{activeTab === 'req' ? 'active' : ''}}" data-tab="req" bindtap="onTab">{{L.tabReq}}</view>
+      <view class="tab-bar__item {{activeTab === 'room' ? 'active' : ''}}" data-tab="room" bindtap="onTab">{{L.tabRooms}}</view>
+    </view>
+
+    <!-- ============ 需求单 ============ -->
+    <block wx:if="{{activeTab === 'req'}}">
+      <view class="tip-bar">
+        <text class="tip-bar__title">{{L.statsTotal}}：{{stats.total}}</text>
+        <text class="tip-bar__overdue" wx:if="{{stats.overdue > 0}}">⚠ {{L.statsOverdue}}：{{stats.overdue}}</text>
+        <text class="tip-bar__logout" bindtap="onLogout">退出</text>
+      </view>
+
+      <!-- 模块筛选 -->
+      <view class="filter-bar">
+        <view class="filter-chip {{moduleFilter === '' ? 'active' : ''}}" data-module="" bindtap="onModuleFilter">{{L.filterAll}}</view>
+        <view class="filter-chip {{moduleFilter === 'hotel' ? 'active' : ''}}" data-module="hotel" bindtap="onModuleFilter">{{L.moduleHotel}}</view>
+        <view class="filter-chip {{moduleFilter === 'repair' ? 'active' : ''}}" data-module="repair" bindtap="onModuleFilter">{{L.moduleRepair}}</view>
+        <view class="filter-chip {{moduleFilter === 'frontdesk' ? 'active' : ''}}" data-module="frontdesk" bindtap="onModuleFilter">{{L.moduleFrontdesk}}</view>
+      </view>
+
+      <view class="workflow-hint">
+        <view class="workflow-hint__title">{{L.workflowHint}}</view>
+        <view class="workflow-steps">
+          <view class="workflow-step">
+            <view class="workflow-step__dot status--pending"></view>
+            <text class="workflow-step__text">{{L.statusPending}}</text>
+          </view>
+          <view class="workflow-step__arrow">→</view>
+          <view class="workflow-step">
+            <view class="workflow-step__dot status--accepted"></view>
+            <text class="workflow-step__text">{{L.statusAccepted}}</text>
+          </view>
+          <view class="workflow-step__arrow">→</view>
+          <view class="workflow-step">
+            <view class="workflow-step__dot status--processing"></view>
+            <text class="workflow-step__text">{{L.statusProcessing}}</text>
+          </view>
+          <view class="workflow-step__arrow">→</view>
+          <view class="workflow-step">
+            <view class="workflow-step__dot status--completed"></view>
+            <text class="workflow-step__text">{{L.statusCompleted}}</text>
+          </view>
+        </view>
+      </view>
+
+      <scroll-view scroll-y class="req-list" refresher-enabled refresher-triggered="{{loading}}" bindrefresherrefresh="loadRequirements">
+        <block wx:if="{{requirements.length}}">
+          <view class="req-card {{item.overdue ? 'req-card--overdue' : ''}}" wx:for="{{requirements}}" wx:key="id">
+            <view class="req-card__header">
+              <view class="req-card__no">{{L.orderNo}}：{{item.order_no}}</view>
+              <view class="req-card__status status--{{item.status}}">{{item.statusLabel}}</view>
+            </view>
+            <view class="req-card__title">{{item.title}}</view>
+            <view class="req-card__meta">
+              <text class="req-card__module">{{item.moduleLabel}}</text>
+              <text wx:if="{{item.room_no}}"> · 房号 {{item.room_no}}</text>
+            </view>
+            <view class="req-card__meta">{{L.createdAt}} {{item.createdAtText}}</view>
+            <view class="req-card__meta" wx:if="{{item.contact}}">{{L.contact}}：{{item.contact}}</view>
+            <view class="req-card__detail" wx:if="{{item.detail}}">{{item.detail}}</view>
+            <view wx:if="{{item.overdue}}" class="req-card__overdue">⚠ {{L.overdueTip}}</view>
+
+            <!-- 已录入信息展示 -->
+            <view class="req-card__entry" wx:if="{{item.assigned_to || item.quote || item.remark}}">
+              <view class="req-card__entry-row" wx:if="{{item.assigned_to}}">
+                <text class="req-card__entry-label">{{L.fieldAssignedTo}}</text>
+                <text class="req-card__entry-val">{{item.assigned_to}}</text>
+              </view>
+              <view class="req-card__entry-row" wx:if="{{item.quote}}">
+                <text class="req-card__entry-label">{{L.fieldQuote}}</text>
+                <text class="req-card__entry-val">{{item.quote}}</text>
+              </view>
+              <view class="req-card__entry-row" wx:if="{{item.remark}}">
+                <text class="req-card__entry-label">{{L.fieldRemark}}</text>
+                <text class="req-card__entry-val">{{item.remark}}</text>
+              </view>
+            </view>
+
+            <view class="req-card__actions">
+              <button class="action-btn action-btn--ghost" data-id="{{item.id}}" bindtap="onOpenEntry">📝 {{L.entryBtn}}</button>
+              <button wx:if="{{item.status === 'pending' || item.status === 'matching'}}" class="action-btn action-btn--primary" data-id="{{item.id}}" data-next="accepted" data-label="{{L.accept}}" bindtap="onAction">🖐 {{L.accept}}</button>
+              <button wx:if="{{item.status === 'accepted'}}" class="action-btn action-btn--primary" data-id="{{item.id}}" data-next="processing" data-label="{{L.process}}" bindtap="onAction">🛠 {{L.process}}</button>
+              <button wx:if="{{item.status === 'processing'}}" class="action-btn action-btn--success" data-id="{{item.id}}" data-next="completed" data-label="{{L.complete}}" bindtap="onAction">✅ {{L.complete}}</button>
+              <button wx:if="{{item.status === 'returned'}}" class="action-btn action-btn--warn" data-id="{{item.id}}" data-next="processing" data-label="{{L.reprocess}}" bindtap="onAction">🔁 {{L.reprocess}}</button>
+              <view wx:if="{{item.status === 'completed' || item.status === 'rated'}}" class="done-badge">🎉 {{L.done}}</view>
+            </view>
+          </view>
+        </block>
+        <view wx:else class="empty">
+          <view class="empty__icon">📋</view>
+          <view class="empty__text">{{L.noData}}</view>
+        </view>
+      </scroll-view>
+
+      <!-- 录入弹窗：接单人 / 报价 / 备注 -->
+      <view class="entry-mask" wx:if="{{panel.show}}" bindtap="onCloseEntry">
+        <view class="entry-panel" catchtap="">
+          <view class="entry-panel__title">{{L.panelTitle}}</view>
+          <view class="entry-field">
+            <text class="entry-field__label">{{L.assignedToLabel}}</text>
+            <input class="entry-field__input" type="text" placeholder="{{L.assignedToPlaceholder}}" value="{{panel.assignedTo}}" data-field="assignedTo" bindinput="onPanelInput" />
+          </view>
+          <view class="entry-field">
+            <text class="entry-field__label">{{L.quoteLabel}}</text>
+            <input class="entry-field__input" type="text" placeholder="{{L.quotePlaceholder}}" value="{{panel.quote}}" data-field="quote" bindinput="onPanelInput" />
+          </view>
+          <view class="entry-field">
+            <text class="entry-field__label">{{L.remarkLabel}}</text>
+            <textarea class="entry-field__textarea" placeholder="{{L.remarkPlaceholder}}" value="{{panel.remark}}" data-field="remark" bindinput="onPanelInput" auto-height />
+          </view>
+          <view class="entry-panel__actions">
+            <button class="btn-entry btn-entry--cancel" bindtap="onCloseEntry">{{L.cancel || '取消'}}</button>
+            <button class="btn-entry btn-entry--save" bindtap="onSaveEntry">{{L.saveEntry}}</button>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <!-- ============ 房态管理（住宿闭环）============ -->
+    <block wx:if="{{activeTab === 'room'}}">
+      <view class="tip-bar">
+        <text class="tip-bar__title">{{L.roomStatsStay}}：{{roomStats.stay}}</text>
+        <text class="tip-bar__title">{{L.roomStatsOut}}：{{roomStats.out}}</text>
+        <text class="tip-bar__title tip-bar__income">{{L.roomStatsIncome}}：{{roomStats.income}}</text>
+        <text class="tip-bar__logout" bindtap="onOpenCreate">+ {{L.roomCreate}}</text>
+      </view>
+
+      <!-- 房态筛选 -->
+      <view class="filter-bar">
+        <view class="filter-chip {{roomFilter === '' ? 'active' : ''}}" data-filter="" bindtap="onRoomFilter">{{L.filterAll}}</view>
+        <view class="filter-chip {{roomFilter === 'reserved' ? 'active' : ''}}" data-filter="reserved" bindtap="onRoomFilter">{{L.roomReserved}}</view>
+        <view class="filter-chip {{roomFilter === 'checked_in' ? 'active' : ''}}" data-filter="checked_in" bindtap="onRoomFilter">{{L.roomCheckedIn}}</view>
+        <view class="filter-chip {{roomFilter === 'checked_out' ? 'active' : ''}}" data-filter="checked_out" bindtap="onRoomFilter">{{L.roomCheckedOut}}</view>
+      </view>
+
+      <scroll-view scroll-y class="req-list" refresher-enabled refresher-triggered="{{roomLoading}}" bindrefresherrefresh="loadRooms">
+        <block wx:if="{{rooms.length}}">
+          <view class="room-card" wx:for="{{rooms}}" wx:key="id">
+            <view class="room-card__header">
+              <view class="room-card__no">🚪 {{L.roomNo}}：{{item.room_no}}</view>
+              <view class="room-card__status status--{{item.status}}">{{item.statusLabel}}</view>
+            </view>
+            <view class="room-card__meta" wx:if="{{item.guest_name}}">{{L.roomGuest}}：{{item.guest_name}}</view>
+            <view class="room-card__meta" wx:if="{{item.requirement_id}}">{{L.roomOrder}}：#{{item.requirement_id}}</view>
+            <view class="room-card__meta" wx:if="{{item.checkInText}}">🛎 {{L.roomCheckIn}}：{{item.checkInText}}</view>
+            <view class="room-card__meta" wx:if="{{item.checkOutText}}">🚪 {{L.roomCheckOut}}：{{item.checkOutText}}</view>
+            <view class="room-card__pay" wx:if="{{item.payment.amount || item.payment.paid || item.payment.method || item.payment.received_by}}">
+              <text class="room-card__pay-label">💰 {{L.roomPayment}}：</text>
+              <text wx:if="{{item.payment.amount}}">{{L.payAmount}} {{item.payment.amount}}</text>
+              <text wx:if="{{item.payment.paid}}"> / {{L.paidAmount}} {{item.payment.paid}}</text>
+              <text wx:if="{{item.payment.method}}"> ({{item.payment.method}})</text>
+              <text wx:if="{{item.payment.received_by}}"> · {{item.payment.received_by}}</text>
+            </view>
+            <view class="room-card__actions">
+              <button class="action-btn action-btn--ghost" data-id="{{item.id}}" bindtap="onOpenPay">💰 {{L.roomPayment}}</button>
+              <button wx:if="{{item.status === 'reserved'}}" class="action-btn action-btn--primary" data-id="{{item.id}}" bindtap="onRoomCheckIn">🛎 {{L.roomCheckIn}}</button>
+              <button wx:if="{{item.status === 'checked_in'}}" class="action-btn action-btn--warn" data-id="{{item.id}}" bindtap="onRoomCheckOut">🚪 {{L.roomCheckOut}}</button>
+              <view wx:if="{{item.status === 'checked_out'}}" class="done-badge">✅ {{L.roomCheckedOut}}</view>
+            </view>
+          </view>
+        </block>
+        <view wx:else class="empty">
+          <view class="empty__icon">🏨</view>
+          <view class="empty__text">{{L.noData}}</view>
+        </view>
+      </scroll-view>
+
+      <!-- 建档弹窗 -->
+      <view class="entry-mask" wx:if="{{createRoom.show}}" bindtap="onCloseCreate">
+        <view class="entry-panel" catchtap="">
+          <view class="entry-panel__title">{{L.createRoomTitle}}</view>
+          <view class="entry-field">
+            <text class="entry-field__label">{{L.roomNo}}</text>
+            <input class="entry-field__input" type="text" placeholder="{{L.createRoomNoPlaceholder}}" value="{{createRoom.room_no}}" data-field="room_no" bindinput="onCreateInput" />
+          </view>
+          <view class="entry-field">
+            <text class="entry-field__label">{{L.roomGuest}}</text>
+            <input class="entry-field__input" type="text" placeholder="{{L.createRoomGuestPlaceholder}}" value="{{createRoom.guest_name}}" data-field="guest_name" bindinput="onCreateInput" />
+          </view>
+          <view class="entry-field">
+            <text class="entry-field__label">{{L.roomOrder}}</text>
+            <input class="entry-field__input" type="text" placeholder="{{L.createRoomOrderPlaceholder}}" value="{{createRoom.requirement_id}}" data-field="requirement_id" bindinput="onCreateInput" />
+          </view>
+          <view class="entry-field">
+            <text class="entry-field__label">{{L.roomPayment}}</text>
+            <input class="entry-field__input" type="text" placeholder="{{L.createRoomPayPlaceholder}}" value="{{createRoom.payment}}" data-field="payment" bindinput="onCreateInput" />
+          </view>
+          <view class="entry-panel__actions">
+            <button class="btn-entry btn-entry--cancel" bindtap="onCloseCreate">{{L.cancel || '取消'}}</button>
+            <button class="btn-entry btn-entry--save" bindtap="onCreateRoom">{{L.roomCreate}}</button>
+          </view>
+        </view>
+      </view>
+
+      <!-- 收款录入弹窗 -->
+      <view class="entry-mask" wx:if="{{payRoom.show}}" bindtap="onClosePay">
+        <view class="entry-panel" catchtap="">
+          <view class="entry-panel__title">{{L.payTitle}}</view>
+          <view class="entry-field">
+            <text class="entry-field__label">{{L.payAmount}}</text>
+            <input class="entry-field__input" type="text" placeholder="{{L.payAmountPlaceholder}}" value="{{payRoom.amount}}" data-field="amount" bindinput="onPayInput" />
+          </view>
+          <view class="entry-field">
+            <text class="entry-field__label">{{L.paidAmount}}</text>
+            <input class="entry-field__input" type="text" placeholder="{{L.paidAmountPlaceholder}}" value="{{payRoom.paid}}" data-field="paid" bindinput="onPayInput" />
+          </view>
+          <view class="entry-field">
+            <text class="entry-field__label">{{L.payMethod}}</text>
+            <input class="entry-field__input" type="text" placeholder="{{L.payMethodPlaceholder}}" value="{{payRoom.method}}" data-field="method" bindinput="onPayInput" />
+          </view>
+          <view class="entry-field">
+            <text class="entry-field__label">{{L.payReceivedBy}}</text>
+            <input class="entry-field__input" type="text" placeholder="{{L.payReceivedPlaceholder}}" value="{{payRoom.received_by}}" data-field="received_by" bindinput="onPayInput" />
+          </view>
+          <view class="entry-panel__actions">
+            <button class="btn-entry btn-entry--cancel" bindtap="onClosePay">{{L.cancel || '取消'}}</button>
+            <button class="btn-entry btn-entry--save" bindtap="onSavePay">{{L.saveEntry}}</button>
+          </view>
+        </view>
+      </view>
+    </block>
+  </view>
+</view>

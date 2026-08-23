@@ -125,7 +125,7 @@ page { background: #f0f2f5; }
 }
 .mini-btn--primary { background: #1890ff; color: #fff; border-color: #1890ff; }
 .mini-btn--danger { color: #ff4d4f; border-color: #ffa39e; }
-.mini-btn--pdf { color: #B8860B; border-color: #d9c48a; background: #FDF6E9; }
+.mini-btn--pdf { color: var(--primary); border-color: rgba(27, 58, 95, 0.25); background: #E8EEF4; }
 .mini-btn--elec { color: #fa541c; border-color: #ffbb96; background: #fff2e8; }
 
 /* ===== 筛选栏 ===== */
@@ -358,7 +358,7 @@ page { background: #f0f2f5; }
 .repair-item__top { display: flex; align-items: center; }
 .repair-item__room { font-size: 28rpx; font-weight: 600; color: #262626; }
 .repair-item__type {
-  font-size: 22rpx; color: #B8860B; background: #fff3e0;
+  font-size: 22rpx; color: var(--primary); background: #E8EEF4;
   padding: 4rpx 14rpx; border-radius: 20rpx; margin: 0 12rpx;
 }
 .repair-item__status {

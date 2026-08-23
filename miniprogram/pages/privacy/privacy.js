@@ -60,5 +60,12 @@ Page({
     const c = CONTENT[lang] || CONTENT['zh-CN'];
     this.setData({ title: c.title, updated: c.updated, blocks: c.blocks });
     wx.setNavigationBarTitle({ title: c.title });
+  },
+
+  onShareAppMessage() {
+    return {
+      title: this.data.title,
+      path: '/pages/privacy/privacy'
+    };
   }
 });

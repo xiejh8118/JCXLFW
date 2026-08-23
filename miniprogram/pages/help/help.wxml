@@ -1,25 +1,56 @@
-<!-- pages/help/help.wxml -->
+<!-- pages/help/help.wxml - AI 智能助手（多轮对话） -->
 <view class="container">
   <view class="help-header">
     <view class="help-title">{{L.title}}</view>
     <view class="help-lang" bindtap="onLangSwitch">{{lang === 'zh-CN' ? '中' : lang === 'en' ? 'EN' : 'ខ'}}</view>
   </view>
 
-  <view class="ask-box">
-    <input class="ask-input" placeholder="{{L.placeholder}}" value="{{query}}" bindinput="onInput" confirm-type="search" bindconfirm="onAsk" />
-    <button class="ask-btn" bindtap="onAsk" loading="{{loading}}">{{L.askBtn}}</button>
-  </view>
-
-  <view wx:if="{{answer}}" class="answer-card">
-    <view class="answer-label">{{L.answerLabel}}</view>
-    <view class="answer-text">{{answer}}</view>
-  </view>
-
-  <view class="faq-section">
-    <view class="faq-title">{{L.faqLabel}}</view>
-    <view class="faq-item" wx:for="{{faqs}}" wx:key="id" data-q="{{item.question}}" data-a="{{item.answer}}" bindtap="onFaqTap">
-      <view class="faq-q">{{item.question}}</view>
-      <view class="faq-a">{{item.answer}}</view>
+  <!-- AI 中枢内置能力：智能派单 -->
+  <view class="hub-quick">
+    <view class="hub-quick__chip" bindtap="onDispatch">
+      <text class="hub-quick__icon">⚡</text>
+      <view class="hub-quick__body">
+        <view class="hub-quick__title">{{L.dispatchTitle}}</view>
+        <view class="hub-quick__desc">{{L.dispatchDesc}}</view>
+      </view>
+      <text class="hub-quick__arrow">›</text>
     </view>
+    <!-- 前台咨询闭环：直接生成咨询工单，进入统一工单体系 -->
+    <view class="hub-quick__chip" bindtap="onConsultFrontDesk">
+      <text class="hub-quick__icon">💬</text>
+      <view class="hub-quick__body">
+        <view class="hub-quick__title">{{L.consultTitle}}</view>
+        <view class="hub-quick__desc">{{L.consultDesc}}</view>
+      </view>
+      <text class="hub-quick__arrow">›</text>
+    </view>
+  </view>
+
+  <scroll-view class="chat" scroll-y scroll-into-view="{{scrollIntoView}}" scroll-with-animation>
+    <view wx:if="{{messages.length === 0}}" class="chat-empty">
+      <view class="chat-empty__icon">🤖</view>
+      <view class="chat-empty__text">{{L.welcome}}</view>
+    </view>
+
+    <view wx:for="{{messages}}" wx:key="index" id="msg-{{index}}" class="bubble-row {{item.role}}">
+      <view wx:if="{{item.role === 'assistant'}}" class="avatar">🤖</view>
+      <view class="bubble {{item.role}}">{{item.content}}</view>
+    </view>
+
+    <view wx:if="{{loading}}" class="bubble-row assistant">
+      <view class="avatar">🤖</view>
+      <view class="bubble assistant loading">{{L.thinking}}</view>
+    </view>
+  </scroll-view>
+
+  <view class="faq-bar" wx:if="{{faqs.length}}">
+    <scroll-view class="faq-scroll" scroll-x>
+      <view class="faq-chip" wx:for="{{faqs}}" wx:key="id" data-q="{{item.question}}" bindtap="onFaqTap">{{item.question}}</view>
+    </scroll-view>
+  </view>
+
+  <view class="input-bar">
+    <input class="input" placeholder="{{L.placeholder}}" value="{{inputValue}}" bindinput="onInput" confirm-type="send" bindconfirm="onSend" />
+    <button class="send-btn" bindtap="onSend" loading="{{loading}}">{{L.sendBtn}}</button>
   </view>
 </view>

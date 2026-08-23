@@ -1,223 +1,236 @@
-/* pages/index/index.wxss */
+/* pages/index/index.wxss - 红金重工商务风 */
 
 .index-header {
-  padding: 40rpx 30rpx 32rpx;
-  background: linear-gradient(160deg, #6B3A0A 0%, var(--primary-dark) 40%, var(--primary) 100%);
-  color: #FFFFFF;
-  border-radius: 0 0 32rpx 32rpx;
+  position: relative;
+  padding: 48rpx 30rpx 40rpx;
+  background: linear-gradient(90deg, #F8F5F0 0%, #F3EBDF 100%);
+  color: var(--text-primary);
+  border-radius: 0 0 44rpx 44rpx;
+  overflow: hidden;
+  box-shadow: 0 8rpx 24rpx rgba(120, 95, 65, 0.08);
+}
+
+/* 顶部装饰网格（香槟金低透明度，不抢文字） */
+.index-header__bg-pattern {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(200, 168, 120, 0.04) 1rpx, transparent 1rpx),
+    linear-gradient(90deg, rgba(200, 168, 120, 0.04) 1rpx, transparent 1rpx);
+  background-size: 40rpx 40rpx;
+  pointer-events: none;
+}
+
+/* 底部香槟金细线 */
+.index-header::after {
+  content: '';
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: 0;
+  height: 2rpx;
+  background: linear-gradient(90deg, transparent 0%, #C8A878 30%, #E8D9C3 70%, transparent 100%);
+  border-radius: 2rpx;
+  opacity: 0.7;
 }
 
 .index-header__row {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.index-header__brand {
+  display: flex;
+  align-items: center;
+}
+
+.index-header__logo {
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 50%;
+  margin-right: 24rpx;
+  background: transparent;
+  padding: 0;
+  box-sizing: border-box;
+  /* 轻微半透明 + 浮起阴影，让深蓝 LOGO 与深红页面有融合感而不"贴膏药" */
+  opacity: 0.9;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.3);
+}
+
+.index-header__text {
+  display: flex;
+  flex-direction: column;
 }
 
 .index-header__greeting {
   font-size: 22rpx;
-  opacity: 0.75;
-  margin-bottom: 2rpx;
+  color: var(--text-hint);
+  margin-bottom: 4rpx;
+  letter-spacing: 1rpx;
 }
 
 .index-header__title {
-  font-size: 40rpx;
-  font-weight: 700;
-}
-
-.index-header__lang {
-  background: rgba(255,255,255,0.18);
-  padding: 10rpx 24rpx;
-  border-radius: 30rpx;
-  font-size: 22rpx;
+  font-size: 38rpx;
   font-weight: 500;
-  flex-shrink: 0;
+  letter-spacing: 3rpx;
+  line-height: 1.25;
+  color: var(--text-primary);
 }
 
-/* 商务服务入口 */
-.svc-banner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 24rpx 24rpx 8rpx;
-  padding: 28rpx 32rpx;
-  background: linear-gradient(135deg, #B8860B 0%, #D4A017 100%);
-  border-radius: 16rpx;
-  box-shadow: 0 4rpx 12rpx rgba(184,134,11,0.25);
+.index-header__subtitle {
+  font-size: 24rpx;
+  color: var(--text-hint);
+  margin-top: 6rpx;
+  letter-spacing: 1rpx;
 }
 
-.svc-banner:active {
+/* ===== AI 智能服务中枢 ===== */
+.ai-hub {
+  position: relative;
+  margin: 6rpx 0;
+  background: #FFFFFF;
+  border-radius: 28rpx;
+  border: 1rpx solid #E8D9C3;
+  box-shadow: 0 8rpx 28rpx rgba(120, 95, 65, 0.08);
+  overflow: hidden;
+}
+
+.ai-hub:active {
   transform: scale(0.98);
 }
 
-.svc-banner__left {
-  flex: 1;
+.ai-hub__glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 30% 30%, rgba(232, 217, 195, 0.25), transparent 60%);
+  pointer-events: none;
+  opacity: 0.6;
 }
 
-.svc-banner__title {
-  font-size: 32rpx;
-  font-weight: 600;
-  color: #fff;
-  margin-bottom: 6rpx;
-}
-
-.svc-banner__subtitle {
-  font-size: 24rpx;
-  color: rgba(255,255,255,0.8);
-}
-
-.svc-banner__arrow {
-  font-size: 28rpx;
-  color: rgba(255,255,255,0.7);
-}
-
-/* 合规体检入口 */
-.checkup-banner {
+.ai-hub__core {
   display: flex;
   align-items: center;
-  background: #FFF;
-  border-radius: 16rpx;
-  padding: 32rpx 28rpx;
-  margin: 20rpx 0;
-  border-left: 8rpx solid #B8860B;
-  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.06);
-}
-.checkup-banner__badge {
-  background: #B8860B;
-  color: #FFF;
-  font-size: 20rpx;
-  padding: 6rpx 16rpx;
-  border-radius: 20rpx;
-  margin-right: 20rpx;
-  flex-shrink: 0;
-}
-.checkup-banner__body {
-  flex: 1;
-}
-.checkup-banner__title {
-  font-size: 32rpx;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 6rpx;
-}
-.checkup-banner__subtitle {
-  font-size: 24rpx;
-  color: #999;
-}
-.checkup-banner__arrow {
-  font-size: 28rpx;
-  color: #CCC;
+  padding: 22rpx 28rpx;
+  background: #FFFFFF;
+  border-radius: 28rpx;
+  position: relative;
+  overflow: hidden;
 }
 
-/* 服务网格 */
+/* 数字人图（高瘦比例 1:1.36） */
+.ai-hub__icon-img {
+  width: 96rpx;
+  height: 130rpx;
+  margin-right: 24rpx;
+  flex-shrink: 0;
+}
+
+.ai-hub__body {
+  flex: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.ai-hub__title {
+  font-size: 34rpx;
+  font-weight: 500;
+  color: var(--text-primary);
+  letter-spacing: 2rpx;
+  margin-bottom: 10rpx;
+}
+
+.ai-hub__tags {
+  font-size: 24rpx;
+  color: var(--text-hint);
+  letter-spacing: 1rpx;
+}
+
+.ai-hub__arrow {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  background: #C8A878;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+  color: #FFFFFF;
+  flex-shrink: 0;
+}
+
+/* ===== 4 大服务网格 ===== */
 .service-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16rpx;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
 }
 
 .service-item {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 28rpx 12rpx;
-  background: var(--bg-card);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow);
+  align-items: flex-start;
+  padding: 28rpx 26rpx;
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(120, 95, 65, 0.08);
+  border: 1rpx solid #E8D9C3;
 }
 
 .service-item:active {
-  transform: scale(0.95);
+  transform: scale(0.97);
 }
 
 .service-item__icon {
-  width: 80rpx;
-  height: 80rpx;
+  width: 84rpx;
+  height: 84rpx;
   border-radius: 20rpx;
+  background: #F7EFE3;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 36rpx;
-  margin-bottom: 10rpx;
+  font-size: 42rpx;
+  color: #C8A878;
+  margin-bottom: 18rpx;
 }
 
 .service-item__name {
-  font-size: 22rpx;
+  font-size: 28rpx;
+  font-weight: 500;
   color: var(--text-primary);
-  text-align: center;
-}
-
-/* 工具网格 */
-.tool-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16rpx;
-}
-
-.tool-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 24rpx 12rpx;
-  background: var(--bg-card);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow);
-}
-
-.tool-item:active {
-  transform: scale(0.95);
-}
-
-.tool-item__icon {
-  width: 64rpx;
-  height: 64rpx;
-  border-radius: 16rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 30rpx;
   margin-bottom: 8rpx;
 }
 
-.tool-item__name {
-  font-size: 22rpx;
-  color: var(--text-primary);
-  text-align: center;
-}
-
-/* 今日汇率卡片 */
-.rate-card {
-  padding: 28rpx 32rpx;
-  background: linear-gradient(135deg, #FFF9F0 0%, #FFFFFF 100%);
-  border: 1rpx solid rgba(184,134,11,0.15);
-}
-
-.rate-row {
-  margin-bottom: 16rpx;
-}
-
-.rate-pair {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.rate-currency {
+.service-item__desc {
   font-size: 22rpx;
   color: var(--text-hint);
-  margin-bottom: 6rpx;
+  line-height: 1.4;
 }
 
-.rate-value {
-  font-size: 40rpx;
-  font-weight: 700;
-  color: var(--primary);
+/* ===== 今日日期（压缩小条） ===== */
+.cal-card {
+  display: flex;
+  align-items: center;
+  padding: 14rpx 24rpx;
+  background: #FFFFFF;
+  border-radius: 12rpx;
+  border: 1rpx solid #E8D9C3;
+  border-left: 6rpx solid #C8A878;
+}
+.cal-card:active { transform: scale(0.98); }
+.cal-card__icon { font-size: 32rpx; margin-right: 16rpx; flex-shrink: 0; color: #C8A878; }
+.cal-card__date { flex: 1; font-size: 24rpx; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cal-card__arrow { font-size: 32rpx; color: var(--text-hint); margin-left: 12rpx; }
+
+/* ===== 今日汇率卡片 ===== */
+.rate-card {
+  padding: 28rpx 32rpx;
+  background: #FFFFFF;
+  border: 1rpx solid #E8D9C3;
 }
 
-.rate-update {
-  text-align: right;
-}
-
-/* 美元基准展示 */
 .rate-main {
   display: flex;
   align-items: baseline;
@@ -227,7 +240,7 @@
 .rate-base {
   font-size: 28rpx;
   font-weight: 600;
-  color: var(--primary);
+  color: #C8A878;
 }
 .rate-eq {
   font-size: 26rpx;
@@ -236,140 +249,15 @@
 .rate-big {
   font-size: 42rpx;
   font-weight: 800;
-  color: var(--primary);
+  color: var(--text-secondary);
 }
 .rate-sub {
   line-height: 1.5;
-}
-
-/* ===== 新定位样式（柬企海外商旅服务 / KHMER） ===== */
-
-/* 平台定位横幅 */
-.platform-banner {
-  margin: 24rpx 24rpx 8rpx;
-  padding: 24rpx 28rpx;
-  background: linear-gradient(135deg, #B8860B 0%, #D4A017 100%);
-  border-radius: 16rpx;
-  box-shadow: 0 4rpx 12rpx rgba(184,134,11,0.25);
-}
-.platform-banner__text {
-  font-size: 28rpx;
-  font-weight: 600;
-  color: #fff;
-  line-height: 1.5;
-}
-
-/* 场景网格（4 大场景，2 列） */
-.scenario-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20rpx;
-}
-.scenario-item {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 28rpx 28rpx 32rpx;
-  background: var(--bg-card);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow);
-}
-.scenario-item:active {
-  transform: scale(0.97);
-}
-.scenario-item__icon {
-  width: 84rpx;
-  height: 84rpx;
-  border-radius: 20rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 40rpx;
-  margin-bottom: 16rpx;
-}
-.scenario-item__name {
-  font-size: 30rpx;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 6rpx;
-}
-.scenario-item__desc {
-  font-size: 22rpx;
   color: var(--text-hint);
 }
-
-/* 需求单 CTA */
-.cta-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 32rpx 32rpx;
-  background: linear-gradient(135deg, #2C3E50 0%, #34495E 100%);
-  border-radius: 16rpx;
-  box-shadow: 0 4rpx 16rpx rgba(44,62,80,0.25);
-}
-.cta-card:active {
-  transform: scale(0.98);
-}
-.cta-card__left {
-  flex: 1;
-}
-.cta-card__title {
-  font-size: 30rpx;
-  font-weight: 600;
-  color: #fff;
-  margin-bottom: 8rpx;
-}
-.cta-card__subtitle {
-  font-size: 22rpx;
-  color: rgba(255,255,255,0.75);
-}
-.cta-card__btn {
-  flex-shrink: 0;
-  margin-left: 20rpx;
-  background: #B8860B;
-  color: #fff;
-  font-size: 26rpx;
-  font-weight: 600;
-  padding: 16rpx 28rpx;
-  border-radius: 30rpx;
-}
-
-/* 智能客服卡片 */
-.cs-card {
-  display: flex;
-  align-items: center;
-  padding: 28rpx 32rpx;
-  background: linear-gradient(135deg, #B8860B 0%, #D4A017 100%);
-  border-radius: 16rpx;
-  box-shadow: 0 4rpx 16rpx rgba(184,134,11,0.25);
-}
-.cs-card:active {
-  transform: scale(0.98);
-}
-.cs-card__icon {
-  font-size: 48rpx;
-  margin-right: 20rpx;
-}
-.cs-card__left {
-  flex: 1;
-}
-.cs-card__title {
-  font-size: 30rpx;
-  font-weight: 600;
-  color: #fff;
-  margin-bottom: 8rpx;
-}
-.cs-card__subtitle {
-  font-size: 22rpx;
-  color: rgba(255,255,255,0.85);
-}
-.cs-card__btn {
-  flex-shrink: 0;
-  margin-left: 20rpx;
-  color: #fff;
-  font-size: 40rpx;
-  font-weight: 600;
+.rate-update {
+  text-align: right;
+  color: var(--text-hint);
 }
 
 /* 免责声明 */
@@ -380,4 +268,3 @@
   line-height: 1.6;
   text-align: center;
 }
-
