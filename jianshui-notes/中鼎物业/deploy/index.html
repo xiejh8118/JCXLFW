@@ -1,0 +1,1768 @@
+<!-- 本工作台通过 WorkBuddy 资料库能力（library skill）搭建、存储和部署 -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>中鼎物业工作台</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--primary:#1890ff;--success:#52c41a;--warning:#faad14;--danger:#ff4d4f;--bg:#f0f2f5;--card:#fff;--text:#333;--text2:#666;--text3:#999;--border:#e8e8e8;--radius:8px;--shadow:0 2px 8px rgba(0,0,0,.06)}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+/* Header */
+.app-header{background:var(--card);box-shadow:var(--shadow);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.header-left{display:flex;align-items:center;gap:10px}
+.header-left .brand-logo{height:28px;width:auto;flex-shrink:0;object-fit:contain}
+.header-left h1{font-size:18px;font-weight:600;white-space:nowrap}
+.header-right{display:flex;align-items:center;gap:8px}
+.sync-status{font-size:12px;padding:3px 10px;border-radius:12px;white-space:nowrap}
+.sync-status.synced{background:#f6ffed;color:var(--success);border:1px solid #b7eb8f}
+.sync-status.syncing{background:#e6f7ff;color:var(--primary);border:1px solid #91d5ff}
+.sync-status.offline{background:#fff1f0;color:var(--danger);border:1px solid #ffa39e}
+.btn{display:inline-flex;align-items:center;gap:4px;padding:7px 14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card);color:var(--text);cursor:pointer;font-size:13px;transition:all .2s;min-height:36px}
+.btn:hover{border-color:var(--primary);color:var(--primary)}
+.btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.btn-primary:hover{background:#40a9ff;color:#fff}
+.btn-danger{color:var(--danger);border-color:#ffa39e}
+.btn-danger:hover{background:var(--danger);color:#fff}
+.btn-sm{padding:4px 10px;font-size:12px;min-height:30px}
+.btn svg{width:14px;height:14px}
+/* Container */
+.container{max-width:1200px;margin:0 auto;padding:16px 20px 80px}
+/* Today Section */
+.today-section{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 20px;margin-bottom:16px}
+.today-section h2{font-size:15px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.today-section h2 svg{width:18px;height:18px;color:var(--danger)}
+.today-list{display:flex;flex-direction:column;gap:8px}
+.today-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:6px;background:#fff1f0;border:1px solid #ffa39e}
+.today-item.warning{background:#fffbe6;border-color:#ffe58f}
+.today-item.info{background:#e6f7ff;border-color:#91d5ff}
+.today-item-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.today-item-left .room{font-weight:600;font-size:15px}
+.today-item-left .month{color:var(--text3);font-size:12px}
+.today-item-left .amount{color:var(--danger);font-weight:600}
+.today-item-left .tag{font-size:11px;padding:1px 6px;border-radius:4px;background:var(--danger);color:#fff}
+.today-item.warning .tag{background:var(--warning)}
+.today-item.info .tag{background:var(--primary)}
+.today-item-right{display:flex;gap:6px}
+.today-empty{text-align:center;color:var(--text3);padding:20px}
+/* Tab Nav */
+.tab-nav{display:flex;gap:0;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:16px}
+.tab-btn{flex:1;padding:12px;text-align:center;border:none;background:none;cursor:pointer;font-size:14px;color:var(--text2);transition:all .2s;border-bottom:2px solid transparent;display:flex;align-items:center;justify-content:center;gap:6px}
+.tab-btn svg{width:16px;height:16px}
+.tab-btn.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+/* Tab Content */
+.tab-content{display:none}
+.tab-content.active{display:block}
+/* Ledger */
+.ledger-toolbar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.ledger-toolbar select,.ledger-toolbar input{padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;min-height:36px;background:var(--card)}
+.table-container{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:1000px}
+th{background:#fafafa;padding:10px 12px;text-align:left;font-size:12px;color:var(--text2);font-weight:600;white-space:nowrap;border-bottom:1px solid var(--border)}
+td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px;white-space:nowrap}
+tr:hover td{background:#fafafa}
+.status-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:500}
+.status-badge.unpaid{background:#fff1f0;color:var(--danger)}
+.status-badge.paid{background:#f6ffed;color:var(--success)}
+.status-badge.partial{background:#fffbe6;color:var(--warning)}
+.collect-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px}
+.collect-badge.uncollected{background:#f5f5f5;color:var(--text3)}
+.collect-badge.collected{background:#e6f7ff;color:var(--primary)}
+.collect-badge.promised{background:#fffbe6;color:var(--warning)}
+.collect-badge.settled{background:#f6ffed;color:var(--success)}
+.row-actions{display:flex;gap:4px}
+.amount-red{color:var(--danger);font-weight:500}
+.amount-green{color:var(--success);font-weight:500}
+.empty-row{text-align:center;color:var(--text3);padding:40px}
+.meter-group{display:inline-flex;align-items:center;gap:3px;font-size:12px;color:var(--text2)}
+.meter-group .arrow{color:var(--text3)}
+.meter-group .usage{color:var(--primary);font-weight:500}
+/* Mobile cards */
+.mobile-cards{display:none}
+.mobile-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;margin-bottom:10px}
+.mobile-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.mobile-card-header .room{font-weight:600;font-size:16px}
+.mobile-card-body{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:13px}
+.mobile-card-body .label{color:var(--text3)}
+.mobile-card-body .value{color:var(--text);font-weight:500}
+.mobile-card-body .full{grid-column:1/-1}
+.mobile-card-footer{display:flex;gap:6px;margin-top:10px;border-top:1px solid var(--border);padding-top:10px}
+/* Dashboard */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.stat-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+.stat-label{font-size:13px;color:var(--text2);margin-bottom:6px}
+.stat-value{font-size:22px;font-weight:700}
+.stat-value.red{color:var(--danger)}
+.stat-value.green{color:var(--success)}
+.stat-value.blue{color:var(--primary)}
+.stat-value.orange{color:var(--warning)}
+.overdue-section{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 20px}
+.overdue-section h3{font-size:15px;font-weight:600;margin-bottom:12px}
+.overdue-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:6px;background:#fff1f0;margin-bottom:8px;border:1px solid #ffa39e}
+.overdue-item-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.overdue-item-left .room{font-weight:600}
+.overdue-item-left .month{color:var(--danger);font-size:12px}
+.overdue-item-left .amount{color:var(--danger);font-weight:600}
+.overdue-item-right{display:flex;gap:6px}
+/* Receipt */
+.receipt-section{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 20px;margin-bottom:16px}
+.receipt-section h3{font-size:15px;font-weight:600;margin-bottom:12px}
+.receipt-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.receipt-controls select{padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;min-height:36px;background:var(--card);flex:1;min-width:200px}
+.receipt-preview{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px}
+.receipt-placeholder{text-align:center;color:var(--text3);padding:40px}
+/* Bill layout for screen and print */
+.bill-paper{max-width:580px;margin:0 auto;border:1px solid var(--border);padding:32px 40px;font-family:"Courier New",monospace}
+.bill-title{text-align:center;font-size:20px;font-weight:700;letter-spacing:2px;margin-bottom:4px}
+.bill-subtitle{text-align:center;font-size:12px;color:var(--text3);margin-bottom:16px}
+.bill-info{display:flex;justify-content:space-between;margin-bottom:12px;font-size:13px}
+.bill-info .label{color:var(--text2)}
+.bill-table{width:100%;border-collapse:collapse;margin-bottom:8px;font-size:13px}
+.bill-table th{border:1px solid #333;padding:6px 8px;text-align:center;font-weight:600;background:#f5f5f5;font-size:12px}
+.bill-table td{border:1px solid #333;padding:6px 8px;text-align:center}
+.bill-table td.label-col{text-align:left;font-weight:500}
+.bill-table .total-row td{font-weight:700;font-size:14px;background:#fafafa}
+.bill-footer{margin-top:16px;font-size:12px;color:var(--text2)}
+.bill-sign{display:flex;justify-content:space-between;margin-top:24px;font-size:13px}
+.bill-sign-line{border-bottom:1px solid #333;display:inline-block;width:140px;height:20px}
+/* Modal */
+.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.45);z-index:200;justify-content:center;align-items:flex-start;padding:20px;overflow-y:auto}
+.modal-overlay.show{display:flex}
+.modal{background:var(--card);border-radius:var(--radius);box-shadow:0 4px 20px rgba(0,0,0,.15);width:100%;max-width:560px;margin-top:20px}
+.modal-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border)}
+.modal-header h3{font-size:16px;font-weight:600}
+.modal-close{background:none;border:none;cursor:pointer;padding:4px;color:var(--text3);font-size:20px}
+.modal-body{padding:20px;max-height:70vh;overflow-y:auto}
+.form-row{margin-bottom:14px}
+.form-row label{display:block;margin-bottom:4px;font-size:13px;color:var(--text2);font-weight:500}
+.form-row input,.form-row select{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:16px;min-height:40px;background:var(--card);color:var(--text)}
+.form-row input:focus,.form-row select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 2px rgba(24,144,255,.2)}
+.form-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.calc-display{background:#f0f7ff;border:1px solid #91d5ff;border-radius:6px;padding:8px 12px;font-size:13px;color:var(--primary);margin-top:6px;display:flex;gap:12px;flex-wrap:wrap}
+.calc-display .calc-item{display:flex;align-items:center;gap:4px}
+.calc-display .calc-label{color:var(--text2);font-size:12px}
+.calc-display .calc-value{font-weight:600}
+.rate-config{background:#fffbe6;border:1px solid #ffe58f;border-radius:6px;padding:10px 12px;margin-bottom:14px;display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+.rate-config .rate-item{display:flex;align-items:center;gap:6px;font-size:13px}
+.rate-config .rate-item input{width:80px;padding:4px 8px;border:1px solid var(--border);border-radius:4px;font-size:14px;text-align:center}
+/* Login screen */
+.login-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#1890ff 0%,#096dd9 100%);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px}
+.login-card{background:#fff;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.2);padding:40px 36px;width:100%;max-width:380px}
+.login-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:24px}
+.login-logo .brand-logo{height:36px;width:auto;object-fit:contain}
+.login-logo h1{font-size:22px;font-weight:700;color:#1890ff}
+.login-card .form-row{margin-bottom:16px}
+.login-card .form-row label{font-size:13px;color:#666;font-weight:500;margin-bottom:6px;display:block}
+.login-card .form-row input{width:100%;padding:10px 14px;border:1px solid #e8e8e8;border-radius:6px;font-size:16px;min-height:44px}
+.login-card .form-row input:focus{outline:none;border-color:#1890ff;box-shadow:0 0 0 2px rgba(24,144,255,.2)}
+.login-card .btn-login{width:100%;padding:12px;background:#1890ff;color:#fff;border:none;border-radius:6px;font-size:16px;font-weight:600;cursor:pointer;transition:background .2s;margin-top:4px}
+.login-card .btn-login:hover{background:#096dd9}
+.login-card .login-hint{text-align:center;font-size:12px;color:#999;margin-top:16px;line-height:1.6}
+.login-error{color:#ff4d4f;font-size:13px;text-align:center;margin-bottom:12px;display:none}
+.login-error.show{display:block}
+/* Header user info */
+.user-info{display:flex;align-items:center;gap:8px;padding:4px 12px;border-radius:16px;background:#f0f7ff;border:1px solid #91d5ff;font-size:13px}
+.user-info .user-avatar{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#fff}
+.user-info .user-avatar.admin{background:#1890ff}
+.user-info .user-avatar.operator{background:#52c41a}
+.user-info .user-name{font-weight:500;white-space:nowrap}
+.user-info .user-role{font-size:11px;color:#666}
+.btn-logout{padding:4px 10px;font-size:12px;border-radius:6px;cursor:pointer;border:1px solid #ffa39e;background:#fff1f0;color:#ff4d4f;min-height:30px}
+.btn-logout:hover{background:#ff4d4f;color:#fff}
+/* User management */
+.user-mgmt-section{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 20px;margin-bottom:16px}
+.user-mgmt-section h3{font-size:15px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.user-mgmt-section h3 svg{width:18px;height:18px;color:var(--primary)}
+.user-table{width:100%;border-collapse:collapse;min-width:400px}
+.user-table th{background:#fafafa;padding:10px 12px;text-align:left;font-size:12px;color:#666;font-weight:600;border-bottom:1px solid #e8e8e8}
+.user-table td{padding:10px 12px;border-bottom:1px solid #e8e8e8;font-size:13px}
+.user-table tr:hover td{background:#fafafa}
+.role-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:500}
+.role-badge.admin{background:#e6f7ff;color:#1890ff}
+.role-badge.operator{background:#f6ffed;color:#52c41a}
+/* Permission denied overlay */
+.perm-lock{opacity:.45;pointer-events:none}
+.perm-locked-btn{position:relative}
+.perm-locked-btn::after{content:'权限不足';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.7);color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .2s}
+.perm-locked-btn:hover::after{opacity:1}
+/* Print area */
+.print-area{display:none}
+/* Toast */
+.toast{position:fixed;top:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.75);color:#fff;padding:10px 24px;border-radius:var(--radius);font-size:14px;z-index:300;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+/* Data count tip */
+.data-tip{background:#e6f7ff;border:1px solid #91d5ff;border-radius:var(--radius);padding:10px 16px;margin-bottom:12px;font-size:13px;color:var(--primary);display:flex;align-items:center;gap:6px}
+/* Bottom tab nav (mobile) */
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;width:100%;background:var(--card);border-top:1px solid var(--border);z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+.bottom-nav-item{flex:1;padding:8px 0;text-align:center;cursor:pointer;border:none;background:none;color:var(--text3);font-size:11px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.bottom-nav-item svg{width:20px;height:20px}
+.bottom-nav-item.active{color:var(--primary)}
+/* Responsive */
+@media(max-width:768px){
+  .app-header{padding:10px 12px}
+  .header-left h1{font-size:15px}
+  .header-right .btn-text{display:none}
+  .header-right .btn{padding:7px 10px}
+  .container{padding:12px 12px 70px}
+  .stats-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .stat-value{font-size:18px}
+  .tab-nav{display:none}
+  .bottom-nav{display:flex}
+  .table-container{display:none}
+  .mobile-cards{display:block}
+  .form-row-2,.form-row-3{grid-template-columns:1fr}
+  .bill-paper{padding:16px}
+  .today-item{flex-direction:column;align-items:flex-start;gap:8px}
+  .today-item-right{width:100%}
+  .today-item-right .btn{flex:1}
+  .overdue-item{flex-direction:column;align-items:flex-start;gap:8px}
+  .overdue-item-right{width:100%}
+  .overdue-item-right .btn{flex:1}
+}
+/* Print */
+@media print{
+  body *{visibility:hidden}
+  .print-area,.print-area *{visibility:visible}
+  .print-area{display:block;position:absolute;top:0;left:0;width:100%;padding:20px}
+  .bill-paper{border:none;max-width:none}
+  @page{margin:1cm}
+}
+</style>
+</head>
+<body>
+
+<!-- Login Overlay -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-card">
+    <div class="login-logo">
+      <img src="./logo.png" class="brand-logo" alt="中鼎集团">
+      <h1>中鼎物业工作台</h1>
+    </div>
+    <div class="login-error" id="loginError">用户名或密码错误</div>
+    <div class="form-row">
+      <label>用户名</label>
+      <input type="text" id="loginUsername" placeholder="请输入用户名" autocomplete="off">
+    </div>
+    <div class="form-row">
+      <label>密码</label>
+      <input type="password" id="loginPassword" placeholder="请输入密码" autocomplete="off">
+    </div>
+    <button class="btn-login" id="loginBtn">登 录</button>
+    <div class="login-hint">默认管理员：admin / admin123<br>操作员账号由管理员创建</div>
+  </div>
+</div>
+
+<!-- Header -->
+<header class="app-header">
+  <div class="header-left">
+    <img src="./logo.png" class="brand-logo" alt="中鼎集团">
+    <h1>中鼎物业工作台</h1>
+  </div>
+  <div class="header-right">
+    <div class="user-info" id="userInfo" style="display:none">
+      <span class="user-avatar admin" id="userAvatar">A</span>
+      <span class="user-name" id="userName">admin</span>
+      <span class="user-role" id="userRole">管理员</span>
+    </div>
+    <span class="sync-status syncing" id="syncStatus">同步中</span>
+    <button class="btn btn-sm" id="exportBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      <span class="btn-text">导出备份</span>
+    </button>
+    <button class="btn btn-sm" id="importBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+      <span class="btn-text">导入恢复</span>
+    </button>
+    <button class="btn btn-sm btn-logout" id="logoutBtn" style="display:none">退出</button>
+    <input type="file" id="importFile" accept=".json" style="display:none">
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- Today's Tasks -->
+  <section class="today-section">
+    <h2>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      今天要处理
+    </h2>
+    <div class="today-list" id="todayList"></div>
+  </section>
+
+  <!-- Data count tip -->
+  <div class="data-tip" id="dataTip" style="display:none">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    <span id="dataTipText"></span>
+  </div>
+
+  <!-- Tab Navigation (PC) -->
+  <nav class="tab-nav">
+    <button class="tab-btn active" data-tab="ledger">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+      收费台账
+    </button>
+    <button class="tab-btn" data-tab="dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-3"/></svg>
+      催收看板
+    </button>
+    <button class="tab-btn" data-tab="receipt">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2v20l2-2 2 2 2-2 2 2 2-2 2 2V2l-2 2-2-2-2 2-2-2-2 2-2-2z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>
+      收据打印
+    </button>
+    <button class="tab-btn" data-tab="users" id="tabUsersBtn" style="display:none">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      人员管理
+    </button>
+  </nav>
+
+  <!-- Tab 1: Fee Ledger -->
+  <section class="tab-content active" id="tab-ledger">
+    <div class="ledger-toolbar">
+      <button class="btn btn-primary" id="addBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        新增收费
+      </button>
+      <select id="filterMonth">
+        <option value="">全部月份</option>
+      </select>
+      <select id="filterStatus">
+        <option value="">全部状态</option>
+      </select>
+      <button class="btn btn-sm" id="clearSampleBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        清空数据
+      </button>
+    </div>
+    <!-- PC Table -->
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th data-field="roomNo">房号</th>
+            <th data-field="month">月份</th>
+            <th data-field="waterMeter">水表(上次&#8594;本次)</th>
+            <th data-field="waterFee">水费</th>
+            <th data-field="elecMeter">电表(上次&#8594;本次)</th>
+            <th data-field="elecFee">电费</th>
+            <th data-field="rent">房租</th>
+            <th>总额</th>
+            <th data-field="payStatus">缴费状态</th>
+            <th data-field="collectStatus">催收状态</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="feeTableBody"></tbody>
+      </table>
+    </div>
+    <!-- Mobile Cards -->
+    <div class="mobile-cards" id="mobileCards"></div>
+  </section>
+
+  <!-- Tab 2: Collection Dashboard -->
+  <section class="tab-content" id="tab-dashboard">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">本月应收</div>
+        <div class="stat-value blue" id="totalReceivable" data-sp-bindable="database" data-sp-database-id="Ktelmlq00KIz0BErfvsHhV">$0.00</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">已收金额</div>
+        <div class="stat-value green" id="totalCollected" data-sp-bindable="database" data-sp-database-id="Ktelmlq00KIz0BErfvsHhV">$0.00</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">未收金额</div>
+        <div class="stat-value orange" id="totalUncollected" data-sp-bindable="database" data-sp-database-id="Ktelmlq00KIz0BErfvsHhV">$0.00</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">逾期金额</div>
+        <div class="stat-value red" id="totalOverdue" data-sp-bindable="database" data-sp-database-id="Ktelmlq00KIz0BErfvsHhV">$0.00</div>
+      </div>
+    </div>
+    <div class="overdue-section">
+      <h3>逾期未缴清单</h3>
+      <div id="overdueList"></div>
+    </div>
+  </section>
+
+  <!-- Tab 3: Receipt Printing -->
+  <section class="tab-content" id="tab-receipt">
+    <div class="receipt-section">
+      <h3>选择收费记录生成打印单</h3>
+      <div class="receipt-controls">
+        <select id="receiptSelect">
+          <option value="">请选择收费记录</option>
+        </select>
+        <button class="btn btn-primary" id="printReceiptBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          打印 / 导出PDF
+        </button>
+      </div>
+    </div>
+    <div class="receipt-preview" id="receiptPreview">
+      <div class="receipt-placeholder">请选择一条收费记录以预览打印单</div>
+    </div>
+  </section>
+
+  <!-- Tab 4: User Management (Admin only) -->
+  <section class="tab-content" id="tab-users">
+    <div class="user-mgmt-section">
+      <h3>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        人员管理
+      </h3>
+      <div class="ledger-toolbar">
+        <button class="btn btn-primary" id="addUserBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          新增操作员
+        </button>
+      </div>
+      <div class="table-container">
+        <table class="user-table">
+          <thead>
+            <tr>
+              <th>用户名</th>
+              <th>角色</th>
+              <th>密码</th>
+              <th>创建时间</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="userTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- Bottom Navigation (Mobile) -->
+<nav class="bottom-nav">
+  <button class="bottom-nav-item active" data-tab="ledger">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+    台账
+  </button>
+  <button class="bottom-nav-item" data-tab="dashboard">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-3"/></svg>
+    看板
+  </button>
+  <button class="bottom-nav-item" data-tab="receipt">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2v20l2-2 2 2 2-2 2 2 2-2 2 2V2l-2 2-2-2-2 2-2-2-2 2-2-2z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>
+    收据
+  </button>
+  <button class="bottom-nav-item" data-tab="users" id="bottomUsersBtn" style="display:none">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    人员
+  </button>
+</nav>
+
+<!-- Add/Edit Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle">新增收费记录</h3>
+      <button class="modal-close" id="modalClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <!-- Rate config -->
+      <div class="rate-config">
+        <div class="rate-item">
+          <span>水费率 ($/吨):</span>
+          <input type="number" id="waterRate" value="0.7" step="0.01" min="0">
+        </div>
+        <div class="rate-item">
+          <span>电费率 ($/度):</span>
+          <input type="number" id="elecRate" value="0.205" step="0.001" min="0">
+        </div>
+      </div>
+      <form id="feeForm">
+        <input type="hidden" id="editRecordId" name="editRecordId">
+        <div class="form-row-2">
+          <div class="form-row">
+            <label>房号 *</label>
+            <input type="text" name="roomNo" id="roomNoInput" required placeholder="如 A-101" list="roomList" autocomplete="off">
+            <datalist id="roomList"></datalist>
+          </div>
+          <div class="form-row">
+            <label>月份 *</label>
+            <input type="month" name="month" id="monthInput" required>
+          </div>
+        </div>
+        <!-- Water meter -->
+        <div class="form-row-2">
+          <div class="form-row">
+            <label>上次水表 (吨)</label>
+            <input type="number" name="prevWater" id="prevWaterInput" step="0.1" min="0" placeholder="0.0">
+          </div>
+          <div class="form-row">
+            <label>本次水表 (吨)</label>
+            <input type="number" name="currWater" id="currWaterInput" step="0.1" min="0" placeholder="0.0">
+          </div>
+        </div>
+        <div class="calc-display" id="waterCalc">
+          <span class="calc-item"><span class="calc-label">用水量:</span><span class="calc-value" id="waterUsage">0</span> 吨</span>
+          <span class="calc-item"><span class="calc-label">水费:</span><span class="calc-value" id="waterFeeCalc">$0.00</span></span>
+        </div>
+        <!-- Electricity meter -->
+        <div class="form-row-2" style="margin-top:14px">
+          <div class="form-row">
+            <label>上次电表 (度)</label>
+            <input type="number" name="prevElec" id="prevElecInput" step="0.1" min="0" placeholder="0.0">
+          </div>
+          <div class="form-row">
+            <label>本次电表 (度)</label>
+            <input type="number" name="currElec" id="currElecInput" step="0.1" min="0" placeholder="0.0">
+          </div>
+        </div>
+        <div class="calc-display" id="elecCalc">
+          <span class="calc-item"><span class="calc-label">用电量:</span><span class="calc-value" id="elecUsage">0</span> 度</span>
+          <span class="calc-item"><span class="calc-label">电费:</span><span class="calc-value" id="elecFeeCalc">$0.00</span></span>
+        </div>
+        <!-- Rent -->
+        <div class="form-row" style="margin-top:14px">
+          <label>房租 ($)</label>
+          <input type="number" name="rent" id="rentInput" step="0.01" min="0" placeholder="0.00">
+        </div>
+        <div class="calc-display" id="totalCalc" style="background:#f6ffed;border-color:#b7eb8f;color:var(--success)">
+          <span class="calc-item"><span class="calc-label">合计:</span><span class="calc-value" id="totalFeeCalc" style="font-size:16px">$0.00</span></span>
+        </div>
+        <!-- Status -->
+        <div class="form-row-2" style="margin-top:14px">
+          <div class="form-row">
+            <label>缴费状态</label>
+            <select name="payStatus" id="payStatusSelect"><option value="">请选择</option></select>
+          </div>
+          <div class="form-row">
+            <label>催收状态</label>
+            <select name="collectStatus" id="collectStatusSelect"><option value="">请选择</option></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <label>催收日期</label>
+          <input type="date" name="collectDate" id="collectDateInput">
+        </div>
+        <div class="form-row">
+          <label>备注</label>
+          <input type="text" name="remark" id="remarkInput" placeholder="可选备注">
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn" id="cancelBtn">取消</button>
+          <button type="submit" class="btn btn-primary" id="submitBtn">保存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- User Management Modal -->
+<div class="modal-overlay" id="userModalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="userModalTitle">新增操作员</h3>
+      <button class="modal-close" id="userModalClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form id="userForm">
+        <input type="hidden" id="editUserId">
+        <div class="form-row">
+          <label>用户名 *</label>
+          <input type="text" id="userUsername" required placeholder="请输入用户名" autocomplete="off">
+        </div>
+        <div class="form-row">
+          <label>密码 *</label>
+          <input type="text" id="userPassword" required placeholder="请输入密码" autocomplete="off">
+        </div>
+        <div class="form-row">
+          <label>角色</label>
+          <select id="userRoleSelect">
+            <option value="operator">操作员</option>
+            <option value="admin">管理员</option>
+          </select>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn" id="userCancelBtn">取消</button>
+          <button type="submit" class="btn btn-primary" id="userSubmitBtn">保存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Print Area -->
+<div class="print-area" id="printArea"></div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var db = window.__SMART_PAGE__ && window.__SMART_PAGE__.database;
+  var DATABASE_ID = 'Ktelmlq00KIz0BErfvsHhV';
+  var SCHEMA_OPTIONS = {};
+  var allRecords = [];
+  var editingRecordId = null;
+  var currentTab = 'ledger';
+  var FORM_CACHE_KEY = 'wb_zhongding_v2_form_cache';
+  var LS_KEY = 'wb_zhongding_v2_records';
+  var ROOM_KEY = 'wb_zhongding_v2_rooms';
+  var RATE_KEY = 'wb_zhongding_v2_rates';
+  var USERS_KEY = 'wb_zhongding_v2_users';
+  var SESSION_KEY = 'wb_zhongding_v2_session';
+  var currentUser = null;
+
+  function $(id){return document.getElementById(id);}
+  function fmtMoney(v){
+    var n = Number(v)||0;
+    return '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
+  }
+  function fmtNum(v,dec){
+    var n = Number(v)||0;
+    return dec!=null ? n.toFixed(dec) : String(n);
+  }
+  function fmtDate(iso){
+    if(!iso) return '-';
+    try{return iso.substring(0,10);}catch(e){return iso;}
+  }
+  function getCurrentMonth(){
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+  }
+  function getToday(){
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+  function getWaterRate(){
+    var r = parseFloat($('waterRate').value);
+    if(isNaN(r)||r<0) r = 0.7;
+    return r;
+  }
+  function getElecRate(){
+    var r = parseFloat($('elecRate').value);
+    if(isNaN(r)||r<0) r = 0.205;
+    return r;
+  }
+  function calcWaterUsage(r){
+    var prev = Number(r['上次水表'])||0;
+    var curr = Number(r['本次水表'])||0;
+    return Math.max(0, curr - prev);
+  }
+  function calcElecUsage(r){
+    var prev = Number(r['上次电表'])||0;
+    var curr = Number(r['本次电表'])||0;
+    return Math.max(0, curr - prev);
+  }
+  function calcTotal(r){
+    return (Number(r['水费'])||0) + (Number(r['电费'])||0) + (Number(r['房租'])||0);
+  }
+  function showToast(msg){
+    var t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(function(){t.classList.remove('show');},2500);
+  }
+  function setSyncStatus(s){
+    var el = $('syncStatus');
+    if(s==='synced'){el.textContent='已同步';el.className='sync-status synced';}
+    else if(s==='syncing'){el.textContent='同步中';el.className='sync-status syncing';}
+    else{el.textContent='离线模式';el.className='sync-status offline';}
+  }
+
+  /* Room number management */
+  function getRooms(){
+    try{return JSON.parse(localStorage.getItem(ROOM_KEY)||'[]');}catch(e){return [];}
+  }
+  function saveRoom(room){
+    if(!room) return;
+    var rooms = getRooms();
+    if(rooms.indexOf(room)<0){
+      rooms.push(room);
+      rooms.sort();
+      try{localStorage.setItem(ROOM_KEY,JSON.stringify(rooms));}catch(e){}
+      renderRoomList();
+    }
+  }
+  function renderRoomList(){
+    var rooms = getRooms();
+    var dl = $('roomList');
+    dl.innerHTML = rooms.map(function(r){return '<option value="'+r+'">';}).join('');
+  }
+
+  /* Rate persistence */
+  function loadRates(){
+    try{
+      var r = JSON.parse(localStorage.getItem(RATE_KEY)||'{}');
+      if(r.water!=null) $('waterRate').value = r.water;
+      if(r.elec!=null) $('elecRate').value = r.elec;
+    }catch(e){}
+  }
+  function saveRates(){
+    try{
+      localStorage.setItem(RATE_KEY, JSON.stringify({water:getWaterRate(), elec:getElecRate()}));
+    }catch(e){}
+  }
+
+  /* User management */
+  function getUsers(){
+    try{
+      var users = JSON.parse(localStorage.getItem(USERS_KEY)||'[]');
+      /* Ensure default admin exists */
+      var hasAdmin = users.some(function(u){return u.username==='admin';});
+      if(!hasAdmin){
+        users.push({id:'admin',username:'admin',password:'admin123',role:'admin',createdAt:'系统默认'});
+        try{localStorage.setItem(USERS_KEY,JSON.stringify(users));}catch(e){}
+      }
+      return users;
+    }catch(e){
+      var def = [{id:'admin',username:'admin',password:'admin123',role:'admin',createdAt:'系统默认'}];
+      try{localStorage.setItem(USERS_KEY,JSON.stringify(def));}catch(e2){}
+      return def;
+    }
+  }
+  function saveUsers(users){
+    try{localStorage.setItem(USERS_KEY,JSON.stringify(users));}catch(e){}
+  }
+  function getSession(){
+    try{return JSON.parse(localStorage.getItem(SESSION_KEY)||'null');}catch(e){return null;}
+  }
+  function saveSession(user){
+    try{localStorage.setItem(SESSION_KEY,JSON.stringify(user));}catch(e){}
+  }
+  function clearSession(){
+    try{localStorage.removeItem(SESSION_KEY);}catch(e){}
+    currentUser = null;
+  }
+  function isAdmin(){return currentUser && currentUser.role==='admin';}
+  function genUserId(){
+    return 'u' + Date.now().toString(36) + Math.random().toString(36).substring(2,6);
+  }
+
+  /* Login */
+  function doLogin(){
+    var username = $('loginUsername').value.trim();
+    var password = $('loginPassword').value;
+    if(!username || !password){
+      $('loginError').textContent = '请输入用户名和密码';
+      $('loginError').classList.add('show');
+      return;
+    }
+    var users = getUsers();
+    var user = users.find(function(u){return u.username===username && u.password===password;});
+    if(!user){
+      $('loginError').textContent = '用户名或密码错误';
+      $('loginError').classList.add('show');
+      return;
+    }
+    $('loginError').classList.remove('show');
+    currentUser = {id:user.id, username:user.username, role:user.role};
+    saveSession(currentUser);
+    enterApp();
+  }
+
+  function enterApp(){
+    $('loginOverlay').style.display = 'none';
+    /* Show user info */
+    $('userInfo').style.display = 'flex';
+    $('logoutBtn').style.display = 'inline-flex';
+    $('userName').textContent = currentUser.username;
+    var avatar = currentUser.username.charAt(0).toUpperCase();
+    $('userAvatar').textContent = avatar;
+    if(currentUser.role==='admin'){
+      $('userAvatar').className = 'user-avatar admin';
+      $('userRole').textContent = '管理员';
+      /* Show user management tab */
+      $('tabUsersBtn').style.display = 'flex';
+      $('bottomUsersBtn').style.display = 'flex';
+    }else{
+      $('userAvatar').className = 'user-avatar operator';
+      $('userRole').textContent = '操作员';
+      /* Hide user management tab */
+      $('tabUsersBtn').style.display = 'none';
+      $('bottomUsersBtn').style.display = 'none';
+    }
+    applyPermissions();
+    init();
+  }
+
+  function logout(){
+    if(!confirm('确认退出登录？')) return;
+    clearSession();
+    $('loginOverlay').style.display = 'flex';
+    $('userInfo').style.display = 'none';
+    $('logoutBtn').style.display = 'none';
+    $('loginUsername').value = '';
+    $('loginPassword').value = '';
+    $('loginPassword').focus();
+    /* Clear tab content */
+    document.querySelectorAll('.tab-content').forEach(function(s){ s.classList.remove('active'); });
+    $('tab-ledger').classList.add('active');
+  }
+
+  /* Permission control */
+  function applyPermissions(){
+    var adminOnly = ['clearSampleBtn','importBtn'];
+    adminOnly.forEach(function(id){
+      var el = $(id);
+      if(!el) return;
+      if(isAdmin()){
+        el.style.display = '';
+        el.classList.remove('perm-locked-btn');
+        el.disabled = false;
+      }else{
+        /* Operators: hide import button, lock clear button */
+        if(id==='importBtn'){
+          el.style.display = 'none';
+        }else{
+          el.classList.add('perm-locked-btn');
+          el.disabled = false;
+          el.onclick = function(){ showToast('权限不足，仅管理员可操作'); };
+        }
+      }
+    });
+    /* Re-render table to hide/show delete buttons */
+    renderTable();
+    renderMobileCards();
+  }
+
+  /* User CRUD */
+  function renderUserTable(){
+    var users = getUsers();
+    var html = '';
+    users.forEach(function(u){
+      var roleClass = u.role==='admin'?'admin':'operator';
+      var roleText = u.role==='admin'?'管理员':'操作员';
+      var pwdDisplay = u.role==='admin' ? '******' : u.password;
+      var canDelete = u.username!=='admin';
+      html += '<tr>'+
+        '<td><strong>'+u.username+'</strong></td>'+
+        '<td><span class="role-badge '+roleClass+'">'+roleText+'</span></td>'+
+        '<td>'+pwdDisplay+'</td>'+
+        '<td>'+(u.createdAt||'-')+'</td>'+
+        '<td><div class="row-actions">'+
+          '<button class="btn btn-sm" data-edit-user="'+u.id+'">编辑</button>'+
+          (canDelete?'<button class="btn btn-sm btn-danger" data-delete-user="'+u.id+'">删除</button>':'')+
+        '</div></td>'+
+      '</tr>';
+    });
+    $('userTableBody').innerHTML = html;
+    bindUserActions();
+  }
+
+  function bindUserActions(){
+    document.querySelectorAll('[data-edit-user]').forEach(function(b){
+      b.onclick = function(){ openUserModal(this.getAttribute('data-edit-user')); };
+    });
+    document.querySelectorAll('[data-delete-user]').forEach(function(b){
+      b.onclick = function(){ deleteUser(this.getAttribute('data-delete-user')); };
+    });
+  }
+
+  function openUserModal(uid){
+    var form = document.getElementById('userForm');
+    form.reset();
+    $('editUserId').value = '';
+    if(uid){
+      $('userModalTitle').textContent = '编辑用户';
+      var users = getUsers();
+      var u = users.find(function(x){return x.id===uid;});
+      if(u){
+        $('editUserId').value = u.id;
+        $('userUsername').value = u.username;
+        $('userPassword').value = u.password;
+        $('userRoleSelect').value = u.role;
+      }
+    }else{
+      $('userModalTitle').textContent = '新增操作员';
+      $('userRoleSelect').value = 'operator';
+    }
+    $('userModalOverlay').classList.add('show');
+  }
+
+  function closeUserModal(){
+    $('userModalOverlay').classList.remove('show');
+  }
+
+  function handleUserSubmit(e){
+    e.preventDefault();
+    var uid = $('editUserId').value;
+    var username = $('userUsername').value.trim();
+    var password = $('userPassword').value;
+    var role = $('userRoleSelect').value;
+    if(!username || !password){ showToast('用户名和密码不能为空'); return; }
+
+    var users = getUsers();
+    /* Check duplicate username */
+    var dup = users.find(function(u){return u.username===username && u.id!==uid;});
+    if(dup){ showToast('用户名已存在'); return; }
+
+    if(uid){
+      /* Edit */
+      var u = users.find(function(x){return x.id===uid;});
+      if(u){
+        u.username = username;
+        u.password = password;
+        u.role = role;
+      }
+      showToast('用户已更新');
+    }else{
+      /* Add */
+      users.push({
+        id: genUserId(),
+        username: username,
+        password: password,
+        role: role,
+        createdAt: getToday()
+      });
+      showToast('用户已添加');
+    }
+    saveUsers(users);
+    closeUserModal();
+    renderUserTable();
+  }
+
+  function deleteUser(uid){
+    var users = getUsers();
+    var u = users.find(function(x){return x.id===uid;});
+    if(!u) return;
+    if(u.username==='admin'){ showToast('默认管理员不可删除'); return; }
+    if(!confirm('确认删除用户「'+u.username+'」？')) return;
+    users = users.filter(function(x){return x.id!==uid;});
+    saveUsers(users);
+    showToast('用户已删除');
+    renderUserTable();
+  }
+
+  function init(){
+    loadRates();
+    renderRoomList();
+    if(!db){
+      setSyncStatus('offline');
+      loadFromLocal();
+      return;
+    }
+    setSyncStatus('syncing');
+    db.getSchema({databaseId:DATABASE_ID}).then(function(schema){
+      (schema.properties||[]).forEach(function(f){
+        if((f.type==='select'||f.type==='multi_select')&&f.config&&f.config.options){
+          SCHEMA_OPTIONS[f.name]=f.config.options;
+        }
+      });
+      renderSelectOptions();
+      loadData();
+    }).catch(function(err){
+      console.error('[database] schema error:',err);
+      setSyncStatus('offline');
+      loadFromLocal();
+    });
+  }
+
+  function renderSelectOptions(){
+    var paySel = $('payStatusSelect');
+    if(paySel && SCHEMA_OPTIONS['缴费状态']){
+      SCHEMA_OPTIONS['缴费状态'].forEach(function(o){
+        var opt=document.createElement('option');
+        opt.value=o.id; opt.textContent=o.text;
+        paySel.appendChild(opt);
+      });
+    }
+    var colSel = $('collectStatusSelect');
+    if(colSel && SCHEMA_OPTIONS['催收状态']){
+      SCHEMA_OPTIONS['催收状态'].forEach(function(o){
+        var opt=document.createElement('option');
+        opt.value=o.id; opt.textContent=o.text;
+        colSel.appendChild(opt);
+      });
+    }
+    var fStat = $('filterStatus');
+    if(fStat && SCHEMA_OPTIONS['缴费状态']){
+      SCHEMA_OPTIONS['缴费状态'].forEach(function(o){
+        var opt=document.createElement('option');
+        opt.value=o.text; opt.textContent=o.text;
+        fStat.appendChild(opt);
+      });
+    }
+  }
+
+  function loadData(){
+    db.query({databaseId:DATABASE_ID,sorts:[{property:'月份',direction:'descending'}],pageSize:100}).then(function(result){
+      allRecords = result.results || [];
+      setSyncStatus('synced');
+      /* Collect room numbers from records */
+      allRecords.forEach(function(r){
+        if(r['房号']) saveRoom(r['房号']);
+      });
+      renderAll();
+    }).catch(function(err){
+      console.error('[database] query error:',err);
+      setSyncStatus('offline');
+      loadFromLocal();
+    });
+  }
+
+  function loadFromLocal(){
+    try{
+      var data = localStorage.getItem(LS_KEY);
+      allRecords = data ? JSON.parse(data) : [];
+      renderAll();
+    }catch(e){allRecords=[]; renderAll();}
+  }
+
+  function saveLocal(){
+    try{localStorage.setItem(LS_KEY, JSON.stringify(allRecords));}catch(e){}
+  }
+
+  function renderAll(){
+    renderTodayTasks();
+    renderFilterMonths();
+    renderTable();
+    renderMobileCards();
+    renderDashboard();
+    renderReceiptSelect();
+    checkDataCount();
+  }
+
+  function renderTodayTasks(){
+    var cm = getCurrentMonth();
+    var overdue=[], dueToday=[], partial=[];
+    allRecords.forEach(function(r){
+      var payStatus = r['缴费状态'];
+      var month = r['月份'];
+      if(payStatus === '已缴') return;
+      if(month < cm){
+        overdue.push(r);
+      }else if(month === cm && payStatus === '未缴'){
+        dueToday.push(r);
+      }else if(payStatus === '部分'){
+        partial.push(r);
+      }
+    });
+    var html = '';
+    if(overdue.length===0 && dueToday.length===0 && partial.length===0){
+      html = '<div class="today-empty">暂无待处理事项，数据已同步</div>';
+    }
+    overdue.forEach(function(r){ html += renderTodayItem(r,'逾期未缴','overdue'); });
+    dueToday.forEach(function(r){ html += renderTodayItem(r,'本月待缴','info'); });
+    partial.forEach(function(r){ html += renderTodayItem(r,'部分缴费','warning'); });
+    $('todayList').innerHTML = html;
+    bindTodayActions();
+  }
+
+  function renderTodayItem(r, label, cls){
+    var rid = r._id || r.record_id || '';
+    return '<div class="today-item '+cls+'">'+
+      '<div class="today-item-left">'+
+        '<span class="room">'+(r['房号']||'')+'</span>'+
+        '<span class="month">'+(r['月份']||'')+'</span>'+
+        '<span class="amount">'+fmtMoney(calcTotal(r))+'</span>'+
+        '<span class="tag">'+label+'</span>'+
+      '</div>'+
+      '<div class="today-item-right">'+
+        '<button class="btn btn-sm btn-primary" data-action="paid" data-id="'+rid+'">标记已缴</button>'+
+        '<button class="btn btn-sm" data-action="collect" data-id="'+rid+'">催收</button>'+
+        '<button class="btn btn-sm" data-action="receipt" data-id="'+rid+'">打印</button>'+
+      '</div>'+
+    '</div>';
+  }
+
+  function bindTodayActions(){
+    document.querySelectorAll('[data-action]').forEach(function(btn){
+      btn.onclick = function(){
+        var action = this.getAttribute('data-action');
+        var id = this.getAttribute('data-id');
+        if(action === 'paid') markPaid(id);
+        else if(action === 'collect') markCollected(id);
+        else if(action === 'receipt'){
+          switchTab('receipt');
+          $('receiptSelect').value = id;
+          previewReceipt();
+        }
+      };
+    });
+  }
+
+  function renderFilterMonths(){
+    var sel = $('filterMonth');
+    var months = {};
+    allRecords.forEach(function(r){ if(r['月份']) months[r['月份']] = 1; });
+    var cur = sel.value;
+    var html = '<option value="">全部月份</option>';
+    Object.keys(months).sort().reverse().forEach(function(m){
+      html += '<option value="'+m+'"'+(m===cur?' selected':'')+'>'+m+'</option>';
+    });
+    sel.innerHTML = html;
+  }
+
+  function getFilteredRecords(){
+    var fm = $('filterMonth').value;
+    var fs = $('filterStatus').value;
+    return allRecords.filter(function(r){
+      if(fm && r['月份'] !== fm) return false;
+      if(fs && r['缴费状态'] !== fs) return false;
+      return true;
+    });
+  }
+
+  function renderTable(){
+    var rows = getFilteredRecords();
+    var html = '';
+    if(rows.length === 0){
+      html = '<tr><td colspan="11" class="empty-row">暂无收费记录，点击"新增收费"添加</td></tr>';
+    }else{
+      rows.forEach(function(r){
+        var rid = r._id || r.record_id || '';
+        var payClass = r['缴费状态']==='已缴'?'paid':r['缴费状态']==='部分'?'partial':'unpaid';
+        var colClass = r['催收状态']==='已缴清'?'settled':r['催收状态']==='已催收'?'collected':r['催收状态']==='已承诺'?'promised':'uncollected';
+        var wPrev = fmtNum(r['上次水表'],1);
+        var wCurr = fmtNum(r['本次水表'],1);
+        var wUsage = fmtNum(calcWaterUsage(r),1);
+        var ePrev = fmtNum(r['上次电表'],1);
+        var eCurr = fmtNum(r['本次电表'],1);
+        var eUsage = fmtNum(calcElecUsage(r),1);
+        html += '<tr>'+
+          '<td data-field="roomNo" data-sp-bindable="database" data-sp-database-id="Ktelmlq00KIz0BErfvsHhV">'+(r['房号']||'')+'</td>'+
+          '<td data-field="month" data-sp-bindable="database" data-sp-database-id="Ktelmlq00KIz0BErfvsHhV">'+(r['月份']||'')+'</td>'+
+          '<td data-field="waterMeter" data-sp-bindable="database" data-sp-database-id="Ktelmlq00KIz0BErfvsHhV"><span class="meter-group">'+wPrev+'<span class="arrow">&#8594;</span>'+wCurr+' <span class="usage">('+wUsage+')</span></span></td>'+
+          '<td data-field="waterFee" data-sp-bindable="database" data-sp-database-id="Ktelmlq00KIz0BErfvsHhV">'+fmtMoney(r['水费'])+'</td>'+
+          '<td data-field="elecMeter" data-sp-bindable="database" data-sp-database-id="Ktelmlq00KIz0BErfvsHhV"><span class="meter-group">'+ePrev+'<span class="arrow">&#8594;</span>'+eCurr+' <span class="usage">('+eUsage+')</span></span></td>'+
+          '<td data-field="elecFee" data-sp-bindable="database" data-sp-database-id="Ktelmlq00KIz0BErfvsHhV">'+fmtMoney(r['电费'])+'</td>'+
+          '<td data-field="rent" data-sp-bindable="database" data-sp-database-id="Ktelmlq00KIz0BErfvsHhV">'+fmtMoney(r['房租'])+'</td>'+
+          '<td data-field="total" data-sp-bindable="database" data-sp-database-id="Ktelmlq00KIz0BErfvsHhV">'+fmtMoney(calcTotal(r))+'</td>'+
+          '<td data-field="payStatus" data-sp-bindable="database" data-sp-database-id="Ktelmlq00KIz0BErfvsHhV"><span class="status-badge '+payClass+'">'+(r['缴费状态']||'-')+'</span></td>'+
+          '<td data-field="collectStatus" data-sp-bindable="database" data-sp-database-id="Ktelmlq00KIz0BErfvsHhV"><span class="collect-badge '+colClass+'">'+(r['催收状态']||'-')+'</span></td>'+
+          '<td><div class="row-actions">'+
+            '<button class="btn btn-sm" data-edit="'+rid+'">编辑</button>'+
+            '<button class="btn btn-sm" data-receipt="'+rid+'">打印</button>'+
+            (isAdmin()?'<button class="btn btn-sm btn-danger" data-delete="'+rid+'">删除</button>':'')+
+          '</div></td>'+
+        '</tr>';
+      });
+    }
+    $('feeTableBody').innerHTML = html;
+    bindRowActions();
+  }
+
+  function renderMobileCards(){
+    var rows = getFilteredRecords();
+    var html = '';
+    if(rows.length === 0){
+      html = '<div class="empty-row">暂无收费记录</div>';
+    }else{
+      rows.forEach(function(r){
+        var rid = r._id || r.record_id || '';
+        var payClass = r['缴费状态']==='已缴'?'paid':r['缴费状态']==='部分'?'partial':'unpaid';
+        html += '<div class="mobile-card">'+
+          '<div class="mobile-card-header">'+
+            '<span class="room">'+(r['房号']||'')+'</span>'+
+            '<span class="status-badge '+payClass+'">'+(r['缴费状态']||'-')+'</span>'+
+          '</div>'+
+          '<div class="mobile-card-body">'+
+            '<span class="label">月份</span><span class="value">'+(r['月份']||'')+'</span>'+
+            '<span class="label">水表</span><span class="value">'+fmtNum(r['上次水表'],1)+'&#8594;'+fmtNum(r['本次水表'],1)+' ('+fmtNum(calcWaterUsage(r),1)+'吨)</span>'+
+            '<span class="label">电表</span><span class="value">'+fmtNum(r['上次电表'],1)+'&#8594;'+fmtNum(r['本次电表'],1)+' ('+fmtNum(calcElecUsage(r),1)+'度)</span>'+
+            '<span class="label">水费</span><span class="value">'+fmtMoney(r['水费'])+'</span>'+
+            '<span class="label">电费</span><span class="value">'+fmtMoney(r['电费'])+'</span>'+
+            '<span class="label">房租</span><span class="value">'+fmtMoney(r['房租'])+'</span>'+
+            '<span class="label">总额</span><span class="value amount-red">'+fmtMoney(calcTotal(r))+'</span>'+
+          '</div>'+
+          '<div class="mobile-card-footer">'+
+            '<button class="btn btn-sm" data-edit="'+rid+'">编辑</button>'+
+            '<button class="btn btn-sm" data-receipt="'+rid+'">打印</button>'+
+            (isAdmin()?'<button class="btn btn-sm btn-danger" data-delete="'+rid+'">删除</button>':'')+
+          '</div>'+
+        '</div>';
+      });
+    }
+    $('mobileCards').innerHTML = html;
+    bindRowActions();
+  }
+
+  function bindRowActions(){
+    document.querySelectorAll('[data-edit]').forEach(function(b){
+      b.onclick = function(){ openModal(this.getAttribute('data-edit')); };
+    });
+    document.querySelectorAll('[data-receipt]').forEach(function(b){
+      b.onclick = function(){
+        switchTab('receipt');
+        $('receiptSelect').value = this.getAttribute('data-receipt');
+        previewReceipt();
+      };
+    });
+    document.querySelectorAll('[data-delete]').forEach(function(b){
+      b.onclick = function(){ deleteRecord(this.getAttribute('data-delete')); };
+    });
+  }
+
+  function renderDashboard(){
+    var cm = getCurrentMonth();
+    var receivable=0, collected=0, uncollected=0, overdue=0;
+    var overdueList = [];
+    allRecords.forEach(function(r){
+      var total = calcTotal(r);
+      var month = r['月份'];
+      var pay = r['缴费状态'];
+      if(month === cm){
+        receivable += total;
+        if(pay === '已缴') collected += total;
+        else uncollected += total;
+      }
+      if(month < cm && pay !== '已缴'){
+        overdue += total;
+        overdueList.push(r);
+      }
+    });
+    $('totalReceivable').textContent = fmtMoney(receivable);
+    $('totalCollected').textContent = fmtMoney(collected);
+    $('totalUncollected').textContent = fmtMoney(uncollected);
+    $('totalOverdue').textContent = fmtMoney(overdue);
+    var html = '';
+    if(overdueList.length === 0){
+      html = '<div class="today-empty">暂无逾期记录</div>';
+    }else{
+      overdueList.forEach(function(r){
+        var rid = r._id || r.record_id || '';
+        html += '<div class="overdue-item">'+
+          '<div class="overdue-item-left">'+
+            '<span class="room">'+(r['房号']||'')+'</span>'+
+            '<span class="month">'+(r['月份']||'')+'</span>'+
+            '<span class="amount">'+fmtMoney(calcTotal(r))+'</span>'+
+          '</div>'+
+          '<div class="overdue-item-right">'+
+            '<button class="btn btn-sm btn-primary" data-action="paid" data-id="'+rid+'">标记已缴</button>'+
+            '<button class="btn btn-sm" data-action="collect" data-id="'+rid+'">催收</button>'+
+            '<button class="btn btn-sm" data-action="receipt" data-id="'+rid+'">打印</button>'+
+          '</div>'+
+        '</div>';
+      });
+    }
+    $('overdueList').innerHTML = html;
+    bindTodayActions();
+  }
+
+  function renderReceiptSelect(){
+    var sel = $('receiptSelect');
+    var cur = sel.value;
+    var html = '<option value="">请选择收费记录</option>';
+    allRecords.forEach(function(r){
+      var rid = r._id || r.record_id || '';
+      var label = (r['房号']||'') + ' ' + (r['月份']||'') + ' ' + fmtMoney(calcTotal(r));
+      html += '<option value="'+rid+'"'+(rid===cur?' selected':'')+'>'+label+'</option>';
+    });
+    sel.innerHTML = html;
+  }
+
+  /* Bill HTML generation (shared by preview and print) */
+  function generateBillHTML(r){
+    var today = getToday();
+    var rid = r._id || r.record_id || '';
+    var receiptNo = 'ZD' + today.replace(/-/g,'') + '-' + rid.substring(0,8);
+    var wUsage = calcWaterUsage(r);
+    var eUsage = calcElecUsage(r);
+    var wRate = 0.7;
+    var eRate = 0.205;
+    /* Try to get rates from localStorage */
+    try{
+      var saved = JSON.parse(localStorage.getItem(RATE_KEY)||'{}');
+      if(saved.water!=null) wRate = saved.water;
+      if(saved.elec!=null) eRate = saved.elec;
+    }catch(e){}
+    var wFee = Number(r['水费'])||0;
+    var eFee = Number(r['电费'])||0;
+    var rent = Number(r['房租'])||0;
+    var total = wFee + eFee + rent;
+
+    return '<div class="bill-paper">'+
+      '<div class="bill-title">中鼎物业收费通知单</div>'+
+      '<div class="bill-subtitle">ZHONGDING PROPERTY MANAGEMENT FEE NOTICE</div>'+
+      '<div class="bill-info">'+
+        '<span><span class="label">编号:</span> '+receiptNo+'</span>'+
+        '<span><span class="label">开具日期:</span> '+today+'</span>'+
+      '</div>'+
+      '<div class="bill-info">'+
+        '<span><span class="label">房号:</span> '+(r['房号']||'')+'</span>'+
+        '<span><span class="label">月份:</span> '+(r['月份']||'')+'</span>'+
+      '</div>'+
+      '<table class="bill-table">'+
+        '<thead>'+
+          '<tr>'+
+            '<th style="width:14%">项目</th>'+
+            '<th style="width:16%">上次表数</th>'+
+            '<th style="width:16%">本次表数</th>'+
+            '<th style="width:14%">用量</th>'+
+            '<th style="width:14%">单价</th>'+
+            '<th style="width:26%">金额</th>'+
+          '</tr>'+
+        '</thead>'+
+        '<tbody>'+
+          '<tr>'+
+            '<td class="label-col">水费</td>'+
+            '<td>'+fmtNum(r['上次水表'],1)+' 吨</td>'+
+            '<td>'+fmtNum(r['本次水表'],1)+' 吨</td>'+
+            '<td>'+fmtNum(wUsage,1)+' 吨</td>'+
+            '<td>$'+wRate.toFixed(3)+'/吨</td>'+
+            '<td>'+fmtMoney(wFee)+'</td>'+
+          '</tr>'+
+          '<tr>'+
+            '<td class="label-col">电费</td>'+
+            '<td>'+fmtNum(r['上次电表'],1)+' 度</td>'+
+            '<td>'+fmtNum(r['本次电表'],1)+' 度</td>'+
+            '<td>'+fmtNum(eUsage,1)+' 度</td>'+
+            '<td>$'+eRate.toFixed(3)+'/度</td>'+
+            '<td>'+fmtMoney(eFee)+'</td>'+
+          '</tr>'+
+          '<tr>'+
+            '<td class="label-col">房租</td>'+
+            '<td>-</td>'+
+            '<td>-</td>'+
+            '<td>-</td>'+
+            '<td>-</td>'+
+            '<td>'+fmtMoney(rent)+'</td>'+
+          '</tr>'+
+          '<tr class="total-row">'+
+            '<td colspan="5" style="text-align:right">合计金额（大写）</td>'+
+            '<td>'+fmtMoney(total)+'</td>'+
+          '</tr>'+
+        '</tbody>'+
+      '</table>'+
+      '<div class="bill-footer">'+
+        '<p>缴费状态: '+(r['缴费状态']||'-')+'</p>'+
+        (r['备注'] ? '<p>备注: '+(r['备注'])+'</p>' : '')+
+      '</div>'+
+      '<div class="bill-sign">'+
+        '<span>签收人: <span class="bill-sign-line"></span></span>'+
+        '<span>签收日期: <span class="bill-sign-line"></span></span>'+
+      '</div>'+
+      '<div style="text-align:center;margin-top:20px;font-size:11px;color:var(--text3)">'+
+        '<p>中鼎物业管理有限公司</p>'+
+        '<p>（此通知单仅作收费凭证，请妥善保管）</p>'+
+      '</div>'+
+    '</div>';
+  }
+
+  function previewReceipt(){
+    var rid = $('receiptSelect').value;
+    if(!rid){
+      $('receiptPreview').innerHTML = '<div class="receipt-placeholder">请选择一条收费记录以预览打印单</div>';
+      return;
+    }
+    var r = findRecord(rid);
+    if(!r) return;
+    $('receiptPreview').innerHTML = generateBillHTML(r);
+  }
+
+  function printReceipt(){
+    var rid = $('receiptSelect').value;
+    if(!rid){ showToast('请先选择收费记录'); return; }
+    var r = findRecord(rid);
+    if(!r) return;
+    $('printArea').innerHTML = generateBillHTML(r);
+    window.print();
+  }
+
+  function findRecord(rid){
+    return allRecords.find(function(r){
+      return (r._id||r.record_id||'') === rid;
+    });
+  }
+
+  /* Auto-calc in form */
+  function updateFormCalc(){
+    var prevW = parseFloat($('prevWaterInput').value) || 0;
+    var currW = parseFloat($('currWaterInput').value) || 0;
+    var prevE = parseFloat($('prevElecInput').value) || 0;
+    var currE = parseFloat($('currElecInput').value) || 0;
+    var rent = parseFloat($('rentInput').value) || 0;
+    var wRate = getWaterRate();
+    var eRate = getElecRate();
+
+    var wUsage = Math.max(0, currW - prevW);
+    var eUsage = Math.max(0, currE - prevE);
+    var wFee = wUsage * wRate;
+    var eFee = eUsage * eRate;
+    var total = wFee + eFee + rent;
+
+    $('waterUsage').textContent = fmtNum(wUsage, 1);
+    $('waterFeeCalc').textContent = fmtMoney(wFee);
+    $('elecUsage').textContent = fmtNum(eUsage, 1);
+    $('elecFeeCalc').textContent = fmtMoney(eFee);
+    $('totalFeeCalc').textContent = fmtMoney(total);
+  }
+
+  /* Auto-fill previous meter reading from last record */
+  function autoFillPrevReading(){
+    var room = $('roomNoInput').value.trim();
+    var month = $('monthInput').value;
+    if(!room || !month) return;
+    /* Find the most recent record for this room with month < current month */
+    var candidates = allRecords.filter(function(r){
+      return r['房号'] === room && r['月份'] < month;
+    });
+    if(candidates.length === 0) return;
+    candidates.sort(function(a,b){
+      return (b['月份']||'').localeCompare(a['月份']||'');
+    });
+    var last = candidates[0];
+    /* Only fill if empty */
+    if(!$('prevWaterInput').value && last['本次水表']!=null){
+      $('prevWaterInput').value = last['本次水表'];
+    }
+    if(!$('prevElecInput').value && last['本次电表']!=null){
+      $('prevElecInput').value = last['本次电表'];
+    }
+    updateFormCalc();
+    showToast('已自动填入上次表数（来自'+last['月份']+'记录）');
+  }
+
+  function openModal(rid){
+    var form = document.getElementById('feeForm');
+    form.reset();
+    $('editRecordId').value = '';
+    if(rid){
+      editingRecordId = rid;
+      $('modalTitle').textContent = '编辑收费记录';
+      var r = findRecord(rid);
+      if(r){
+        $('roomNoInput').value = r['房号'] || '';
+        $('monthInput').value = r['月份'] || '';
+        $('prevWaterInput').value = r['上次水表'] != null ? r['上次水表'] : '';
+        $('currWaterInput').value = r['本次水表'] != null ? r['本次水表'] : '';
+        $('prevElecInput').value = r['上次电表'] != null ? r['上次电表'] : '';
+        $('currElecInput').value = r['本次电表'] != null ? r['本次电表'] : '';
+        $('rentInput').value = r['房租'] != null ? r['房租'] : '';
+        var paySel = $('payStatusSelect');
+        if(r['缴费状态'] && SCHEMA_OPTIONS['缴费状态']){
+          var opt = SCHEMA_OPTIONS['缴费状态'].find(function(o){ return o.text === r['缴费状态']; });
+          if(opt) paySel.value = opt.id;
+        }
+        var colSel = $('collectStatusSelect');
+        if(r['催收状态'] && SCHEMA_OPTIONS['催收状态']){
+          var opt2 = SCHEMA_OPTIONS['催收状态'].find(function(o){ return o.text === r['催收状态']; });
+          if(opt2) colSel.value = opt2.id;
+        }
+        $('collectDateInput').value = r['催收日期'] ? fmtDate(r['催收日期']) : '';
+        $('remarkInput').value = r['备注'] || '';
+      }
+    }else{
+      editingRecordId = null;
+      $('modalTitle').textContent = '新增收费记录';
+      $('monthInput').value = getCurrentMonth();
+      restoreFormCache();
+    }
+    updateFormCalc();
+    $('modalOverlay').classList.add('show');
+  }
+
+  function closeModal(){
+    $('modalOverlay').classList.remove('show');
+    editingRecordId = null;
+  }
+
+  function handleSubmit(e){
+    e.preventDefault();
+    var submitBtn = $('submitBtn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = '保存中...';
+
+    /* Calculate fees from meter readings */
+    var prevW = parseFloat($('prevWaterInput').value) || 0;
+    var currW = parseFloat($('currWaterInput').value) || 0;
+    var prevE = parseFloat($('prevElecInput').value) || 0;
+    var currE = parseFloat($('currElecInput').value) || 0;
+    var rent = parseFloat($('rentInput').value) || 0;
+    var wRate = getWaterRate();
+    var eRate = getElecRate();
+    var wUsage = Math.max(0, currW - prevW);
+    var eUsage = Math.max(0, currE - prevE);
+    var wFee = Math.round(wUsage * wRate * 100) / 100;
+    var eFee = Math.round(eUsage * eRate * 100) / 100;
+
+    var properties = {};
+    properties['房号'] = {text: $('roomNoInput').value};
+    properties['月份'] = {text: $('monthInput').value};
+    properties['上次水表'] = {number: prevW};
+    properties['本次水表'] = {number: currW};
+    properties['上次电表'] = {number: prevE};
+    properties['本次电表'] = {number: currE};
+    properties['水费'] = {currency: wFee};
+    properties['电费'] = {currency: eFee};
+    properties['房租'] = {currency: rent};
+
+    var payVal = $('payStatusSelect').value;
+    if(payVal) properties['缴费状态'] = {select: payVal};
+    var colVal = $('collectStatusSelect').value;
+    if(colVal) properties['催收状态'] = {select: colVal};
+    var dateVal = $('collectDateInput').value;
+    if(dateVal) properties['催收日期'] = {date: dateVal};
+    properties['备注'] = {text: $('remarkInput').value};
+
+    /* Save room number */
+    saveRoom($('roomNoInput').value);
+    saveRates();
+
+    if(editingRecordId){
+      db.updateRecord({databaseId:DATABASE_ID, recordId:editingRecordId, properties:properties}).then(function(){
+        showToast('修改成功');
+        clearFormCache();
+        closeModal();
+        loadData();
+      }).catch(function(err){
+        console.error('[database] update error:', err);
+        showToast('修改失败，请重试');
+      }).finally(function(){
+        submitBtn.disabled = false;
+        submitBtn.textContent = '保存';
+      });
+    }else{
+      db.addRecord({databaseId:DATABASE_ID, properties:properties}).then(function(){
+        showToast('添加成功');
+        clearFormCache();
+        closeModal();
+        loadData();
+      }).catch(function(err){
+        console.error('[database] add error:', err);
+        showToast('添加失败，请重试');
+      }).finally(function(){
+        submitBtn.disabled = false;
+        submitBtn.textContent = '保存';
+      });
+    }
+  }
+
+  function markPaid(rid){
+    if(!rid){ showToast('记录ID缺失'); return; }
+    var properties = {};
+    if(SCHEMA_OPTIONS['缴费状态']){
+      var opt = SCHEMA_OPTIONS['缴费状态'].find(function(o){ return o.text === '已缴'; });
+      if(opt) properties['缴费状态'] = {select: opt.id};
+    }
+    if(SCHEMA_OPTIONS['催收状态']){
+      var opt2 = SCHEMA_OPTIONS['催收状态'].find(function(o){ return o.text === '已缴清'; });
+      if(opt2) properties['催收状态'] = {select: opt2.id};
+    }
+    db.updateRecord({databaseId:DATABASE_ID, recordId:rid, properties:properties}).then(function(){
+      showToast('已标记为已缴清');
+      loadData();
+    }).catch(function(err){
+      console.error('[database] update error:', err);
+      showToast('操作失败，请重试');
+    });
+  }
+
+  function markCollected(rid){
+    if(!rid){ showToast('记录ID缺失'); return; }
+    var properties = {};
+    if(SCHEMA_OPTIONS['催收状态']){
+      var opt = SCHEMA_OPTIONS['催收状态'].find(function(o){ return o.text === '已催收'; });
+      if(opt) properties['催收状态'] = {select: opt.id};
+    }
+    properties['催收日期'] = {date: getToday()};
+    db.updateRecord({databaseId:DATABASE_ID, recordId:rid, properties:properties}).then(function(){
+      showToast('已标记为已催收');
+      loadData();
+    }).catch(function(err){
+      console.error('[database] update error:', err);
+      showToast('操作失败，请重试');
+    });
+  }
+
+  function deleteRecord(rid){
+    if(!isAdmin()){ showToast('权限不足，仅管理员可删除记录'); return; }
+    if(!rid){ showToast('记录ID缺失'); return; }
+    if(!confirm('确认删除此条收费记录？删除后不可恢复。')) return;
+    db.deleteRecord({databaseId:DATABASE_ID, recordId:rid}).then(function(){
+      showToast('删除成功');
+      loadData();
+    }).catch(function(err){
+      console.error('[database] delete error:', err);
+      showToast('删除失败，请重试');
+    });
+  }
+
+  function exportData(){
+    var data = JSON.stringify(allRecords, null, 2);
+    var blob = new Blob([data], {type:'application/json'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = '中鼎物业收费台账_'+getToday()+'.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('备份文件已下载');
+  }
+
+  function importData(file){
+    if(!isAdmin()){ showToast('权限不足，仅管理员可导入数据'); return; }
+    var reader = new FileReader();
+    reader.onload = function(e){
+      try{
+        var data = JSON.parse(e.target.result);
+        if(!Array.isArray(data)){ showToast('文件格式错误'); return; }
+        if(!db){ showToast('离线模式不支持导入'); return; }
+        if(!confirm('将导入'+data.length+'条记录，是否继续？')) return;
+        var promises = data.map(function(r){
+          var properties = {};
+          if(r['房号']) properties['房号'] = {text: r['房号']};
+          if(r['月份']) properties['月份'] = {text: r['月份']};
+          if(r['上次水表']!=null) properties['上次水表'] = {number: Number(r['上次水表'])||0};
+          if(r['本次水表']!=null) properties['本次水表'] = {number: Number(r['本次水表'])||0};
+          if(r['上次电表']!=null) properties['上次电表'] = {number: Number(r['上次电表'])||0};
+          if(r['本次电表']!=null) properties['本次电表'] = {number: Number(r['本次电表'])||0};
+          if(r['水费']!=null) properties['水费'] = {currency: Number(r['水费'])||0};
+          if(r['电费']!=null) properties['电费'] = {currency: Number(r['电费'])||0};
+          if(r['房租']!=null) properties['房租'] = {currency: Number(r['房租'])||0};
+          if(r['缴费状态']) properties['缴费状态'] = {select: r['缴费状态']};
+          if(r['催收状态']) properties['催收状态'] = {select: r['催收状态']};
+          if(r['催收日期']) properties['催收日期'] = {date: r['催收日期']};
+          if(r['备注']) properties['备注'] = {text: r['备注']};
+          return db.addRecord({databaseId:DATABASE_ID, properties:properties});
+        });
+        Promise.all(promises).then(function(){
+          showToast('成功导入'+data.length+'条记录');
+          loadData();
+        }).catch(function(){
+          showToast('部分记录导入失败');
+          loadData();
+        });
+      }catch(err){
+        showToast('文件解析失败');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function checkDataCount(){
+    if(allRecords.length >= 30){
+      $('dataTip').style.display = 'flex';
+      $('dataTipText').textContent = '数据已积累'+allRecords.length+'条，建议导出备份';
+    }else{
+      $('dataTip').style.display = 'none';
+    }
+  }
+
+  function switchTab(name){
+    currentTab = name;
+    document.querySelectorAll('.tab-content').forEach(function(s){ s.classList.remove('active'); });
+    document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+    document.querySelectorAll('.bottom-nav-item').forEach(function(b){ b.classList.remove('active'); });
+    $('tab-'+name).classList.add('active');
+    document.querySelectorAll('[data-tab="'+name+'"]').forEach(function(b){ b.classList.add('active'); });
+    if(name === 'receipt') previewReceipt();
+    if(name === 'users') renderUserTable();
+  }
+
+  /* Form input caching */
+  var cacheTimer = null;
+  function cacheFormInputs(){
+    var data = {};
+    data.roomNo = $('roomNoInput').value;
+    data.month = $('monthInput').value;
+    data.rent = $('rentInput').value;
+    data.remark = $('remarkInput').value;
+    try{ localStorage.setItem(FORM_CACHE_KEY, JSON.stringify(data)); }catch(e){}
+  }
+  function restoreFormCache(){
+    try{
+      var data = JSON.parse(localStorage.getItem(FORM_CACHE_KEY) || '{}');
+      if(data.roomNo) $('roomNoInput').value = data.roomNo;
+      if(data.month) $('monthInput').value = data.month;
+      if(data.rent) $('rentInput').value = data.rent;
+      if(data.remark) $('remarkInput').value = data.remark;
+    }catch(e){}
+  }
+  function clearFormCache(){
+    try{ localStorage.removeItem(FORM_CACHE_KEY); }catch(e){}
+  }
+
+  /* Event binding */
+  function bindEvents(){
+    document.querySelectorAll('.tab-btn,.bottom-nav-item').forEach(function(b){
+      b.onclick = function(){ switchTab(this.getAttribute('data-tab')); };
+    });
+    $('addBtn').onclick = function(){ openModal(null); };
+    $('modalClose').onclick = closeModal;
+    $('cancelBtn').onclick = closeModal;
+    $('modalOverlay').onclick = function(e){ if(e.target === this) closeModal(); };
+    document.getElementById('feeForm').addEventListener('submit', handleSubmit);
+    $('filterMonth').onchange = function(){ renderTable(); renderMobileCards(); };
+    $('filterStatus').onchange = function(){ renderTable(); renderMobileCards(); };
+    $('receiptSelect').onchange = previewReceipt;
+    $('printReceiptBtn').onclick = printReceipt;
+    $('exportBtn').onclick = exportData;
+    $('importBtn').onclick = function(){ $('importFile').click(); };
+    $('importFile').onchange = function(){
+      if(this.files && this.files[0]) importData(this.files[0]);
+      this.value = '';
+    };
+    $('clearSampleBtn').onclick = function(){
+      if(!isAdmin()){ showToast('权限不足，仅管理员可清空数据'); return; }
+      if(allRecords.length === 0){ showToast('暂无数据'); return; }
+      if(!confirm('确认清空所有收费记录？此操作不可恢复！\n\n建议先导出备份。')) return;
+      if(!confirm('再次确认：将删除全部'+allRecords.length+'条记录！')) return;
+      var ids = allRecords.map(function(r){ return r._id || r.record_id; }).filter(Boolean);
+      if(ids.length === 0){ showToast('无可删除记录'); return; }
+      var done=0, fail=0;
+      ids.forEach(function(id){
+        db.deleteRecord({databaseId:DATABASE_ID, recordId:id}).then(function(){
+          done++;
+          if(done+fail === ids.length){ showToast('已清空'+done+'条记录'); loadData(); }
+        }).catch(function(){ fail++; if(done+fail === ids.length){ showToast('清空完成，成功'+done+'条'); loadData(); } });
+      });
+    };
+
+    /* Auto-calc on meter input change */
+    ['prevWaterInput','currWaterInput','prevElecInput','currElecInput','rentInput','waterRate','elecRate'].forEach(function(id){
+      $(id).addEventListener('input', function(){
+        updateFormCalc();
+        saveRates();
+      });
+    });
+
+    /* Auto-fill previous reading when room or month changes */
+    $('roomNoInput').addEventListener('change', autoFillPrevReading);
+    $('roomNoInput').addEventListener('blur', function(){
+      /* Save room on blur */
+      var v = $('roomNoInput').value.trim();
+      if(v) saveRoom(v);
+    });
+    $('monthInput').addEventListener('change', autoFillPrevReading);
+
+    /* Form input cache */
+    var form = document.getElementById('feeForm');
+    form.addEventListener('input', function(){
+      clearTimeout(cacheTimer);
+      cacheTimer = setTimeout(cacheFormInputs, 300);
+    });
+    form.addEventListener('change', function(){
+      clearTimeout(cacheTimer);
+      cacheTimer = setTimeout(cacheFormInputs, 300);
+    });
+
+    /* Login & logout */
+    $('loginBtn').onclick = doLogin;
+    $('loginPassword').addEventListener('keydown', function(e){
+      if(e.key==='Enter') doLogin();
+    });
+    $('loginUsername').addEventListener('keydown', function(e){
+      if(e.key==='Enter') $('loginPassword').focus();
+    });
+    $('logoutBtn').onclick = logout;
+
+    /* User management */
+    $('addUserBtn').onclick = function(){ openUserModal(null); };
+    $('userModalClose').onclick = closeUserModal;
+    $('userCancelBtn').onclick = closeUserModal;
+    $('userModalOverlay').onclick = function(e){ if(e.target===this) closeUserModal(); };
+    document.getElementById('userForm').addEventListener('submit', handleUserSubmit);
+  }
+
+  /* Start */
+  bindEvents();
+  var savedSession = getSession();
+  if(savedSession){
+    currentUser = savedSession;
+    enterApp();
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/tax-law/index",
+    "pages/travel/index",
+    "pages/specialty/index",
+    "pages/ai-chat/index"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#C8963E",
+    "navigationBarTitleText": "柬税笔记",
+    "navigationBarTextStyle": "white"
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#C8963E",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "assets/icons/home.png",
+        "selectedIconPath": "assets/icons/home-active.png"
+      },
+      {
+        "pagePath": "pages/tax-law/index",
+        "text": "税法",
+        "iconPath": "assets/icons/tax.png",
+        "selectedIconPath": "assets/icons/tax-active.png"
+      },
+      {
+        "pagePath": "pages/travel/index",
+        "text": "旅游",
+        "iconPath": "assets/icons/travel.png",
+        "selectedIconPath": "assets/icons/travel-active.png"
+      },
+      {
+        "pagePath": "pages/specialty/index",
+        "text": "特产",
+        "iconPath": "assets/icons/gift.png",
+        "selectedIconPath": "assets/icons/gift-active.png"
+      },
+      {
+        "pagePath": "pages/ai-chat/index",
+        "text": "问答",
+        "iconPath": "assets/icons/chat.png",
+        "selectedIconPath": "assets/icons/chat-active.png"
+      }
+    ]
+  },
+  "usingComponents": {},
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

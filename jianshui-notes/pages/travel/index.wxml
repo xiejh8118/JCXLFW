@@ -1,0 +1,86 @@
+<!-- 柬埔寨旅游页面 -->
+<view class="page-container">
+
+  <!-- 分类标签 -->
+  <scroll-view class="category-scroll" scroll-x enable-flex>
+    <view class="category-list">
+      <view 
+        wx:for="{{categories}}" 
+        wx:key="id"
+        class="category-tag {{activeCategory === item.id ? 'active' : ''}}"
+        data-category="{{item.id}}"
+        bindtap="onCategoryChange"
+      >{{item.name}}</view>
+    </view>
+  </scroll-view>
+
+  <!-- 景点列表 -->
+  <view class="spot-list">
+    <view 
+      wx:for="{{filteredSpots}}" 
+      wx:key="id"
+      class="spot-card card"
+      data-id="{{item.id}}"
+      bindtap="onViewDetail"
+    >
+      <view class="spot-top">
+        <view class="spot-icon">{{item.image}}</view>
+        <view class="spot-meta">
+          <view class="spot-name">{{item.name}}</view>
+          <view class="spot-location">📍 {{item.location}}</view>
+          <view class="spot-rating">
+            <text wx:for="{{[1,2,3,4,5]}}" wx:key="*this" class="star {{index < item.rating ? 'active' : ''}}">★</text>
+            <text class="rating-text">{{item.rating}}.0</text>
+          </view>
+        </view>
+      </view>
+      <view class="spot-summary">{{item.summary}}</view>
+      <view class="spot-tags">
+        <text wx:for="{{item.tips}}" wx:key="*this" class="tag tag-primary">{{item}}</text>
+      </view>
+      <view class="spot-season">
+        <text class="season-label">🌤️ 最佳季节：</text>
+        <text class="season-text">{{item.season}}</text>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view wx:if="{{filteredSpots.length === 0}}" class="empty-state">
+      <view class="empty-state-icon">🗺️</view>
+      <view class="empty-state-text">暂无该分类的景点信息</view>
+    </view>
+  </view>
+
+  <!-- 详情弹窗 -->
+  <view wx:if="{{showDetail && detailSpot}}" class="detail-overlay" bindtap="onCloseDetail">
+    <view class="detail-panel" catchtap="">
+      <!-- 顶部图片区 -->
+      <view class="detail-hero">
+        <view class="detail-icon">{{detailSpot.image}}</view>
+        <view class="detail-close" bindtap="onCloseDetail">✕</view>
+      </view>
+      
+      <!-- 信息区 -->
+      <view class="detail-body">
+        <view class="detail-name">{{detailSpot.name}}</view>
+        <view class="detail-location">📍 {{detailSpot.location}}</view>
+        
+        <view class="detail-rating">
+          <text wx:for="{{[1,2,3,4,5]}}" wx:key="*this" class="star {{index < detailSpot.rating ? 'active' : ''}}">★</text>
+          <text class="rating-text">{{detailSpot.rating}}.0</text>
+        </view>
+
+        <view class="divider"></view>
+        
+        <view class="detail-text">{{detailSpot.content}}</view>
+
+        <view class="divider"></view>
+
+        <view class="detail-season">
+          <text class="font-bold">🌤️ 最佳季节：</text>{{detailSpot.season}}
+        </view>
+      </view>
+    </view>
+  </view>
+
+</view>

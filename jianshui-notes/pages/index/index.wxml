@@ -1,0 +1,110 @@
+<!-- 首页 -->
+<view class="page-container">
+  
+  <!-- 轮播图 -->
+  <view class="banner-wrapper">
+    <swiper 
+      class="banner-swiper" 
+      indicator-dots 
+      autoplay 
+      interval="4000" 
+      duration="500"
+      circular
+      bindchange="onBannerChange"
+    >
+      <swiper-item wx:for="{{banners}}" wx:key="id">
+        <view 
+          class="banner-card" 
+          style="background: linear-gradient(135deg, {{item.color}}, {{item.color}}dd);"
+          data-page="{{item.page}}"
+          bindtap="onBannerTap"
+        >
+          <view class="banner-content">
+            <view class="banner-text">
+              <view class="banner-title">{{item.title}}</view>
+              <view class="banner-desc">{{item.desc}}</view>
+            </view>
+            <view class="banner-icon">{{item.image}}</view>
+          </view>
+        </view>
+      </swiper-item>
+    </swiper>
+  </view>
+
+  <!-- 快捷入口 -->
+  <view class="entry-section">
+    <view class="entry-grid">
+      <view 
+        wx:for="{{quickEntries}}" 
+        wx:key="id"
+        class="entry-item"
+        data-page="{{item.page}}"
+        bindtap="onEntryTap"
+      >
+        <view class="entry-icon-box" style="background-color: {{item.color}}20;">
+          <text class="entry-icon">{{item.icon}}</text>
+        </view>
+        <view class="entry-title">{{item.title}}</view>
+        <view class="entry-desc">{{item.desc}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 热门景点 -->
+  <view class="section-header">
+    <view class="section-title">🏛️ 热门景点</view>
+    <view class="section-more" bindtap="onMoreTravel">查看更多 →</view>
+  </view>
+  <view class="spot-list">
+    <view 
+      wx:for="{{featuredSpots}}" 
+      wx:key="id"
+      class="spot-card card"
+      data-id="{{item.id}}"
+      bindtap="onSpotTap"
+    >
+      <view class="spot-header">
+        <view class="spot-icon">{{item.image}}</view>
+        <view class="spot-info">
+          <view class="spot-name">{{item.name}}</view>
+          <view class="spot-location">📍 {{item.location}}</view>
+          <view class="spot-rating">
+            <text wx:for="{{[1,2,3,4,5]}}" wx:key="*this" class="star {{index < item.rating ? 'active' : ''}}">★</text>
+          </view>
+        </view>
+      </view>
+      <view class="spot-desc">{{item.summary}}</view>
+      <view class="spot-tags">
+        <text wx:for="{{item.tips}}" wx:key="*this" class="tag tag-primary">{{item}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 精选特产 -->
+  <view class="section-header">
+    <view class="section-title">🎁 精选特产</view>
+    <view class="section-more" bindtap="onMoreSpecialty">查看更多 →</view>
+  </view>
+  <view class="specialty-grid">
+    <view 
+      wx:for="{{featuredSpecialties}}" 
+      wx:key="id"
+      class="specialty-card card"
+      data-id="{{item.id}}"
+      bindtap="onSpecialtyTap"
+    >
+      <view class="specialty-icon">{{item.image}}</view>
+      <view class="specialty-name">{{item.name}}</view>
+      <view class="specialty-price">{{item.price}}</view>
+      <view class="specialty-rating">
+        <text wx:for="{{[1,2,3,4,5]}}" wx:key="*this" class="star-small {{index < item.rating ? 'active' : ''}}">★</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部提示 -->
+  <view class="footer-tip">
+    <text class="text-secondary text-small">柬税笔记 - 您的柬埔寨全能助手 🤝</text>
+  </view>
+
+</view>

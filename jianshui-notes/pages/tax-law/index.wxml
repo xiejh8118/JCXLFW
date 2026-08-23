@@ -1,0 +1,90 @@
+<!-- 柬埔寨税法页面 -->
+<view class="page-container">
+
+  <!-- 搜索栏 -->
+  <view class="search-section">
+    <view class="search-bar">
+      <text class="search-icon">🔍</text>
+      <input 
+        class="search-input" 
+        placeholder="搜索税法条目、关键词..."
+        value="{{searchValue}}"
+        bindinput="onSearch"
+        confirm-type="search"
+      />
+      <text 
+        wx:if="{{searchValue}}"
+        class="search-clear" 
+        bindtap="onClearSearch"
+      >✕</text>
+    </view>
+  </view>
+
+  <!-- 分类标签 -->
+  <scroll-view class="category-scroll" scroll-x enable-flex>
+    <view class="category-list">
+      <view 
+        wx:for="{{categories}}" 
+        wx:key="id"
+        class="category-tag {{activeCategory === item.id ? 'active' : ''}}"
+        data-category="{{item.id}}"
+        bindtap="onCategoryChange"
+      >{{item.name}}</view>
+    </view>
+  </scroll-view>
+
+  <!-- 结果计数 -->
+  <view class="result-count">
+    <text class="text-secondary text-small">共 {{filteredLaws.length}} 条结果</text>
+  </view>
+
+  <!-- 税法列表 -->
+  <view class="law-list">
+    <view 
+      wx:for="{{filteredLaws}}" 
+      wx:key="id"
+      class="law-card card"
+    >
+      <!-- 标题栏 -->
+      <view 
+        class="law-header"
+        data-id="{{item.id}}"
+        bindtap="onToggleDetail"
+      >
+        <view class="law-header-left">
+          <view class="law-title">{{item.title}}</view>
+          <view class="law-summary">{{item.summary}}</view>
+          <view class="law-tags">
+            <text wx:for="{{item.tags}}" wx:key="*this" class="tag tag-primary">{{item}}</text>
+          </view>
+        </view>
+        <view class="law-arrow {{expandedId === item.id ? 'expanded' : ''}}">
+          <text>▶</text>
+        </view>
+      </view>
+
+      <!-- 展开内容 -->
+      <view wx:if="{{expandedId === item.id}}" class="law-content">
+        <view class="divider"></view>
+        <view class="law-text">{{item.content}}</view>
+        <view class="law-actions">
+          <view 
+            class="copy-btn"
+            data-content="{{item.content}}"
+            bindtap="onCopyContent"
+          >
+            📋 复制内容
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view wx:if="{{filteredLaws.length === 0}}" class="empty-state">
+      <view class="empty-state-icon">📭</view>
+      <view class="empty-state-text">未找到匹配的税法条目</view>
+      <view class="empty-state-text text-small mt-16">试试换个关键词或分类吧</view>
+    </view>
+  </view>
+
+</view>

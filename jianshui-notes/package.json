@@ -1,0 +1,10 @@
+{
+  "name": "jianshui-notes",
+  "version": "1.0.0",
+  "description": "柬税笔记 - 柬埔寨税法、旅游、特产与问答",
+  "main": "app.js",
+  "scripts": {},
+  "dependencies": {},
+  "author": "",
+  "license": "ISC"
+}
